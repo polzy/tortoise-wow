@@ -125,6 +125,22 @@ void LucifronFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Lucifron's Curse (19703) doubles mana cost on the affected target — high-prio
+    // dispel for casters/healers. Action is class-routed: druid/mage have a real
+    // "remove curse" action, other classes the chain is a no-op so the trigger does
+    // no harm. Same priority Magmadar uses for its fear cure pots.
+    triggers.push_back(new TriggerNode(
+        "lucifron curse",
+        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
+
+    // Impending Doom (19702) is a magic debuff that ticks heavy shadow damage; if a
+    // priest is present they can dispel it off party members. The "dispel magic"
+    // action node is defined in PriestActions; non-priests no-op. Priority slightly
+    // higher than the curse since the DoT actively kills heals.
+    triggers.push_back(new TriggerNode(
+        "lucifron impending doom",
+        NextAction::array(0, new NextAction("dispel magic", 90.0f), NULL)));
 }
 
 void LucifronFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -148,6 +164,13 @@ void GehennasFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Gehennas' Curse (19716) reduces healing on the affected target by 75% — high prio
+    // for healers to self-dispel. Same chain as Lucifron's curse, the "remove curse"
+    // action node is class-routed.
+    triggers.push_back(new TriggerNode(
+        "gehennas curse",
+        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
 }
 
 void GehennasFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -231,6 +254,12 @@ void ShazzrahFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Shazzrah's Curse (19713) deals heavy magic damage on cast — decurse asap.
+    // Same class-routed chain as the Lucifron / Gehennas curses.
+    triggers.push_back(new TriggerNode(
+        "shazzrah curse",
+        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
 }
 
 void ShazzrahFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

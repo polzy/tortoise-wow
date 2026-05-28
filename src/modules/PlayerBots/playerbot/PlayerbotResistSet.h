@@ -16,10 +16,16 @@
  *
  * Per-class totals (raid soft-cap is 315; cloth classes typically undershoot which
  * is fine — healers in back row, frontline tanks/melee benefit most):
- *   Fire:   239-339
+ *   Fire:   235-335 (BACK = Onyxia Scale Cloak 15138 — +16 fire res but the key
+ *                   value is Deep Breath immunity, the largest single Onyxia mit)
  *   Frost:  340-373  (frost gear is plentiful in tw_world)
  *   Nature: 279-337
  *   Shadow: 240-280  (sparsest pool; cloth chest slots have several gaps)
+ *
+ * Onyxia Scale Cloak requires turning in 5 Onyxia Scales (drop from Onyxia).
+ * EquipNewItem will silently fail until the bot has actually killed Onyxia and
+ * obtained the scales, leaving the BiS BACK slot (Cloak of Rapid Regeneration
+ * 55352) in place — so the first Onyxia attempt still benefits from BiS.
  */
 #pragma once
 #include "Common.h"
@@ -62,15 +68,15 @@ namespace mcwow_resist
     {
         // slots: HEAD NECK SHOUL BODY CHEST WAIST LEGS FEET WRIST HANDS R1 R2 T1 T2 BACK
         static const std::unordered_map<uint32, ResistSet> fire = {
-            { SpecKey(1, 0), { { 19148, 17783, 16980, 0, 21527, 19149, 19433, 20039, 17014, 19164, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(2, 0), { { 19148, 17783, 16980, 0, 21527, 19149, 19433, 20039, 17014, 19164, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(3, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 19433, 16984,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(4, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 15054, 16982,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(5, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(7, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 19433, 16984,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(8, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(9, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
-            { SpecKey(11,0), { { 16983, 17783, 16980, 0, 21527, 19149, 15054, 16982,     0, 16979, 17982, 58209, 33153, 60668, 12905 } } },
+            { SpecKey(1, 0), { { 19148, 17783, 16980, 0, 21527, 19149, 19433, 20039, 17014, 19164, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(2, 0), { { 19148, 17783, 16980, 0, 21527, 19149, 19433, 20039, 17014, 19164, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(3, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 19433, 16984,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(4, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 15054, 16982,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(5, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(7, 0), { { 16983, 17783, 16980, 0, 21527, 19149, 19433, 16984,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(8, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(9, 0), { { 14130, 17783, 16980, 0, 21527,     0, 19165, 13369,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
+            { SpecKey(11,0), { { 16983, 17783, 16980, 0, 21527, 19149, 15054, 16982,     0, 16979, 17982, 58209, 33153, 60668, 15138 } } },
         };
         static const std::unordered_map<uint32, ResistSet> frost = {
             { SpecKey(1, 0), { { 23019, 83457, 22968, 0, 22669, 18547, 22699, 12419, 22671, 22670, 22707, 60389, 55087, 23042, 22658 } } },

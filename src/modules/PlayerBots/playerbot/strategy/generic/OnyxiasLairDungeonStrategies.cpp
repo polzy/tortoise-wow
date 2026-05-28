@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "OnyxiasLairDungeonStrategies.h"
+#include "DungeonMultipliers.h"
 
 using namespace ai;
 
@@ -68,5 +69,13 @@ void OnyxiaFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
 
 void OnyxiaFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
 {
-    // ...
+    // Deep Breath dodge. The trigger scans for an Onyxia (entry 10184) within 80y
+    // currently casting spell 17086 ("Breath"). When found, every nearby bot fires
+    // "move away from onyxia breath" — a MoveAwayFromCreature sweep at 40y, which
+    // typically clears the bot from the fire-patch corridor. Not a true perpendicular
+    // kite (would require flight-path projection math), but eliminates the "everyone
+    // dies to Deep Breath" failure mode that #39 was filed for.
+    triggers.push_back(new TriggerNode(
+        "onyxia deep breath",
+        NextAction::array(0, new NextAction("move away from onyxia breath", 100.0f), NULL)));
 }
