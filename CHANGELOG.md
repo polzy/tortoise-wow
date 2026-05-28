@@ -54,6 +54,13 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 - Onyxia P2 Deep Breath dodge — `OnyxiaDeepBreathTrigger` detects spell 17086
   cast within 80y; `OnyxiaMoveAwayFromBreathAction` sweeps the bot 40y away
   from her position. Reaction-tier priority.
+- Off-tank target priority. `PlayerbotAI::IsOffTank()` flags any tank in a
+  group that is NOT the lowest-GUID tank (stable role assignment across
+  reconnects). For OTs, `TankTargetValue` switches to
+  `FindTargetForOffTankStrategy` which picks the lowest-MaxHP attacker —
+  reliably biases OTs toward adds (Geddon spawns, Lucifron summons, Garr
+  Firesworn, Onyxia P2 whelps) rather than fighting the MT over the boss.
+  RTI marker still overrides for both MT and OT.
 - Molten Core dispels wired into existing fight strategies:
   - Lucifron's Curse (19703) → `remove curse`
   - Lucifron Impending Doom (19702) → `dispel magic`
