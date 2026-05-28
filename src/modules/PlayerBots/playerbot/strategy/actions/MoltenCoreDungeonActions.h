@@ -174,4 +174,37 @@ namespace ai
     public:
         GolemaggMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from golemagg", 11988, 31.0f) {}
     };
+
+    // --- Majordomo Executus (12018) ---
+    class MajordomoEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        MajordomoEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable majordomo fight strategy", "+majordomo") {}
+    };
+    class MajordomoDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        MajordomoDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable majordomo fight strategy", "-majordomo") {}
+    };
+
+    // --- Ragnaros (11502) ---
+    class RagnarosEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        RagnarosEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable ragnaros fight strategy", "+ragnaros") {}
+    };
+    class RagnarosDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        RagnarosDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable ragnaros fight strategy", "-ragnaros") {}
+    };
+
+    // Wrath of Ragnaros 40y PBAOE knockback — flee to outside the radius.
+    // Melee gets bounced anyway; the dodge target is mainly for casters/heals
+    // who shouldn't have been in melee range to begin with.
+    class RagnarosWrathMoveAwayAction : public MoveAwayFromCreature
+    {
+    public:
+        RagnarosWrathMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from ragnaros wrath", 11502, 41.0f) {}
+    };
 }

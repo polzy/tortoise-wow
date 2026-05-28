@@ -38,6 +38,14 @@ void MoltenCoreDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     triggers.push_back(new TriggerNode(
         "start golemagg fight",
         NextAction::array(0, new NextAction("enable golemagg fight strategy", 100.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "start majordomo fight",
+        NextAction::array(0, new NextAction("enable majordomo fight strategy", 100.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "start ragnaros fight",
+        NextAction::array(0, new NextAction("enable ragnaros fight strategy", 100.0f), NULL)));
 }
 
 void MoltenCoreDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -332,6 +340,99 @@ void GolemaggFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
 }
 
 void GolemaggFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    Player* bot = ai->GetBot();
+    if (ai->IsRanged(bot) || ai->IsHeal(bot))
+    {
+        multipliers.push_back(new PreventMoveAwayFromCreatureOnReachToCastMultiplier(ai));
+    }
+}
+
+// ========== Majordomo Executus (12018) ==========
+
+void MajordomoFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // Fire prot pot — Domo himself doesn't cast fire, but his 4 Flamewaker Elites
+    // do hit hard with fire. The pot helps everyone except the OT(s) handling the
+    // adds during the pre-engage CC phase.
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+    // No specific Domo cast-detection triggers wired yet — the encounter is mostly
+    // about CC discipline (don't break sap/poly on the elites) which is governed
+    // by per-class strategies, not by Domo's spell timings. Future: add a
+    // "majordomo aegis casting" interrupt trigger for the 50%-hp self-heal.
+}
+
+void MajordomoFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end majordomo fight",
+        NextAction::array(0, new NextAction("disable majordomo fight strategy", 100.0f), NULL)));
+}
+
+void MajordomoFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end majordomo fight",
+        NextAction::array(0, new NextAction("disable majordomo fight strategy", 100.0f), NULL)));
+}
+
+// ========== Ragnaros (11502) ==========
+
+void RagnarosFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    Player* bot = ai->GetBot();
+
+    // Fire prot pot — Wrath of Ragnaros, Magma Blast and Elemental Fire all deal
+    // fire damage. Essential mit for the whole raid.
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Casters and healers stay >40y from him to avoid the Wrath PBAoE radius and
+    // the Magma Blast targeting (which only triggers when no melee in range).
+    // Melee stays in close; the WrathMoveAway trigger below covers the dodge.
+    if (ai->IsRanged(bot) || ai->IsHeal(bot))
+    {
+        triggers.push_back(new TriggerNode(
+            "enemy too close for spell",
+            NextAction::array(0, new NextAction("flee", 100.0f), NULL)));
+    }
+
+    // Submerge phase: when Ragnaros casts Submerge Fade (21107 aura), 8 Sons of
+    // Flame spawn around the raid. The "ragnaros submerge" trigger marks the
+    // phase; OT add-pickup logic already biases OTs toward the low-HP Sons.
+    // Melee/ranged should also pivot to Sons (lowest-HP attackers — handled by
+    // PossibleTargets logic — but we boost priority here).
+    triggers.push_back(new TriggerNode(
+        "ragnaros submerge",
+        NextAction::array(0, new NextAction("attack least hp target", 80.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ragnaros fight",
+        NextAction::array(0, new NextAction("disable ragnaros fight strategy", 100.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ragnaros fight",
+        NextAction::array(0, new NextAction("disable ragnaros fight strategy", 100.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // Wrath of Ragnaros 40y PBAOE knockback — flee 41y while he's casting.
+    triggers.push_back(new TriggerNode(
+        "ragnaros wrath",
+        NextAction::array(0, new NextAction("move away from ragnaros wrath", 100.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
 {
     Player* bot = ai->GetBot();
     if (ai->IsRanged(bot) || ai->IsHeal(bot))

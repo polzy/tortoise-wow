@@ -119,4 +119,43 @@ namespace ai
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
         void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
     };
+
+    // --- Majordomo Executus (12018) ---
+    // Pre-Ragnaros encounter, 8 elite Healer/Elite adds need to be CC'd / killed
+    // before tanking Domo himself. Spell IDs (from boss_majordomo_executus.cpp):
+    //   20619 Magic Reflection, 21075 Damage Reflection (don't dispel)
+    //   20229 Blastwave AoE, 20620 Aegis (self heal at <50%, interrupt target)
+    //   20618 Teleport (port-out emote, ends fight)
+    class MajordomoFightStrategy : public Strategy
+    {
+    public:
+        MajordomoFightStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "majordomo"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
+    // --- Ragnaros (11502) ---
+    // Spell IDs (from boss_ragnaros.cpp):
+    //   20566 Wrath of Ragnaros — PBAoE knockback, melee gets bounced 40y
+    //   20565 Magma Blast — ranged hit when no melee in range (keep one melee close)
+    //   21154 Might of Ragnaros — targeted knockback
+    //   21859 Submerge — every ~3 min he goes underground, Sons of Flame spawn
+    //   20568 Emerge — comes back up after Sons phase
+    class RagnarosFightStrategy : public Strategy
+    {
+    public:
+        RagnarosFightStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "ragnaros"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
+    };
 }

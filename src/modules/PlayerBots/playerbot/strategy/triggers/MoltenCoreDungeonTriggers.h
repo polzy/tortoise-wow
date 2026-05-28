@@ -209,4 +209,75 @@ namespace ai
     public:
         GolemaggTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "golemagg too close", 11988, 30.0f) {}
     };
+
+    // --- Majordomo Executus (12018) ---
+    class MajordomoStartFightTrigger : public StartBossFightTrigger
+    {
+    public:
+        MajordomoStartFightTrigger(PlayerbotAI* ai) : StartBossFightTrigger(ai, "start majordomo fight", "majordomo", 12018) {}
+    };
+    class MajordomoEndFightTrigger : public EndBossFightTrigger
+    {
+    public:
+        MajordomoEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end majordomo fight", "majordomo", 12018) {}
+    };
+
+    // --- Ragnaros (11502) ---
+    class RagnarosStartFightTrigger : public StartBossFightTrigger
+    {
+    public:
+        RagnarosStartFightTrigger(PlayerbotAI* ai) : StartBossFightTrigger(ai, "start ragnaros fight", "ragnaros", 11502) {}
+    };
+    class RagnarosEndFightTrigger : public EndBossFightTrigger
+    {
+    public:
+        RagnarosEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end ragnaros fight", "ragnaros", 11502) {}
+    };
+
+    // Wrath of Ragnaros (20566): PBAOE knockback. Bot has the debuff after being hit
+    // — too late to dodge. Use the cast detection variant instead so we can sidestep.
+    class RagnarosWrathTrigger : public Trigger
+    {
+    public:
+        RagnarosWrathTrigger(PlayerbotAI* ai) : Trigger(ai, "ragnaros wrath") {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 11502, 60.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 60.0f);
+            for (Unit* u : units)
+            {
+                if (!u) continue;
+                Spell* cast = u->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                if (cast && cast->m_spellInfo && cast->m_spellInfo->Id == 20566)
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    // Submerge (21859): Ragnaros vanishes for ~90s and Sons of Flame spawn. OT picks
+    // up the Sons (handled by OffTank target priority); detection here lets ranged
+    // know to switch to Sons (they're the lowest-HP attackers when up).
+    class RagnarosSubmergeTrigger : public Trigger
+    {
+    public:
+        RagnarosSubmergeTrigger(PlayerbotAI* ai) : Trigger(ai, "ragnaros submerge") {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 11502, 80.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 80.0f);
+            for (Unit* u : units)
+            {
+                if (!u) continue;
+                // SPELL_SUBMERGE_FADE (21107) is the stealth aura applied during submerge.
+                if (u->HasAura(21107))
+                    return true;
+            }
+            return false;
+        }
+    };
 }
