@@ -2681,6 +2681,39 @@ bool PlayerbotAI::IsTank(Player* player, bool inGroup)
     return (botRoles & BOT_ROLE_TANK) != 0;
 }
 
+// True iff `player` is a tank AND there is at least one other tank in the same
+// group/raid with a lower GUID. The "MT" is the lowest-GUID tank by convention;
+// every other tank in the group becomes an OT.
+//
+// Why GUID instead of group slot: group slot order changes when members reshuffle
+// (master ChangeLeader, bot logout/login). GUID is allocated at character creation
+// and never changes, giving a stable role assignment across the whole session.
+//
+// Returns false if the player has no group (a single tank in solo content is by
+// definition the only tank, which is "MT" semantically).
+bool PlayerbotAI::IsOffTank(Player* player)
+{
+    if (!player || !IsTank(player))
+        return false;
+
+    Group* group = player->GetGroup();
+    if (!group)
+        return false;
+
+    const ObjectGuid myGuid = player->GetObjectGuid();
+    for (GroupReference* gref = group->GetFirstMember(); gref; gref = gref->next())
+    {
+        Player* member = gref->getSource();
+        if (!member || member == player)
+            continue;
+        if (!IsTank(member))
+            continue;
+        if (member->GetObjectGuid() < myGuid)
+            return true;  // someone else is the MT
+    }
+    return false;
+}
+
 bool PlayerbotAI::IsHeal(Player* player, bool inGroup)
 {
     PlayerbotAI* botAi = player->GetPlayerbotAI();

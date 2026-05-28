@@ -395,6 +395,11 @@ public:
     void ReInitCurrentEngine();
     void Reset(bool full = false);
     static bool IsTank(Player* player, bool inGroup = true);
+    // Off-tank = a tank that is NOT the lowest-GUID tank in the same group/raid.
+    // The lowest-GUID heuristic gives a stable MT designation across reconnects
+    // without requiring the master to manually mark anyone. Two bots can never
+    // share a guid so the choice is deterministic.
+    static bool IsOffTank(Player* player);
     static bool IsHeal(Player* player, bool inGroup = true);
     bool IsRanged(Player* player, bool inGroup = true);
     bool IsMelee(Player* player, bool inGroup = true);
