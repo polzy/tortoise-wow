@@ -55,6 +55,8 @@ public:
     virtual void CheckAttacker(Unit* creature, ThreatManager* /*threatManager*/) override
     {
         Player* bot = ai->GetBot();
+        AiObjectContext* context = ai->GetAiObjectContext();  // needed for AI_VALUE expansion
+
         if (IsCcTarget(creature)) return;
 
         if (!PossibleAttackTargetsValue::IsValid(creature, bot))

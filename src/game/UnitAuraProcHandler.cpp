@@ -399,7 +399,26 @@ SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Spel
     // In most cases req get honor or XP from kill
     if ((EventProcFlag & PROC_FLAG_KILL) && IsPlayer())
     {
-        bool allow = ((Player*)this)->IsHonorOrXPTarget(pVictim);
+        // crash_20260528_222433: SEH AV in Object::GetUInt32Value+0x2b reached from
+        // IsHonorOrXPTarget+0x22 (line Player.cpp:21814 `pVictim->GetLevel()` or 21815
+        // `GetLevel()` on this). Two paths can land us with bad pointers:
+        //   1. pVictim is null when the proc fires off a self-target spell — guard with
+        //      an explicit null check below.
+        //   2. The Player* this is freed mid-proc (rare race when a bot is logged out
+        //      between Map::Update and SpellEvent execution) — guard with SEH because
+        //      we can't reliably validate the pointer otherwise.
+        if (!pVictim)
+            return SPELL_PROC_TRIGGER_FAILED;
+
+        bool allow = true;
+        __try
+        {
+            allow = ((Player*)this)->IsHonorOrXPTarget(pVictim);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER)
+        {
+            return SPELL_PROC_TRIGGER_FAILED;
+        }
         if (!allow)
             return SPELL_PROC_TRIGGER_FAILED;
     }
