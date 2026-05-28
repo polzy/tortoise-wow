@@ -249,6 +249,31 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
 {
     sWorld.LoadConfigSettings(true);
     sAnticheatLib->Reload();
+
+    // Apply/remove world XP buff based on current Rate.XP.Kill
+    // Uses existing vanilla spells the client already knows (shows buff icon)
+    static const uint32 xpBuffSpells[] = { 22888, 24425, 22818, 22817 }; // x2=RallyingCry, x3=Zandalar, x4=Moxie, x5=Ferocity
+    float rate = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL);
+    uint32 targetSpell = 0;
+    if (rate >= 4.5f) targetSpell = 22817;
+    else if (rate >= 3.5f) targetSpell = 22818;
+    else if (rate >= 2.5f) targetSpell = 24425;
+    else if (rate >= 1.5f) targetSpell = 22888;
+
+    for (const auto& itr : sWorld.GetAllSessions())
+    {
+        if (Player* player = itr.second->GetPlayer())
+        {
+            if (player->IsInWorld())
+            {
+                for (uint32 spell : xpBuffSpells)
+                    player->RemoveAurasDueToSpell(spell);
+                if (targetSpell)
+                    player->CastSpell(player, targetSpell, true);
+            }
+        }
+    }
+
     SendSysMessage("World config settings reloaded.");
     return true;
 }
@@ -8306,33 +8331,6 @@ bool ChatHandler::HandleGoCorpseCommand(char*)
     corpse->GetPosition(corpseLocation);
     player->TeleportTo(corpseLocation);
     return true;
-}
-
-// teleports to a grave yard.
-bool ChatHandler::HandleGoGraveyardCommand(char* args)
-{
-    Player* pPlayer = m_session->GetPlayer();
-
-    uint32 graveyardId;
-    if (!ExtractUInt32(&args, graveyardId))
-        return false;
-
-    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry(graveyardId);
-    if (!graveyard)
-    {
-        PSendSysMessage("Graveyard (WorldSafeLocs ID %u) not found.", graveyardId);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    if (graveyard->x == 0.0f && graveyard->y == 0.0f && graveyard->z == 0.0f)
-    {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD, graveyard->x, graveyard->y, graveyard->map_id);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    return HandleGoHelper(pPlayer, graveyard->map_id, graveyard->x, graveyard->y, &graveyard->z);
 }
 
 //teleport at coordinates, including Z

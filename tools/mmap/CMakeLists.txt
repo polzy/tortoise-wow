@@ -33,8 +33,6 @@ include_directories(
     ../../src/game/Commands
     ../../dep/include/g3dlite
     ../../src/framework
-    ../../dep/fmt/include
-    ../../dep/fmt
     ${ACE_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
     ../../dep/recastnavigation/

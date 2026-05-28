@@ -230,7 +230,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "trigger",        SEC_OBSERVER, false, &ChatHandler::HandleGoTriggerCommand,           "", nullptr },
         { "xyz",            SEC_OBSERVER, false, &ChatHandler::HandleGoXYZCommand,               "", nullptr },
         { "corpse",         SEC_DEVELOPER, false, &ChatHandler::HandleGoCorpseCommand, "Teleports the user to their corpse.", nullptr },
-        { "graveyard",      SEC_OBSERVER, false, &ChatHandler::HandleGoGraveyardCommand,         "", nullptr },
         { "forward",        SEC_OBSERVER, false, &ChatHandler::HandleGoForwardCommand,           "", nullptr },
         { "up",             SEC_OBSERVER, false, &ChatHandler::HandleGoUpCommand,                "", nullptr },
         { "",               SEC_DEVELOPER, false, &ChatHandler::HandleGoCommand,                  "", nullptr },
@@ -993,6 +992,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { "cleaninventory", SEC_DEVELOPER,       false, &ChatHandler::HandleCleanInventoryCommand,      "", nullptr},
         { "showborders",    SEC_DEVELOPER,       false, &ChatHandler::HandleShowBordersCommand,         "", nullptr },
         { "queststatuses",  SEC_PLAYER,           false, &ChatHandler::HandleQuestStatusesCommand,       "", nullptr},
+        // Bot module commands. .rndbot is SEC_PLAYER so a single human can
+        // manage their own random-bot pool without keeping a GM alt logged in;
+        // a server operator who wants tighter control can raise it.
+        { "bot",            SEC_PLAYER,           false, &ChatHandler::HandlePlayerbotCommand,           "", nullptr },
+        { "rndbot",         SEC_PLAYER,          true,  &ChatHandler::HandleRandomPlayerbotCommand,     "", nullptr },
+        { "ahbot",          SEC_MODERATOR,       true,  &ChatHandler::HandleAhBotCommand,               "", nullptr },
+        { "perfmon",        SEC_MODERATOR,       true,  &ChatHandler::HandlePerfMonCommand,             "", nullptr },
         { nullptr,          0,                   false, nullptr,                                        "", nullptr }
     };
 

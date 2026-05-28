@@ -29,6 +29,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Handlers/LoginQueryHolder.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "UpdateMask.h"
@@ -58,29 +59,8 @@ enum CinematicsSkipMode
 };
 
 
-class LoginQueryHolder : public SqlQueryHolder
-{
-private:
-    uint32 m_accountId;
-    ObjectGuid m_guid;
-public:
-    LoginQueryHolder(uint32 accountId, ObjectGuid guid)
-        : SqlQueryHolder(guid.GetCounter()), m_accountId(accountId), m_guid(guid) { }
-    ~LoginQueryHolder()
-    {
-        // Queries should NOT be deleted by user
-        DeleteAllResults();
-    }
-    ObjectGuid GetGuid() const
-    {
-        return m_guid;
-    }
-    uint32 GetAccountId() const
-    {
-        return m_accountId;
-    }
-    bool Initialize();
-};
+// LoginQueryHolder class moved to Handlers/LoginQueryHolder.h
+// so the bot module can construct holders for synthetic bot logins. Initialize() definition stays here.
 
 bool LoginQueryHolder::Initialize()
 {
@@ -229,9 +209,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
     uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
     recv_data >> gender >> skin >> face;
     recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
-
-    uint32 challengeMask;
-    recv_data >> challengeMask;
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
@@ -391,10 +368,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket & recv_data)
         pNewChar->SetCinematic(1);                          // not show intro
 
     pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login
-
-    // Challenge spells are given on first login and not on character creation
-    if (challengeMask)
-        pNewChar->SetPlayerVariable(PlayerVariables::PendingChallengeMask, std::to_string(challengeMask));
 
     // Player created, save it now
     if (!pNewChar->SaveToDB(false, true, false))
@@ -587,6 +560,29 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
             m_playerLoading = false;
             return;
         }
+
+        // If this character is currently in-world as a bot (PlayerbotAI
+        // attached), cleanly detach
+        // the AI BEFORE transferring session ownership. Without this, the
+        // bot's PlayerbotAI keeps ticking on what's now the real-player's
+        // Player object via Player::UpdatePlayerbotHooks → fights with the
+        // login handshake, drives movement / casts / packets the client
+        // doesn't expect → loading screen never finishes (10+ min hang
+        // observed; client eventually gives up). Reproduces deterministically
+        // when:
+        //   1. Char A is being run as a bot
+        //   2. Master logs off
+        //   3. User immediately logs into Char A as a real player
+        // The take-over path below transfers the Player object cleanly; we
+        // just have to make sure the bot brain stops first.
+        if (pCurrChar->GetPlayerbotAI())
+        {
+            sLog.outInfo("[BOT] HandlePlayerLogin: char %s (guid %u) currently running as a bot — "
+                         "detaching PlayerbotAI before real-player session take-over",
+                         pCurrChar->GetName(), playerGuid.GetCounter());
+            pCurrChar->RemovePlayerbotAI();
+        }
+
         pCurrChar->GetSession()->SetPlayer(nullptr);
         pCurrChar->SetSession(this);
 
@@ -634,6 +630,29 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
     if (m_antiCheat)
         m_antiCheat->NewPlayer();
 
+    // Attach a PlayerbotMgr to real-player sessions only. Real players get a mgr so
+    // `.bot` commands work; bots must NOT get one.
+    //
+    // CRITICAL: detecting "is this a bot" via `GetPlayerbotAI()` is wrong here — the AI is
+    // attached LATER by OnBotLogin, so at this point in HandlePlayerLogin the bot still has
+    // a null AI. Without the bot-session check, every bot would get its own PlayerbotMgr and
+    // its own OnPlayerLogin → group_member query → 39 more queued bots → exponential cascade
+    // → ~470 bots/15s → action crashes → heap corruption → 0xc0000374.
+    //
+    // Sentinel: bot sessions are constructed with sock==nullptr. WorldSession::WorldSession
+    // line 101 OVERWRITES whatever remote_ip we pass and sets m_Address = "<BOT>" when sock
+    // is null. The historical cmangos sentinel "disconnected/bot" never reaches the address
+    // field. So we mirror PlayerbotAI::IsRealPlayer's check: BOTH "<BOT>" and the historical
+    // "disconnected/bot" string mark a bot session. (We keep the legacy string in case some
+    // codepath bypasses the WorldSession ctor.)
+    const std::string& addr = GetRemoteAddress();
+    bool isBotSession = (addr == "<BOT>" || addr == "disconnected/bot");
+    if (!isBotSession)
+    {
+        pCurrChar->CreatePlayerbotMgr();
+        extern void Player_OnPlayerbotLogin(Player*);
+        Player_OnPlayerbotLogin(pCurrChar);
+    }
 
     //WE DO NOT NEED TO SEND ALL POSSIBLE TRANSMOGS TO ANY PLAYER ON LOGIN
     //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHh
@@ -780,6 +799,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
     if (alreadyOnline)
         pCurrChar->SendInitWorldStates(pCurrChar->GetCachedZoneId());
 
+    // Apply world XP buff on login (vanilla spells the client knows)
+    {
+        float rate = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL);
+        uint32 xpSpell = 0;
+        if (rate >= 4.5f) xpSpell = 22817;      // Fengus' Ferocity
+        else if (rate >= 3.5f) xpSpell = 22818;  // Mol'dar's Moxie
+        else if (rate >= 2.5f) xpSpell = 24425;  // Spirit of Zandalar
+        else if (rate >= 1.5f) xpSpell = 22888;  // Rallying Cry
+        if (xpSpell && !pCurrChar->HasAura(xpSpell))
+            pCurrChar->CastSpell(pCurrChar, xpSpell, true);
+    }
+
     static SqlStatementID updChars;
     static SqlStatementID updAccount;
 
@@ -836,36 +867,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
     {
         pCurrChar->ContinueTaxiFlight();
         pCurrChar->LoadPet();
-    }
-
-    auto maskVar = pCurrChar->GetPlayerVariable(PlayerVariables::PendingChallengeMask);
-    if (maskVar && *maskVar != "0")
-    {
-        uint32 challengeMask = std::stoul(*maskVar);
-
-        static constexpr uint32 challengeSpells[] = {
-            SPELL_HARDCORE,         // bit 0
-            SPELL_SLOW_AND_STEADY,  // bit 1
-            SPELL_WAR_MODE,         // bit 2
-            SPELL_VARGANT_MODE,     // bit 3
-            SPELL_CRAFTMASTER,      // bit 4
-            SPELL_LUNATIC,          // bit 5
-            SPELL_BOARING_MODE,     // bit 6
-            SPELL_EXHAUSTION_MODE,  // bit 7
-            SPELL_BREWMASTER,       // bit 8
-            SPELL_HEROIC,           // bit 9
-        };
-
-        for (uint32 i = 0; i < (sizeof(challengeSpells) / sizeof(challengeSpells[0])); ++i)
-        {
-            if (challengeMask & (1u << i))
-                pCurrChar->LearnSpell(challengeSpells[i], false);
-        }
-
-        if (challengeMask & 0x1) // Hardcore
-            pCurrChar->SetupHardcoreMode();
-
-        pCurrChar->SetPlayerVariable(PlayerVariables::PendingChallengeMask, "0");
     }
 
     // Set FFA PvP for non GM in non-rest mode

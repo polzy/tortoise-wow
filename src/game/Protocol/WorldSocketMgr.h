@@ -41,6 +41,8 @@ class WorldSocketMgr: public MangosSocketMgr<WorldSocket>
         friend class WorldSocket;
 
         static WorldSocketMgr* Instance();
+
+        ~WorldSocketMgr() noexcept = default;
 };
 
 #define sWorldSocketMgr WorldSocketMgr::Instance()

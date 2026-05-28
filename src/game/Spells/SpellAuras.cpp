@@ -1640,7 +1640,8 @@ void Aura::TriggerSpell()
         if (Unit* caster = GetCaster())
         {
             if (triggerTarget->GetTypeId() != TYPEID_UNIT || !sScriptMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)triggerTarget))
-                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?", GetId(), GetEffIndex());
+                sLog.outDetail("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case",
+                               GetId(), GetEffIndex());
         }
     }
 }

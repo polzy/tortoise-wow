@@ -1,6 +1,12 @@
 /samples/
 /data/
 /build/
+/bin/
 /.vscode/
 *.kate-swp
 *.exe
+*.pdb
+*.ilk
+*.obj
+*.lib
+/src/shared/revision.h

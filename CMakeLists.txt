@@ -47,6 +47,16 @@ option(ENABLE_PROFILING "(Windows only) Enable Optick integration, which allows 
 option(ENABLE_LSAN "Enables Leak Sanitizer" OFF)
 # Allow enabling official Turtle addon support
 option(ALLOW_TURTLE_ADDONS "Allow Turtle addons" OFF)
+# Build cmangos/playerbots — bot AI vendored under src/modules/PlayerBots/.
+# When ON, mangosd links the bot subsystem; runtime activation is gated by
+# AiPlayerbot.Enabled in aiplayerbot.conf.
+option(BUILD_PLAYERBOTS "Build the cmangos/playerbots subsystem" OFF)
+
+# Eluna Lua scripting engine — exposes game objects to Lua scripts.
+# Requires the Eluna source tree cloned into src/game/LuaEngine/.
+# When ON, the game library compiles LuaEngine sources and links lualib.
+# Lua scripts are loaded at runtime from the server's lua_scripts/ directory.
+option(BUILD_ELUNA "Build the Eluna Lua scripting engine" OFF)
 
 
 if(UNIX)
@@ -399,6 +409,12 @@ else()
   message(STATUS "Allow Turtle Addons   : No (default)")
 endif()
 
+if(BUILD_ELUNA)
+  message(STATUS "Build Eluna LuaEngine : Yes")
+else()
+  message(STATUS "Build Eluna LuaEngine : No (default)")
+endif()
+
 
 if(UNIX)
   if(DEBUG_SYMBOLS)
@@ -552,6 +568,85 @@ message(STATUS "Build flags (DEBUG)   : ${CMAKE_CXX_FLAGS_DEBUG}")
 add_subdirectory(src)
 add_subdirectory(dep)
 
+# cmangos/playerbots vendored module
+if (BUILD_PLAYERBOTS)
+    message(STATUS "BUILD_PLAYERBOTS=ON - adding cmangos/playerbots vendored module at src/modules/PlayerBots/")
+    set(PCH ${USE_PCH})
+    add_subdirectory(src/modules/PlayerBots)
+    # Vendor-tree feature gates the playerbots source expects:
+    #   CMANGOS         - selects the cmangos codepath in vendored headers
+    #                     (vs. TrinityCore / MaNGOS-Zero alternates).
+    #   MANGOSBOT_ZERO  - Classic (1.12). Switches level caps, talent trees,
+    #                     spell ranges. Use MANGOSBOT_ONE for TBC,
+    #                     MANGOSBOT_TWO for WotLK if re-vendoring later.
+    #   ENABLE_PLAYERBOTS - turns the subsystem on inside the vendor tree's
+    #                       own ifdef walls.
+    target_compile_definitions(playerbots PRIVATE CMANGOS MANGOSBOT_ZERO ENABLE_PLAYERBOTS)
+    target_include_directories(playerbots PUBLIC
+        ${CMAKE_SOURCE_DIR}/src/modules/PlayerBots/cmangos-compat-stubs
+        ${CMAKE_SOURCE_DIR}/src/game
+        ${CMAKE_SOURCE_DIR}/src/game/AI
+        ${CMAKE_SOURCE_DIR}/src/game/AuctionHouse
+        ${CMAKE_SOURCE_DIR}/src/game/Battlegrounds
+        ${CMAKE_SOURCE_DIR}/src/game/Chat
+        ${CMAKE_SOURCE_DIR}/src/game/Commands
+        ${CMAKE_SOURCE_DIR}/src/game/Database
+        ${CMAKE_SOURCE_DIR}/src/game/Group
+        ${CMAKE_SOURCE_DIR}/src/game/Guild
+        ${CMAKE_SOURCE_DIR}/src/game/Handlers
+        ${CMAKE_SOURCE_DIR}/src/game/LFG
+        ${CMAKE_SOURCE_DIR}/src/game/Mail
+        ${CMAKE_SOURCE_DIR}/src/game/Maps
+        ${CMAKE_SOURCE_DIR}/src/game/Maps/Pool
+        ${CMAKE_SOURCE_DIR}/src/game/Movement
+        ${CMAKE_SOURCE_DIR}/src/game/Movement/spline
+        ${CMAKE_SOURCE_DIR}/src/game/Objects
+        ${CMAKE_SOURCE_DIR}/src/game/OutdoorPvP
+        ${CMAKE_SOURCE_DIR}/src/game/PacketBroadcast
+        ${CMAKE_SOURCE_DIR}/src/game/Protocol
+        ${CMAKE_SOURCE_DIR}/src/game/Spells
+        ${CMAKE_SOURCE_DIR}/src/game/Threat
+        ${CMAKE_SOURCE_DIR}/src/game/Transports
+        ${CMAKE_SOURCE_DIR}/src/game/vmap
+        ${CMAKE_SOURCE_DIR}/src/shared
+        ${CMAKE_SOURCE_DIR}/src/shared/Config
+        ${CMAKE_SOURCE_DIR}/src/shared/Database
+        ${CMAKE_SOURCE_DIR}/src/shared/Log
+        ${CMAKE_SOURCE_DIR}/src/shared/Util
+        ${CMAKE_SOURCE_DIR}/src/framework
+        ${CMAKE_SOURCE_DIR}/src/framework/Network
+        ${ACE_INCLUDE_DIR}
+        ${BOOST_ROOT}
+        ${CMAKE_SOURCE_DIR}/dep/windows/include
+        ${CMAKE_SOURCE_DIR}/dep/windows/include/mysql
+        ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
+    )
+endif()
+
+# Eluna Lua scripting engine — compile definitions set AFTER all targets exist.
+# Include paths and link libraries are handled inside each subdirectory's own
+# CMakeLists.txt (src/game, src/mangosd). This block only adds the preprocessor
+# defines that gate Eluna code, because they must be set on already-declared targets.
+if(BUILD_ELUNA)
+    message(STATUS "BUILD_ELUNA=ON  - Eluna Lua scripting engine enabled")
+
+    # Compile definitions required by the Eluna source tree:
+    #   BUILD_ELUNA     - gate used by host code (#ifdef BUILD_ELUNA)
+    #   ELUNA_CMANGOS   - selects CMaNGOS codepath in Eluna's #ifdefs
+    #   ELUNA_EXPANSION=0 - Classic (0=Classic, 1=TBC, 2=WotLK, 3=Cata)
+    target_compile_definitions(game PUBLIC BUILD_ELUNA ELUNA_CMANGOS ELUNA_EXPANSION=0)
+    target_compile_definitions(mangosd PRIVATE BUILD_ELUNA ELUNA_CMANGOS ELUNA_EXPANSION=0)
+
+    # If PlayerBots is also enabled, it needs the same Eluna awareness
+    if(BUILD_PLAYERBOTS)
+        target_compile_definitions(playerbots PRIVATE BUILD_ELUNA ELUNA_CMANGOS ELUNA_EXPANSION=0)
+        target_include_directories(playerbots PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/game/LuaEngine
+            ${CMAKE_SOURCE_DIR}/src/game/LuaEngine/hooks
+        )
+        target_link_libraries(playerbots lualib)
+    endif()
+endif()
 
 if (USE_EXTRACTORS OR USE_REALMMERGE)
     add_subdirectory(tools)

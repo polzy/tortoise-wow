@@ -189,8 +189,7 @@ set (game_SRCS
     OutdoorPvP/Register.cpp
     PacketBroadcast/MovementBroadcaster.cpp
     PacketBroadcast/PlayerBroadcaster.cpp
-    PlayerBots/PlayerBotAI.cpp
-    PlayerBots/PlayerBotMgr.cpp
+    # PlayerBots/PlayerBot{AI,Mgr}.cpp removed - Penqle stub binned
     Protocol/Opcodes.cpp
     Protocol/WorldSocket.cpp
     Protocol/WorldSocketMgr.cpp
@@ -383,8 +382,7 @@ set (game_SRCS
     OutdoorPvP/OutdoorPvPSI.h
     PacketBroadcast/MovementBroadcaster.h
     PacketBroadcast/PlayerBroadcaster.h
-    PlayerBots/PlayerBotAI.h
-    PlayerBots/PlayerBotMgr.h
+    # PlayerBots/PlayerBot{AI,Mgr}.h removed - Penqle stub binned
     Protocol/Opcodes.h
     Protocol/WorldSocket.h
     Protocol/WorldSocketMgr.h
@@ -526,7 +524,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Objects
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
   ${CMAKE_CURRENT_SOURCE_DIR}/PacketBroadcast
-  ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBots
+  # PlayerBots include dir removed - Penqle stub binned
   ${CMAKE_CURRENT_SOURCE_DIR}/Protocol
   ${CMAKE_CURRENT_SOURCE_DIR}/Spells
   ${CMAKE_CURRENT_SOURCE_DIR}/Threat
@@ -552,6 +550,14 @@ include_directories(
 if(WIN32)
   include_directories(
     ${CMAKE_SOURCE_DIR}/dep/include-windows
+  )
+endif()
+
+if(BUILD_ELUNA)
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine
+    ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/hooks
+    ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/methods/CMangos
   )
 endif()
 
@@ -594,6 +600,25 @@ source_group("HttpApi"
   REGULAR_EXPRESSION HttpApi
 )
 
+source_group("LuaEngine"
+  REGULAR_EXPRESSION LuaEngine
+)
+
+
+# playerbots host-hook stubs for non-bot builds.
+# When BUILD_PLAYERBOTS=OFF, the host-hook call sites need stub implementations.
+# With BUILD_PLAYERBOTS=ON, real implementations are in playerbots.lib.
+if(NOT BUILD_PLAYERBOTS)
+    list(APPEND game_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/PlayerbotStubs.cpp)
+endif()
+
+# Eluna Lua scripting engine sources (gated by BUILD_ELUNA).
+# The LuaEngine/ subdirectory CMakeLists.txt collects Eluna sources into
+# ELUNA_SRCS via PARENT_SCOPE. When BUILD_ELUNA=OFF, no Eluna code compiles.
+if(BUILD_ELUNA)
+    add_subdirectory(LuaEngine)
+    list(APPEND game_SRCS ${ELUNA_SRCS})
+endif()
 
 add_library(game STATIC
   ${game_SRCS}
@@ -606,6 +631,10 @@ target_link_libraries(game
   shared
   Detour
 )
+
+if(BUILD_ELUNA)
+  target_link_libraries(game lualib)
+endif()
 
 if(WIN32)
 	if (ENABLE_PROFILING)

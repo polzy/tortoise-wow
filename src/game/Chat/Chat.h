@@ -200,6 +200,11 @@ class ChatHandler
         bool HandleListAddonsCommand(char *);
         bool HandleUpdateWorldStateCommand(char *);
         bool HandleCastCustomCommand(char* args);
+        // bot adds .perfmon/.bot/.rndbot commands via ChatHandler.
+        bool HandlePerfMonCommand(char* args);
+        bool HandlePlayerbotCommand(char* args);
+        bool HandleRandomPlayerbotCommand(char* args);
+        bool HandleAhBotCommand(char* args);
         bool HandleSendSpellVisualCommand(char *);
         bool HandleSendSpellImpactCommand(char *);
         bool HandleServiceDeleteCharacters(char* args);
@@ -462,7 +467,6 @@ class ChatHandler
         bool HandleGoTriggerCommand(char* args);
         bool HandleGoXYZCommand(char* args);
         bool HandleGoCorpseCommand(char*);
-        bool HandleGoGraveyardCommand(char* args);
 
         bool HandleGuildCreateCommand(char* args);
         bool HandleGuildInviteCommand(char* args);

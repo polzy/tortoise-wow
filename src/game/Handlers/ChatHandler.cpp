@@ -391,6 +391,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         }
     }
 
+    // Dispatch chat to the master's own bots so they can react to /party,
+    // /raid, /guild, /say, /yell, and whispers. cmangos hooks here (in
+    // HandleMessagechatOpcode, after validation and before broadcast).
+    // Implementation lives in src/modules/PlayerBots/playerbot/HostHooks.cpp.
+    // No-op when m_playerbotMgr is null.
+    if (_player && _player->GetPlayerbotMgr())
+        Player_DispatchBotChatCommand(_player, type, msg, lang);
+
     // Message handling
     switch (type)
     {
@@ -1183,11 +1191,14 @@ bool WorldSession::HandleTurtleAddonMessages(uint32 lang, uint32 type, std::stri
             {
                 std::string categories = "Categories:";
 
+                // Client (Turtle_ShopUI.lua Shop_ProcessCategories) expects 4 fields
+                // per category: categoryID=parentID=name=icon
+                // parentID=0 means top-level category (no subcategory nesting).
                 for (auto& itr : sObjectMgr.GetShopCategoriesList())
                     if (sWorld.getConfig(CONFIG_BOOL_SEA_NETWORK))
-                        categories += std::to_string(itr.first) + "=0=" + itr.second.Name_loc4 + "=" + itr.second.Icon + ";"; // TODO: parent_id
+                        categories += std::to_string(itr.first) + "=0=" + itr.second.Name_loc4 + "=" + itr.second.Icon + ";";
                     else
-                        categories += std::to_string(itr.first) + "=0=" + itr.second.Name + "=" + itr.second.Icon + ";"; // TODO: parent_id
+                        categories += std::to_string(itr.first) + "=0=" + itr.second.Name + "=" + itr.second.Icon + ";";
 
                 _player->SendAddonMessage(prefix, categories);
                 return true;
