@@ -92,6 +92,17 @@ void OnyxiaFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
             NextAction::array(0, new NextAction("attack onyxia", 95.0f), NULL)));
     }
 
+    // MT face-away positioning. Tank tries to keep itself between the boss and the
+    // raid-opposite wall so Onyxia faces away. Lower-priority (50) than damage actions
+    // so it doesn't interrupt taunt/sunder etc. The action gates internally on
+    // IsTank + !IsOffTank + boss-on-ground.
+    if (ai->IsTank(bot) && !PlayerbotAI::IsOffTank(bot))
+    {
+        triggers.push_back(new TriggerNode(
+            "always",
+            NextAction::array(0, new NextAction("tank onyxia face away", 50.0f), NULL)));
+    }
+
     // Phase 3 Bellowing Roar fear (18431). The actual anti-fear cooldowns
     // (Berserker Rage / Will of the Forsaken / Tremor Totem) are already wired
     // in class strategies. This trigger boosts their priority during the

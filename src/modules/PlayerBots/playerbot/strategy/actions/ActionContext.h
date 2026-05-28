@@ -370,6 +370,7 @@ namespace ai
             creators["disable onyxia fight strategy"] = [](PlayerbotAI* ai) { return new OnyxiaDisableFightStrategyAction(ai); };
             creators["move away from onyxia breath"] = [](PlayerbotAI* ai) { return new OnyxiaMoveAwayFromBreathAction(ai); };
             creators["attack onyxia"] = [](PlayerbotAI* ai) { return new AttackOnyxiaAction(ai); };
+            creators["tank onyxia face away"] = [](PlayerbotAI* ai) { return new TankOnyxiaFaceAwayAction(ai); };
 
             creators["enable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarEnableFightStrategyAction(ai); };
             creators["disable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarDisableFightStrategyAction(ai); };

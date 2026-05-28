@@ -40,6 +40,102 @@ namespace ai
             : MoveAwayFromCreature(ai, "move away from onyxia breath", 10184, 40.0f) {}
     };
 
+    // MT face-away positioning. The tank computes the raid centroid (mean of all
+    // group member positions in the same map) and moves to the OPPOSITE side of
+    // Onyxia, so when she turns to face the tank her cleave + tail face the wall
+    // instead of the raid.
+    //
+    // Math: T_pos = boss_pos + normalize(boss_pos - centroid_pos) * tank_distance
+    // (where tank_distance ~5y = melee reach). The bot then sets its destination
+    // and lets the normal move-to pathing handle terrain.
+    //
+    // Only fires when the bot is the MT (lowest-GUID tank in the group) and Onyxia
+    // is in P1 or P3 (ground). In P2 she's flying and untargetable to melee.
+    class TankOnyxiaFaceAwayAction : public MovementAction
+    {
+    public:
+        TankOnyxiaFaceAwayAction(PlayerbotAI* ai) : MovementAction(ai, "tank onyxia face away") {}
+
+        bool Execute(Event& event) override
+        {
+            // MT only — OTs handle whelps via the OffTank target priority.
+            if (!ai->IsTank(bot) || PlayerbotAI::IsOffTank(bot))
+                return false;
+
+            // Find Onyxia.
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 10184, 80.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 80.0f);
+            Unit* boss = nullptr;
+            for (Unit* u : units)
+                if (u && u->IsAlive()) { boss = u; break; }
+            if (!boss)
+                return false;
+
+            // Skip in P2 (Hover aura 17131) — boss is airborne.
+            if (boss->HasAura(17131))
+                return false;
+
+            // Compute raid centroid in the same map as the bot.
+            Group* group = bot->GetGroup();
+            if (!group)
+                return false;
+            float cx = 0.0f, cy = 0.0f;
+            uint32 nLive = 0;
+            const uint32 myMap = bot->GetMapId();
+            for (GroupReference* gref = group->GetFirstMember(); gref; gref = gref->next())
+            {
+                Player* m = gref->getSource();
+                if (!m || !m->IsAlive() || m->GetMapId() != myMap || m == bot)
+                    continue;
+                cx += m->GetPositionX();
+                cy += m->GetPositionY();
+                ++nLive;
+            }
+            if (nLive < 2)
+                return false;  // not enough raid members for a meaningful centroid
+            cx /= nLive;
+            cy /= nLive;
+
+            // Vector boss -> centroid, then flip it: tank target = boss + flip * dist.
+            const float bx = boss->GetPositionX();
+            const float by = boss->GetPositionY();
+            const float dx = bx - cx;
+            const float dy = by - cy;
+            const float len = sqrt(dx * dx + dy * dy);
+            if (len < 1.0f)
+                return false;  // raid is already on top of the boss, nothing to fix
+            const float TANK_DISTANCE = 5.0f;  // melee + a bit of buffer
+            const float tx = bx + (dx / len) * TANK_DISTANCE;
+            const float ty = by + (dy / len) * TANK_DISTANCE;
+            const float tz = boss->GetPositionZ();
+
+            // Only move if we're not already in roughly the right spot — avoids
+            // jitter when the bot is already opposite the raid (e.g. tank pulled
+            // boss to the wall and the raid is behind).
+            if (sServerFacade.GetDistance2d(bot, tx, ty) < 3.0f)
+                return false;
+
+            return MoveTo(myMap, tx, ty, tz);
+        }
+
+        bool isUseful() override
+        {
+            if (!ai->IsTank(bot) || PlayerbotAI::IsOffTank(bot))
+                return false;
+            // Cheap check — only useful if Onyxia is nearby and on the ground.
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 10184, 80.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 80.0f);
+            for (Unit* u : units)
+                if (u && u->IsAlive() && !u->HasAura(17131))
+                    return true;
+            return false;
+        }
+    };
+
     // Force-attack Onyxia herself (entry 10184), bypassing the regular
     // current-target / tank-target / dps-assist target selection. Used in P2 so
     // ranged/heal bots keep DPSing the boss while whelps engage them — without

@@ -558,6 +558,14 @@ if(BUILD_ELUNA)
     ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine
     ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/hooks
     ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/methods/CMangos
+    # Eluna upstream expects cmangos-style nested paths like "Globals/SharedDefines.h",
+    # "Entities/Player.h", "Server/WorldSession.h", etc. Penqle's tree is flat
+    # (most headers live directly at src/game/) so we vendor a thin compat shim
+    # tree in _eluna_compat/ that re-includes the real Penqle headers. 37 auto-
+    # generated shims + 7 cross-tree shims (Config/Database/Log/Util) + 4 empty
+    # stubs for TBC+ features that don't exist in vanilla (ArenaTeam, Vehicle,
+    # TemporarySpawn, UniqueTrackablePtr).
+    ${CMAKE_CURRENT_SOURCE_DIR}/_eluna_compat
   )
 endif()
 
