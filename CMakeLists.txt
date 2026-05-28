@@ -644,7 +644,10 @@ if(BUILD_ELUNA)
             ${CMAKE_SOURCE_DIR}/src/game/LuaEngine
             ${CMAKE_SOURCE_DIR}/src/game/LuaEngine/hooks
         )
-        target_link_libraries(playerbots lualib)
+        # PlayerBots/CMakeLists.txt uses the PRIVATE/PUBLIC keyword form, so we
+        # have to match it here — CMake forbids mixing keyword and plain
+        # signatures on the same target.
+        target_link_libraries(playerbots PRIVATE lualib)
     endif()
 endif()
 

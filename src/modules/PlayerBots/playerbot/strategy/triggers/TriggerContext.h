@@ -307,6 +307,8 @@ namespace ai
             creators["start onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaStartFightTrigger(ai); };
             creators["end onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaEndFightTrigger(ai); };
             creators["onyxia deep breath"] = [](PlayerbotAI* ai) { return new OnyxiaDeepBreathTrigger(ai); };
+            creators["onyxia phase 2"] = [](PlayerbotAI* ai) { return new OnyxiaPhase2Trigger(ai); };
+            creators["onyxia bellowing roar"] = [](PlayerbotAI* ai) { return new OnyxiaBellowingRoarTrigger(ai); };
 
             creators["start magmadar fight"] = [](PlayerbotAI* ai) { return new MagmadarStartFightTrigger(ai); };
             creators["end magmadar fight"] = [](PlayerbotAI* ai) { return new MagmadarEndFightTrigger(ai); };

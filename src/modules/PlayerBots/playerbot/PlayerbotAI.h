@@ -761,7 +761,11 @@ public:
     void SetLastEvent(Event& event) { lastEvent = event; }
     Event& GetLastEvent() { return lastEvent; }
 
-#ifdef BUILD_ELUNA
+#if defined(BUILD_ELUNA) && defined(MCWOW_ELUNA_PLAYERBOT_BRIDGE)
+    // Disabled until the Eluna playerbot integration is finished. The original
+    // code referenced MaNGOS::unique_weak_ptr<PlayerbotAI> but no such symbol
+    // exists in this fork (Eluna upstream provides Trinity::unique_weak_ptr).
+    // Define MCWOW_ELUNA_PLAYERBOT_BRIDGE in CMake once the bridge is wired.
     MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }
     void SetWeakPtr(MaNGOS::unique_weak_ptr<PlayerbotAI> weakRef) { m_weakRef = std::move(weakRef); }
 #endif
@@ -820,7 +824,10 @@ public:
     std::vector<std::string> GetRecordedMessages() { m_recordMessages = false; m_recordIncommingMessages= false; auto msgs = m_recordedMessages; m_recordedMessages.clear(); return msgs; }
     void ClearRecordedMessages() { m_recordedMessages.clear(); m_recordMessages = false; m_recordIncommingMessages = false;}
 
-#ifdef BUILD_ELUNA
+#if defined(BUILD_ELUNA) && defined(MCWOW_ELUNA_PLAYERBOT_BRIDGE)
+    // See the GetWeakPtr / SetWeakPtr block above for why this is gated behind
+    // a second flag. Compile errors otherwise on MaNGOS::unique_weak_ptr which
+    // does not exist in this fork.
     MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;
 #endif
 };
