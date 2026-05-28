@@ -321,6 +321,16 @@ namespace ai
             creators["end ragnaros fight"] = [](PlayerbotAI* ai) { return new RagnarosEndFightTrigger(ai); };
             creators["ragnaros wrath"] = [](PlayerbotAI* ai) { return new RagnarosWrathTrigger(ai); };
             creators["ragnaros submerge"] = [](PlayerbotAI* ai) { return new RagnarosSubmergeTrigger(ai); };
+
+            // BWL boss triggers
+            creators["start vaelastrasz fight"] = [](PlayerbotAI* ai) { return new VaelastraszStartFightTrigger(ai); };
+            creators["end vaelastrasz fight"] = [](PlayerbotAI* ai) { return new VaelastraszEndFightTrigger(ai); };
+            creators["vaelastrasz burning adrenaline"] = [](PlayerbotAI* ai) { return new VaelastraszBurningAdrenalineTrigger(ai); };
+            creators["start broodlord fight"] = [](PlayerbotAI* ai) { return new BroodlordStartFightTrigger(ai); };
+            creators["end broodlord fight"] = [](PlayerbotAI* ai) { return new BroodlordEndFightTrigger(ai); };
+            creators["start chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusStartFightTrigger(ai); };
+            creators["end chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusEndFightTrigger(ai); };
+            creators["chromaggus affliction danger"] = [](PlayerbotAI* ai) { return new ChromaggusAfflictionDangerTrigger(ai); };
             creators["magmadar too close"] = [](PlayerbotAI* ai) { return new MagmadarTooCloseTrigger(ai); };
 
             creators["start lucifron fight"] = [](PlayerbotAI* ai) { return new LucifronStartFightTrigger(ai); };

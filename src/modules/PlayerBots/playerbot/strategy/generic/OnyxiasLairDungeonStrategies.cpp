@@ -82,9 +82,14 @@ void OnyxiaFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     // (~30y) reaches her at any normal altitude.
     if (ai->IsRanged(bot) || ai->IsHeal(bot))
     {
+        // "attack onyxia" forces the target to Onyxia herself (creature 10184).
+        // The previous "attack" target generic was inheriting whatever current
+        // target the bot already had — usually a whelp that aggro'd them — so
+        // ranged DPS got stuck on adds and never approached/cast on Onyxia.
+        // Priority 95 (just under emergency 100) so it overrides DpsAssist.
         triggers.push_back(new TriggerNode(
             "onyxia phase 2",
-            NextAction::array(0, new NextAction("attack", 90.0f), NULL)));
+            NextAction::array(0, new NextAction("attack onyxia", 95.0f), NULL)));
     }
 
     // Phase 3 Bellowing Roar fear (18431). The actual anti-fear cooldowns

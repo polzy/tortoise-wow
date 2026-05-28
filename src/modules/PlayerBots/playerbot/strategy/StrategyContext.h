@@ -182,6 +182,9 @@ namespace ai
             creators["golemagg"] = [](PlayerbotAI* ai) { return new GolemaggFightStrategy(ai); };
             creators["majordomo"] = [](PlayerbotAI* ai) { return new MajordomoFightStrategy(ai); };
             creators["ragnaros"] = [](PlayerbotAI* ai) { return new RagnarosFightStrategy(ai); };
+            creators["vaelastrasz"] = [](PlayerbotAI* ai) { return new VaelastraszFightStrategy(ai); };
+            creators["broodlord"] = [](PlayerbotAI* ai) { return new BroodlordFightStrategy(ai); };
+            creators["chromaggus"] = [](PlayerbotAI* ai) { return new ChromaggusFightStrategy(ai); };
             creators["suppression room"] = [](PlayerbotAI* ai) { return new SuppressionRoomStrategy(ai); };
             creators["netherspite"] = [](PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); };
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };

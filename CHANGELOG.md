@@ -54,6 +54,22 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 - Onyxia P2 Deep Breath dodge — `OnyxiaDeepBreathTrigger` detects spell 17086
   cast within 80y; `OnyxiaMoveAwayFromBreathAction` sweeps the bot 40y away
   from her position. Reaction-tier priority.
+- BWL boss strategies: Vaelastrasz (Burning Adrenaline move-away), Broodlord
+  (Knock Away tank re-taunt priority), Chromaggus (Brood Affliction 4-of-5
+  dispel before Chromatic Mutation). Spell IDs lifted from
+  `src/scripts/dungeons/blackwing_lair/boss_*.cpp`.
+- AttackOnyxiaAction: P2 fix so ranged/heal bots stay locked on Onyxia
+  (entry 10184) instead of switching to whelps that aggro them. Pins the
+  AI context's "current target" and selection guid to Onyxia, then routes
+  through the standard reach-spell + cast pipeline. Was needed because the
+  generic "attack" action inherits the bot's existing target — which is a
+  whelp once they start attacking.
+- BiS swap pre-check: `HandleBotBis` and `OverlayResistSet` now call
+  CanEquipNewItem(swap=true) BEFORE destroying the old item. If the new
+  item can't be equipped (class proficiency, allowable_class, etc.) the
+  bot keeps the old item instead of ending up with an empty slot.
+  Observed: Trollbane / Grunthar lost their ranged weapon entirely under
+  the previous destroy-then-check flow.
 - Off-tank target priority. `PlayerbotAI::IsOffTank()` flags any tank in a
   group that is NOT the lowest-GUID tank (stable role assignment across
   reconnects). For OTs, `TankTargetValue` switches to

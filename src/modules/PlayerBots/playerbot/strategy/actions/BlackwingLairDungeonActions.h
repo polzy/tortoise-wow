@@ -154,6 +154,55 @@ namespace ai
         }
     };
 
+    // --- BWL boss enable/disable strategies ---
+    class VaelastraszEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        VaelastraszEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable vaelastrasz fight strategy", "+vaelastrasz") {}
+    };
+    class VaelastraszDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        VaelastraszDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable vaelastrasz fight strategy", "-vaelastrasz") {}
+    };
+
+    // Burning Adrenaline (23620 / 23478): bot will explode on death, splash-damaging
+    // the raid for ~7000 fire. The bot moves 30y from raid center to minimize hits.
+    // Reuses the existing Flee primitive which heads toward the master/group center;
+    // we override by passing "current target" (= boss) so the bot moves AWAY from
+    // the boss/raid bundle into open space.
+    class VaelastraszBurningAdrenalineMoveAwayAction : public MovementAction
+    {
+    public:
+        VaelastraszBurningAdrenalineMoveAwayAction(PlayerbotAI* ai) : MovementAction(ai, "vael burning adrenaline move away") {}
+        bool Execute(Event& event) override
+        {
+            return Flee(AI_VALUE(Unit*, "current target"));
+        }
+    };
+
+    class BroodlordEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BroodlordEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable broodlord fight strategy", "+broodlord") {}
+    };
+    class BroodlordDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BroodlordDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable broodlord fight strategy", "-broodlord") {}
+    };
+
+    class ChromaggusEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        ChromaggusEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable chromaggus fight strategy", "+chromaggus") {}
+    };
+    class ChromaggusDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        ChromaggusDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable chromaggus fight strategy", "-chromaggus") {}
+    };
+
     class DisarmSuppressionDeviceAction : public Action
     {
     public:

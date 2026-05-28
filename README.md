@@ -96,14 +96,22 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Boss / Raid                            | Status | Notes |
 |----------------------------------------|--------|-------|
 | Magmadar (MC)                          | ✅     | Caster move away, fire prot potion, lava bomb dodge |
-| Lucifron / Gehennas / Garr (MC)        | ⚠️    | Fire prot potion only |
-| Baron Geddon (MC)                      | ⚠️    | Living Bomb move-away implemented |
-| Shazzrah / Sulfuron / Golemagg (MC)    | ⚠️    | Stub-ish |
-| Majordomo (MC) / Ragnaros (MC)         | ❌     | Not implemented |
-| Onyxia                                 | ⚠️    | First-pass: ranged flee, fire pot, multiplier. No Deep Breath / phases |
-| BWL bosses                             | ❌     | Files exist (141 lines for all 8) |
-| AQ40 bosses                            | ❌     | |
-| Naxxramas bosses                       | ❌     | 34 lines total for the whole raid |
+| Lucifron (MC)                          | ✅     | Fire prot + Curse decurse + Impending Doom dispel |
+| Gehennas (MC)                          | ✅     | Fire prot + Curse decurse |
+| Garr (MC)                              | ⚠️    | Fire prot potion only — Firesworn explosion handling missing |
+| Baron Geddon (MC)                      | ✅     | Living Bomb move-away + Inferno avoidance for ranged |
+| Shazzrah (MC)                          | ✅     | Fire prot + Curse decurse |
+| Sulfuron / Golemagg (MC)               | ⚠️    | Fire prot + Magma Splash dodge — healer interrupt missing |
+| Majordomo (MC)                         | ✅     | Fire prot — CC discipline left to per-class strategies |
+| Ragnaros (MC)                          | ✅     | Wrath PBAoE dodge, Submerge phase Sons of Flame switch |
+| Onyxia                                 | ✅     | Full 3-phase strat: 8 Deep Breath directions, P2 attack-onyxia, P3 Bellowing Roar |
+| Vaelastrasz (BWL)                      | ✅     | Burning Adrenaline move-away from raid |
+| Broodlord Lashlayer (BWL)              | ✅     | Tank re-taunt priority boost on Knock Away |
+| Chromaggus (BWL)                       | ✅     | Brood Affliction 4-of-5 danger dispel |
+| Firemaw/Ebonroc/Flamegor (BWL)         | ❌     | Drake trio — Shadow Flame + tail swipe TODO |
+| Razorgore / Nefarian (BWL)             | ❌     | Mind Control / Class Calls TODO |
+| AQ20 / AQ40 bosses                     | ❌     | |
+| Naxxramas bosses                       | ⚠️    | Four Horsemen void zone dodge only — rest of wing unscripted |
 
 ### Server / infra
 | Feature                                | Status | Notes |

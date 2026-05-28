@@ -369,6 +369,7 @@ namespace ai
             creators["enable onyxia fight strategy"] = [](PlayerbotAI* ai) { return new OnyxiaEnableFightStrategyAction(ai); };
             creators["disable onyxia fight strategy"] = [](PlayerbotAI* ai) { return new OnyxiaDisableFightStrategyAction(ai); };
             creators["move away from onyxia breath"] = [](PlayerbotAI* ai) { return new OnyxiaMoveAwayFromBreathAction(ai); };
+            creators["attack onyxia"] = [](PlayerbotAI* ai) { return new AttackOnyxiaAction(ai); };
 
             creators["enable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarEnableFightStrategyAction(ai); };
             creators["disable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarDisableFightStrategyAction(ai); };
@@ -380,6 +381,15 @@ namespace ai
             creators["enable ragnaros fight strategy"] = [](PlayerbotAI* ai) { return new RagnarosEnableFightStrategyAction(ai); };
             creators["disable ragnaros fight strategy"] = [](PlayerbotAI* ai) { return new RagnarosDisableFightStrategyAction(ai); };
             creators["move away from ragnaros wrath"] = [](PlayerbotAI* ai) { return new RagnarosWrathMoveAwayAction(ai); };
+
+            // BWL boss actions
+            creators["enable vaelastrasz fight strategy"] = [](PlayerbotAI* ai) { return new VaelastraszEnableFightStrategyAction(ai); };
+            creators["disable vaelastrasz fight strategy"] = [](PlayerbotAI* ai) { return new VaelastraszDisableFightStrategyAction(ai); };
+            creators["vael burning adrenaline move away"] = [](PlayerbotAI* ai) { return new VaelastraszBurningAdrenalineMoveAwayAction(ai); };
+            creators["enable broodlord fight strategy"] = [](PlayerbotAI* ai) { return new BroodlordEnableFightStrategyAction(ai); };
+            creators["disable broodlord fight strategy"] = [](PlayerbotAI* ai) { return new BroodlordDisableFightStrategyAction(ai); };
+            creators["enable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusEnableFightStrategyAction(ai); };
+            creators["disable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusDisableFightStrategyAction(ai); };
 
             creators["enable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronEnableFightStrategyAction(ai); };
             creators["disable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronDisableFightStrategyAction(ai); };
