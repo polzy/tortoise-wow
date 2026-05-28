@@ -3627,20 +3627,35 @@ std::string PlayerbotHolder::HandleBotBis(Player* bot, Player* master, const std
         // that the periodic save layer then discarded). The BiS log claimed "equipped 17"
         // but `SELECT * FROM character_inventory WHERE slot=0` still showed the old gear.
         //
-        // Robust approach: do the swap manually.
-        //   1. If slot occupied: remember the old guid, destroy it.
-        //   2. Re-validate CanEquipNewItem with swap=false (slot now empty).
-        //   3. EquipNewItem into the empty slot.
-        //   4. Verify the slot actually contains the new entry.
-        // If any step fails after step 1 (destroy succeeded but equip failed), the slot
-        // ends up empty — preferable to silently mismatched state.
+        // Robust approach:
+        //   1. Pre-validate CanEquipNewItem(swap=true) BEFORE touching the existing
+        //      item. If the bot can't equip the BiS item for any reason (class
+        //      proficiency, allowable_class, missing item proto, etc.) we leave the
+        //      slot untouched — observed naked hunters (Grunthar, Trollbane lost
+        //      their ranged weapon entirely) when the previous "destroy first,
+        //      check after" path failed validation on step 2.
+        //   2. Only then destroy the old item.
+        //   3. Re-call CanEquipNewItem with swap=false (now slot is empty).
+        //   4. EquipNewItem into the empty slot.
+        //   5. Verify the slot actually contains the new entry.
+        uint16 dest = 0;
+        InventoryResult pre = bot->CanEquipNewItem(slot, dest, itemId, true);
+        if (pre != EQUIP_ERR_OK) { skippedNoSlot++; continue; }
+
         Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
         if (oldItem)
             bot->DestroyItem(oldItem->GetBagSlot(), oldItem->GetSlot(), true);
 
-        uint16 dest = 0;
         InventoryResult res = bot->CanEquipNewItem(slot, dest, itemId, false);
-        if (res != EQUIP_ERR_OK) { skippedNoSlot++; continue; }
+        if (res != EQUIP_ERR_OK)
+        {
+            // Shouldn't happen — pre-check already returned OK and the slot is
+            // now empty. Defensive only; log so we can spot it if it ever fires.
+            sLog.outError("[BIS] %s: slot %u went from OK to err=%d after destroy (item=%u)",
+                          bot->GetName(), (uint32)slot, (int)res, itemId);
+            skippedNoSlot++;
+            continue;
+        }
 
         Item* newItem = bot->EquipNewItem(dest, itemId, true);
 
@@ -3711,14 +3726,16 @@ static std::string OverlayResistSet(Player* bot, mcwow_resist::School school)
         if (Item* existing = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             if (existing->GetEntry() == itemId) { skippedSame++; totalRes += resOf(proto); continue; }
 
-        // Same swap-then-equip pattern as HandleBotBis: destroy the occupant, equip into
-        // the empty slot, then verify the new entry actually landed. See HandleBotBis for
-        // the rationale (EquipNewItem returns non-null even when the swap silently drops
-        // the item into bags or limbo).
+        // Same pattern as HandleBotBis: pre-check CanEquipNewItem(swap=true) BEFORE
+        // touching the existing item so we don't strip a valid old item when the new
+        // one can't actually be equipped.
+        uint16 dest = 0;
+        InventoryResult pre = bot->CanEquipNewItem(slot, dest, itemId, true);
+        if (pre != EQUIP_ERR_OK) { skippedNoSlot++; continue; }
+
         if (Item* old = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             bot->DestroyItem(old->GetBagSlot(), old->GetSlot(), true);
 
-        uint16 dest = 0;
         InventoryResult res = bot->CanEquipNewItem(slot, dest, itemId, false);
         if (res != EQUIP_ERR_OK) { skippedNoSlot++; continue; }
 
