@@ -26,6 +26,17 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "jindo totems nearby",
         NextAction::array(0, new NextAction("engage jindo totem", 95.0f), NULL)));
+
+    // Thekal P1 — focus Lor'Khan (11347) + Zath (11348) together with Thekal
+    // so they all die within the 6s rez window. Priority 85.
+    triggers.push_back(new TriggerNode(
+        "thekal zealots nearby",
+        NextAction::array(0, new NextAction("engage thekal zealot", 85.0f), NULL)));
+
+    // Thekal P2 Tigers (15068) — AOE focus.
+    triggers.push_back(new TriggerNode(
+        "thekal tiger nearby",
+        NextAction::array(0, new NextAction("engage thekal tiger", 85.0f), NULL)));
 }
 
 // ========== Hakkar the Soulflayer (14834) ==========

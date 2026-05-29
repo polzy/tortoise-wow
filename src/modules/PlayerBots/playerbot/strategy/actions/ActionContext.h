@@ -455,6 +455,8 @@ namespace ai
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
             creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };
             creators["engage jindo totem"] = [](PlayerbotAI* ai) { return new EngageJindoTotemAction(ai); };
+            creators["engage thekal zealot"] = [](PlayerbotAI* ai) { return new EngageThekalZealotAction(ai); };
+            creators["engage thekal tiger"] = [](PlayerbotAI* ai) { return new EngageThekalTigerAction(ai); };
 
             // AQ20 dungeon strategy enable/disable
             creators["enable ruins of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnableDungeonStrategyAction(ai); };

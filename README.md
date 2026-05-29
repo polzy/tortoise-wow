@@ -127,7 +127,8 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Mandokir (ZG)                          | ⚠️    | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
 | Marli (ZG)                             | ⚠️    | Pro-engage Spawn of Marli (15041) — adds with poison aura |
 | Jin'do (ZG)                            | ⚠️    | Pro-engage Brainwash Totem (15112, MCs raid members) + Healing Ward (14987). Priority 95 — fight-defining |
-| Other ZG bosses                        | ❌     | Venoxis / Jeklik / Thekal / Arlokk / Hazzarah TODO |
+| Thekal (ZG)                            | ⚠️    | Pro-engage P1 Zealots (Lor'Khan 11347 + Zath 11348) + P2 Tigers (15068) |
+| Other ZG bosses                        | ❌     | Venoxis / Jeklik / Arlokk / Hazzarah TODO |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
 | Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation dispel + caster spread |

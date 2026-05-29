@@ -272,4 +272,25 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "jindo totems nearby",
                 { 15112, 14987 }, 60.0f) {}
     };
+
+    // Thekal P1 zealots — Lor'Khan (11347) and Zath (11348) fight alongside
+    // Thekal in P1. All three must die within ~6s of each other or the
+    // survivors res their fallen comrades. Pro-engage helps the raid focus
+    // them together (boss is single-target; the OTs grab Zath and Lor'Khan).
+    class ThekalZealotsNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        ThekalZealotsNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "thekal zealots nearby",
+                { 11347, 11348 }, 40.0f) {}
+    };
+
+    // Thekal P2 Tigers (15068) summoned during the tiger form phase.
+    // ScriptDev2 boss_thekal.cpp NPC_TIGER.
+    class ThekalTigerNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        ThekalTigerNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "thekal tiger nearby", { 15068 }, 50.0f) {}
+    };
 }

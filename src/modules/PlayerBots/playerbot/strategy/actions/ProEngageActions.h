@@ -218,4 +218,18 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage jindo totem",
                 { 15112, 14987 }, 60.0f) {}
     };
+
+    class EngageThekalZealotAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageThekalZealotAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage thekal zealot", { 11347, 11348 }, 40.0f) {}
+    };
+
+    class EngageThekalTigerAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageThekalTigerAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage thekal tiger", { 15068 }, 50.0f) {}
+    };
 }

@@ -409,6 +409,8 @@ namespace ai
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };
             creators["marli spawn nearby"] = [](PlayerbotAI* ai) { return new MarliSpawnNearbyTrigger(ai); };
             creators["jindo totems nearby"] = [](PlayerbotAI* ai) { return new JindoTotemsNearbyTrigger(ai); };
+            creators["thekal zealots nearby"] = [](PlayerbotAI* ai) { return new ThekalZealotsNearbyTrigger(ai); };
+            creators["thekal tiger nearby"] = [](PlayerbotAI* ai) { return new ThekalTigerNearbyTrigger(ai); };
 
             // AQ20 dungeon enter/leave
             creators["enter ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnterDungeonTrigger(ai); };

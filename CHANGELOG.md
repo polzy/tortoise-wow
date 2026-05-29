@@ -7,6 +7,11 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — ZG Thekal pro-engage (P1 zealots + P2 tigers)
+- Thekal Lor'Khan (11347) + Zath (11348) pro-engage — focus all 3 zealots
+  together so they die in the 6s rez window.
+- Thekal Tigers (15068) — P2 summons.
+
 ### Added — ZG Marli + Jin'do pro-engage (3 more encounters)
 - Marli Spawn of Marli (15041) — pro-engage, poison-aura adds.
 - Jin'do Brainwash Totem (15112) — **MCs raid members**, fight-defining
