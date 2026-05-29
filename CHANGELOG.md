@@ -7,6 +7,22 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — code-review pass (background reviewer, 3 real bugs)
+- **Sulfuron Priestess entry was wrong** (CRITICAL). The trigger and action
+  used 12099 on a "same model as Garr's Firesworn" assumption — incorrect.
+  Per `molten_core.h` line 30, `NPC_FLAMEWAKER_PRIEST = 11662`. The entire
+  pro-engage chain was silent dead code. Fixed both `ProEngageTriggers.h`
+  and `ProEngageActions.h` to use 11662.
+- **C'Thun Small Claw Tentacle (15725) was missing** from the entry list.
+  Per `boss_cthun.cpp:35-39` C'Thun has 5 tentacle types; we had 4 and
+  let the small claws roam un-tanked. Added 15725 to both trigger and
+  action entry lists.
+- **Razorgore phantom entry 14036** removed. Not present in any boss or
+  instance script — was cargo-culted from an external reference. Removed
+  from both trigger and action; entry list is now { 12422, 12420 }
+  (Death Talon Dragonspawn + Blackwing Mage, both confirmed in
+  `boss_razorgore.cpp`).
+
 ### Added — Final pro-engage pass: Venoxis, Gothik, Yauj, C'Thun + intended-usage note
 - ZG Venoxis Razzashi Cobras (11373) pro-engage at 50y prio 80.
 - Naxx Gothik all 7 add types (Unrelenting Trainee 16124 / DK 16125 /

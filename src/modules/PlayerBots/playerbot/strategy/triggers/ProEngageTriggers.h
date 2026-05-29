@@ -59,15 +59,17 @@ namespace ai
 
     // --- Per-encounter instantiations ---
 
-    // Razorgore P1 wave detection. Death Talon Dragonspawn (12422), Grethok
-    // mages (12420) and the variant Death Talon Captain (14036) all spawn in
-    // 8 waves during the egg phase. 60y covers the door spawn points so the
-    // tanks engage as soon as one walks in, not 20y from the orb.
+    // Razorgore P1 wave detection. Death Talon Dragonspawn (12422) and
+    // Blackwing Mage (12420 — the wave-spawn caster) per ScriptDev2
+    // boss_razorgore.cpp. 60y covers the door spawn points so the tanks
+    // engage as soon as one walks in, not 20y from the orb.
+    // (Previous rev included 14036 — not confirmed in any boss/instance
+    // script; removed per code-review 2026-05-29 finding #2.)
     class RazorgoreAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         RazorgoreAddsNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "razorgore adds nearby", { 12422, 12420, 14036 }, 60.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "razorgore adds nearby", { 12422, 12420 }, 60.0f) {}
     };
 
     // Garr Firesworn (12099) pre-engage. The boss script's eruption-on-add
@@ -93,15 +95,17 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "onyxia whelps nearby", { 11262 }, 50.0f) {}
     };
 
-    // Sulfuron Harbinger (12098) Priestess of Shahram adds (12099 — yes, the
-    // same NPC entry as Garr Firesworn; they reuse the model. The encounter
-    // context disambiguates: Sulfuron room vs MC bridge). Range 40y so the
-    // OTs engage the priestesses before they cast Heal on Sulfuron.
+    // Sulfuron Harbinger (12098) Flamewaker Priest adds — they cast Heal
+    // (Inspire) on Sulfuron. Per molten_core.h NPC_FLAMEWAKER_PRIEST = 11662.
+    // Earlier rev used 12099 (Garr's Firesworn) on a "same model = same
+    // entry" assumption; that was wrong (the priests use a different DB
+    // entry) and the trigger never fired. Corrected per code-review
+    // 2026-05-29 (background reviewer finding #1).
     class SulfuronPriestessNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         SulfuronPriestessNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "sulfuron priestess nearby", { 12099 }, 40.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "sulfuron priestess nearby", { 11662 }, 40.0f) {}
     };
 
     // Baron Geddon Living Bomb is on a raid member, not an add — no entry to
@@ -333,16 +337,21 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "yauj brood nearby", { 15621 }, 50.0f) {}
     };
 
-    // AQ40 C'Thun tentacles (P2 body fight). Eye Tentacle (15726) — small,
-    // mind-flay debuff. Giant Claw Tentacle (15728) — high HP melee.
-    // Giant Eye Tentacle (15334) — beam. Flesh Tentacle (15802) — inside the
-    // stomach. AOE focus on all of them.
-    // ScriptDev2 boss_cthun.cpp MOB_EYE_TENTACLE / MOB_GIANT_*_TENTACLE / MOB_FLESH_TENTACLE.
+    // AQ40 C'Thun tentacles (P2 body fight). All 5 types covered:
+    //   Eye Tentacle           15726 (small, mind-flay)
+    //   Claw Tentacle          15725 (small, melee — most frequent during
+    //                                 the evading-tank phase, MUST be in
+    //                                 the list per code-review finding #4)
+    //   Giant Claw Tentacle    15728 (high HP melee)
+    //   Giant Eye Tentacle     15334 (eye beam)
+    //   Flesh Tentacle         15802 (inside the stomach)
+    // ScriptDev2 boss_cthun.cpp MOB_EYE_TENTACLE / MOB_CLAW_TENTACLE /
+    // MOB_GIANT_*_TENTACLE / MOB_FLESH_TENTACLE.
     class CthunTentacleNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         CthunTentacleNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "cthun tentacle nearby",
-                { 15726, 15728, 15334, 15802 }, 60.0f) {}
+                { 15726, 15725, 15728, 15334, 15802 }, 60.0f) {}
     };
 }

@@ -86,7 +86,7 @@ namespace ai
     {
     public:
         EngageRazorgoreAddAction(PlayerbotAI* ai)
-            : EngageNearbyAddAction(ai, "engage razorgore add", { 12422, 12420, 14036 }, 60.0f) {}
+            : EngageNearbyAddAction(ai, "engage razorgore add", { 12422, 12420 }, 60.0f) {}
     };
 
     class EngageGarrFireswornAction : public EngageNearbyAddAction
@@ -107,7 +107,7 @@ namespace ai
     {
     public:
         EngageSulfuronPriestessAction(PlayerbotAI* ai)
-            : EngageNearbyAddAction(ai, "engage sulfuron priestess", { 12099 }, 40.0f) {}
+            : EngageNearbyAddAction(ai, "engage sulfuron priestess", { 11662 }, 40.0f) {}
     };
 
     class EngageRagnarosSonAction : public EngageNearbyAddAction
@@ -267,6 +267,6 @@ namespace ai
     public:
         EngageCthunTentacleAction(PlayerbotAI* ai)
             : EngageNearbyAddAction(ai, "engage cthun tentacle",
-                { 15726, 15728, 15334, 15802 }, 60.0f) {}
+                { 15726, 15725, 15728, 15334, 15802 }, 60.0f) {}
     };
 }
