@@ -47,11 +47,20 @@ integration (PR#79 base from alexisrichard) plus an addon for raid management.
 Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 
 **Intended usage profile**: 1 human master + up to 40 personally-owned bots, running solo
-content (questing, dungeons, raids). It is NOT designed for a multi-master server
-where each of 10 humans drives their own 40-bot raid simultaneously — pro-engage
-triggers, broadcaster throttle, OT target selection and DB save pressure all
-assume one raid at a time. Multi-master would require a per-master scoping pass
-on every cell-window scan and broadcaster channel; not on the roadmap.
+content (questing, dungeons, raids).
+
+**Multi-master correctness**: the strategy layer itself is instance-scoped correctly —
+pro-engage triggers use `Cell::VisitAllObjects(bot, ...)` which only sees mobs in the
+bot's own map+instance, `EngageNearbyAddAction::FindClosest()` is per-bot, `BotStatusBroadcaster`
+whispers each bot's own master, `OffTank` target selection reads the bot's own threat
+list, etc. Two simultaneous BWL raids in two instances would each run pro-engage
+independently with zero cross-pollution.
+
+The real ceiling for multi-master is NOT the strategy logic but the
+**MaNGOS world thread (single-threaded)**: every player/bot tick + map update +
+packet serialization runs on one core, so adding raids past ~3-4 simultaneously
+degrades tick rate visibly. A box with very strong single-thread performance can
+host more bot-raids; a box with many slow cores cannot.
 
 ## What works
 
