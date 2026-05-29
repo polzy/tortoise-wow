@@ -20,6 +20,17 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
     triggers.push_back(new TriggerNode(
         "fankriss adds nearby",
         NextAction::array(0, new NextAction("engage fankriss add", 85.0f), NULL)));
+
+    // Bug Trio Princess Yauj Broods (15621) — adds during the Yauj phase.
+    triggers.push_back(new TriggerNode(
+        "yauj brood nearby",
+        NextAction::array(0, new NextAction("engage yauj brood", 80.0f), NULL)));
+
+    // C'Thun tentacles (15726/15728/15334/15802) — P2 body fight. All sizes
+    // covered, AOE focus. Priority 90 — leaving tentacles up wipes the raid.
+    triggers.push_back(new TriggerNode(
+        "cthun tentacle nearby",
+        NextAction::array(0, new NextAction("engage cthun tentacle", 90.0f), NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========

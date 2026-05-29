@@ -239,4 +239,34 @@ namespace ai
         EngageArlokkProwlerAction(PlayerbotAI* ai)
             : EngageNearbyAddAction(ai, "engage arlokk prowler", { 15101 }, 50.0f) {}
     };
+
+    class EngageVenoxisCobraAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageVenoxisCobraAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage venoxis cobra", { 11373 }, 50.0f) {}
+    };
+
+    class EngageGothikAddAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageGothikAddAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage gothik add",
+                { 16124, 16125, 16126, 16127, 16148, 16149, 16150 }, 80.0f) {}
+    };
+
+    class EngageYaujBroodAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageYaujBroodAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage yauj brood", { 15621 }, 50.0f) {}
+    };
+
+    class EngageCthunTentacleAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageCthunTentacleAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage cthun tentacle",
+                { 15726, 15728, 15334, 15802 }, 60.0f) {}
+    };
 }

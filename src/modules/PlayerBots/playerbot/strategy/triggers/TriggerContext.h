@@ -413,6 +413,10 @@ namespace ai
             creators["thekal tiger nearby"] = [](PlayerbotAI* ai) { return new ThekalTigerNearbyTrigger(ai); };
             creators["arlokk prowler nearby"] = [](PlayerbotAI* ai) { return new ArlokkProwlerNearbyTrigger(ai); };
             creators["hazzarah sleep"] = [](PlayerbotAI* ai) { return new HazzarahSleepTrigger(ai); };
+            creators["venoxis cobra nearby"] = [](PlayerbotAI* ai) { return new VenoxisCobraNearbyTrigger(ai); };
+            creators["gothik adds nearby"] = [](PlayerbotAI* ai) { return new GothikAddsNearbyTrigger(ai); };
+            creators["yauj brood nearby"] = [](PlayerbotAI* ai) { return new YaujBroodNearbyTrigger(ai); };
+            creators["cthun tentacle nearby"] = [](PlayerbotAI* ai) { return new CthunTentacleNearbyTrigger(ai); };
 
             // AQ20 dungeon enter/leave
             creators["enter ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnterDungeonTrigger(ai); };

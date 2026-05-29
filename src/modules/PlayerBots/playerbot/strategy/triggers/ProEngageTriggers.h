@@ -302,4 +302,47 @@ namespace ai
         ArlokkProwlerNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "arlokk prowler nearby", { 15101 }, 50.0f) {}
     };
+
+    // Venoxis Razzashi Cobras (11373) — adds in the boss room, persistent
+    // and respawn-on-Venoxis-cast. ScriptDev2 boss_venoxis.cpp NPC_RAZZASHI_COBRA.
+    class VenoxisCobraNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        VenoxisCobraNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "venoxis cobra nearby", { 11373 }, 50.0f) {}
+    };
+
+    // Naxx Gothik adds — 7 entry types, all engaged on spawn. Live side:
+    // Unrelenting Trainee (16124), DK (16125), Rider (16126). Dead side:
+    // Spectral Trainee (16127), DK (16148), Rider (16150), Horse (16149).
+    // ScriptDev2 naxxramas.h NPC_UNREL_* / NPC_SPECT_*.
+    class GothikAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        GothikAddsNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "gothik adds nearby",
+                { 16124, 16125, 16126, 16127, 16148, 16149, 16150 }, 80.0f) {}
+    };
+
+    // AQ40 Princess Yauj Brood (15621) summoned during the Bug Trio fight.
+    // ScriptDev2 temple_of_ahnqiraj.h NPC_YAUJ_BROOD.
+    class YaujBroodNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        YaujBroodNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "yauj brood nearby", { 15621 }, 50.0f) {}
+    };
+
+    // AQ40 C'Thun tentacles (P2 body fight). Eye Tentacle (15726) — small,
+    // mind-flay debuff. Giant Claw Tentacle (15728) — high HP melee.
+    // Giant Eye Tentacle (15334) — beam. Flesh Tentacle (15802) — inside the
+    // stomach. AOE focus on all of them.
+    // ScriptDev2 boss_cthun.cpp MOB_EYE_TENTACLE / MOB_GIANT_*_TENTACLE / MOB_FLESH_TENTACLE.
+    class CthunTentacleNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        CthunTentacleNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "cthun tentacle nearby",
+                { 15726, 15728, 15334, 15802 }, 60.0f) {}
+    };
 }

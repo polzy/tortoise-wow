@@ -50,6 +50,11 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
             new NextAction("dispel magic", 90.0f),
             new NextAction("cleanse magic", 90.0f),
             NULL)));
+
+    // Venoxis Razzashi Cobras (11373) — persistent room adds.
+    triggers.push_back(new TriggerNode(
+        "venoxis cobra nearby",
+        NextAction::array(0, new NextAction("engage venoxis cobra", 80.0f), NULL)));
 }
 
 // ========== Hakkar the Soulflayer (14834) ==========

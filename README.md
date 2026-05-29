@@ -46,6 +46,13 @@ This fork extends Penqle's tortoise-wow with a heavily patched cmangos/playerbot
 integration (PR#79 base from alexisrichard) plus an addon for raid management.
 Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 
+**Intended usage profile**: 1 human master + up to 40 personally-owned bots, running solo
+content (questing, dungeons, raids). It is NOT designed for a multi-master server
+where each of 10 humans drives their own 40-bot raid simultaneously — pro-engage
+triggers, broadcaster throttle, OT target selection and DB save pressure all
+assume one raid at a time. Multi-master would require a per-master scoping pass
+on every cell-window scan and broadcaster channel; not on the roadmap.
+
 ## What works
 
 ### Bot lifecycle
@@ -117,7 +124,9 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Battleguard Sartura (AQ40)             | ✅     | Whirlwind (26083) — ranged stay >12y |
 | Princess Huhuran (AQ40)                | ✅     | Frenzy (26051) tranq + Noxious Poison (26053) druid cure |
 | Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
-| Other AQ40 bosses                      | ❌     | Skeram (MC retake) / Twin Emperors (mutate swap) / Ouro / C'Thun / Viscidus / Bug Trio need phase/mech frameworks |
+| Bug Trio Yauj (AQ40)                   | ⚠️    | Pro-engage Yauj Broods (15621). Vem/Kri healing chain at death = raid coord beyond bot scope |
+| C'Thun P2 (AQ40)                       | ⚠️    | Pro-engage all 4 tentacle types (Eye 15726, Giant Claw 15728, Giant Eye 15334, Flesh 15802) at priority 90 |
+| Other AQ40 bosses                      | ❌     | Skeram (MC retake), Twin Emperors mutate swap (multi-tank coord), Ouro burrow (GO interaction), Viscidus freeze/shatter (frost CD coord) |
 | Moam (AQ20)                            | ⚠️    | Pro-engage Mana Fiends (15527) on summon |
 | Buru (AQ20)                            | ⚠️    | Pro-engage Hivezara Hatchlings (15521). Egg-explode mechanic still raid-side |
 | Ayamiss (AQ20)                         | ⚠️    | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
@@ -130,7 +139,8 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Thekal (ZG)                            | ⚠️    | Pro-engage P1 Zealots (Lor'Khan 11347 + Zath 11348) + P2 Tigers (15068) |
 | Arlokk (ZG)                            | ⚠️    | Pro-engage Zulian Prowlers (15101) during vanish phases |
 | Hazzarah (ZG)                          | ⚠️    | Sleep (24664) magic dispel chain |
-| Other ZG bosses                        | ❌     | Venoxis / Jeklik TODO |
+| Venoxis (ZG)                           | ⚠️    | Pro-engage Razzashi Cobras (11373) |
+| Other ZG bosses                        | ❌     | Jeklik (Bat form / Charge / Screech fear-break covered by class strats) |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
 | Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation dispel + caster spread |
@@ -141,7 +151,8 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Sapphiron (Naxx)                       | ⚠️    | Life Drain dispel + frost resist gear. Ice Block hide pathing TODO |
 | Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse |
 | Maexxna (Naxx)                         | ⚠️    | Pro-engage Spiderlings (17055) at 60y + Necrotic Poison (28776) cure poison |
-| Other Naxx bosses                      | ❌     | Heigan dance, Razuvious mind control orbs, Gothik teleport, Thaddius polarity |
+| Gothik (Naxx)                          | ⚠️    | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |
+| Other Naxx bosses                      | ❌     | Heigan dance (positional puzzle), Razuvious mind-control orbs (GO use), Thaddius polarity swap (multi-player coord) |
 
 ### Server / infra
 | Feature                                | Status | Notes |

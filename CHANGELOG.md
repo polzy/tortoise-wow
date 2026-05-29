@@ -7,6 +7,22 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Final pro-engage pass: Venoxis, Gothik, Yauj, C'Thun + intended-usage note
+- ZG Venoxis Razzashi Cobras (11373) pro-engage at 50y prio 80.
+- Naxx Gothik all 7 add types (Unrelenting Trainee 16124 / DK 16125 /
+  Rider 16126 + Spectral Trainee 16127 / DK 16148 / Horse 16149 /
+  Rider 16150) at 80y prio 85. Trainees AOE'd, heavies tanked.
+- AQ40 Bug Trio Yauj Broods (15621) pro-engage at 50y prio 80.
+- AQ40 C'Thun tentacles (Eye 15726 / Giant Claw 15728 / Giant Eye
+  15334 / Flesh 15802) at 60y prio 90 — leaving tentacles up wipes
+  the raid.
+- README: explicit note that the project targets 1 master + 40 bots
+  solo use; multi-master simultaneous raids would need per-master
+  scoping on every pro-engage scan and broadcaster channel and is
+  not on the roadmap.
+
+Pro-engage layer now covers 26 encounters.
+
 ### Added — ZG Arlokk + Hazzarah
 - Arlokk Zulian Prowlers (15101) — pro-engage panther adds spawned during
   her vanish phases.

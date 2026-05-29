@@ -64,6 +64,13 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "noth curse plaguebringer",
         NextAction::array(0, new NextAction("remove curse", 90.0f), NULL)));
+
+    // Gothik adds — both live (16124-16126) and dead (16127, 16148-16150)
+    // sides. The tank role on each side grabs the heavies; AOE focus on
+    // trainees. Priority 85.
+    triggers.push_back(new TriggerNode(
+        "gothik adds nearby",
+        NextAction::array(0, new NextAction("engage gothik add", 85.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
