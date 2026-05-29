@@ -7,6 +7,17 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Naxx wing-bosses pro-engage + 2 dispels (Maexxna, Noth)
+- Pro-engage Maexxna Spiderlings (17055) — 12 spawn at 75/50/25% HP per
+  ScriptDev2. Priority 85.
+- Pro-engage Noth Plagued adds (Guardian 16981 / Construct 16982 /
+  Champion 16983 / Warrior 16984) — spawn during teleport-to-balcony.
+  Priority 85.
+- Maexxna Necrotic Poison (28776) — poison, 90% heal reduction. Chain:
+  `cure poison` (druid/shaman) + `cleanse poison` (paladin). Priority 90.
+- Noth Curse of Plaguebringer (29213) — curse, deadly tick. Chain:
+  `remove curse` (druid/mage). Priority 90.
+
 ### Added — pro-engage extensions + minimap drag
 - AQ20 Rajaxx wave commanders pro-engage. All 7 named officers
   (Colonel Zerran 15385 / Major Yeggeth 15386 / Major Pakkon 15388 /

@@ -94,6 +94,22 @@ namespace ai
         bool IsActive() override { return ai->HasAura(28542, bot); }
     };
 
+    // --- Maexxna Necrotic Poison (28776) — poison, 90% healing reduction. ---
+    class MaexxnaNecroticPoisonTrigger : public Trigger
+    {
+    public:
+        MaexxnaNecroticPoisonTrigger(PlayerbotAI* ai) : Trigger(ai, "maexxna necrotic poison", 1) {}
+        bool IsActive() override { return ai->HasAura(28776, bot); }
+    };
+
+    // --- Noth Curse of Plaguebringer (29213) — curse, lethal damage tick. ---
+    class NothCursePlaguebringerTrigger : public Trigger
+    {
+    public:
+        NothCursePlaguebringerTrigger(PlayerbotAI* ai) : Trigger(ai, "noth curse plaguebringer", 1) {}
+        bool IsActive() override { return ai->HasAura(29213, bot); }
+    };
+
     // --- Four Horsemen mark stacks ---
     // Marks (28832 Korth'azz fire / 28833 Blaumeux shadow / 28834 Mograine
     // unholy / 28835 Zeliek holy) stack on every Horseman cast (~12s). At 4

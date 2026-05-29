@@ -188,4 +188,19 @@ namespace ai
         EngageMandokirOhganAction(PlayerbotAI* ai)
             : EngageNearbyAddAction(ai, "engage mandokir ohgan", { 14988 }, 40.0f) {}
     };
+
+    class EngageMaexxnaSpiderlingAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageMaexxnaSpiderlingAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage maexxna spiderling", { 17055 }, 60.0f) {}
+    };
+
+    class EngageNothPlaguedAddAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageNothPlaguedAddAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage noth plagued add",
+                { 16981, 16982, 16983, 16984 }, 80.0f) {}
+    };
 }

@@ -39,6 +39,31 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "gluth zombie chow nearby",
         NextAction::array(0, new NextAction("engage gluth zombie chow", 90.0f), NULL)));
+
+    // Maexxna Spiderlings (17055) — 12 spawn at 75/50/25% HP. Raid AOE.
+    triggers.push_back(new TriggerNode(
+        "maexxna spiderling nearby",
+        NextAction::array(0, new NextAction("engage maexxna spiderling", 85.0f), NULL)));
+
+    // Noth Plagued adds (16981-16984) during teleport phase.
+    triggers.push_back(new TriggerNode(
+        "noth plagued adds nearby",
+        NextAction::array(0, new NextAction("engage noth plagued add", 85.0f), NULL)));
+
+    // Maexxna Necrotic Poison (28776) — poison, 90% heal reduction. Druid /
+    // shaman / paladin can strip (class-routed action chain).
+    triggers.push_back(new TriggerNode(
+        "maexxna necrotic poison",
+        NextAction::array(0,
+            new NextAction("cure poison", 90.0f),
+            new NextAction("cleanse poison", 90.0f),
+            NULL)));
+
+    // Noth Curse of Plaguebringer (29213) — curse, deadly tick. Druid /
+    // mage 'remove curse'.
+    triggers.push_back(new TriggerNode(
+        "noth curse plaguebringer",
+        NextAction::array(0, new NextAction("remove curse", 90.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

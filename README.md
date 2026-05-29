@@ -134,7 +134,9 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506). Enrage mechanic relies on add detonation, raid-side |
 | Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
 | Sapphiron (Naxx)                       | ⚠️    | Life Drain dispel + frost resist gear. Ice Block hide pathing TODO |
-| Other Naxx bosses                      | ❌     | Wings unscripted (Heigan dance, Noth teleport waves, Razuvious mind control orbs, Maexxna webs, Gothik teleport, Thaddius polarity) |
+| Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse |
+| Maexxna (Naxx)                         | ⚠️    | Pro-engage Spiderlings (17055) at 60y + Necrotic Poison (28776) cure poison |
+| Other Naxx bosses                      | ❌     | Heigan dance, Razuvious mind control orbs, Gothik teleport, Thaddius polarity |
 
 ### Server / infra
 | Feature                                | Status | Notes |

@@ -229,4 +229,25 @@ namespace ai
         MandokirOhganNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "mandokir ohgan nearby", { 14988 }, 40.0f) {}
     };
+
+    // Naxx Maexxna Spiderlings (17055) — 12 spawn at 75%/50%/25% HP per
+    // ScriptDev2 boss_maexxna.cpp NPC_SPIDERLING. AOE focus required to
+    // prevent web wraps stacking on cocooned players.
+    class MaexxnaSpiderlingNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        MaexxnaSpiderlingNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "maexxna spiderling nearby", { 17055 }, 60.0f) {}
+    };
+
+    // Naxx Noth's Plagued adds. Plagued Warrior (16984), Guardian (16981),
+    // Champion (16983), Construct (16982). Adds spawn during the
+    // teleport-to-balcony phase. ScriptDev2 boss_noth.cpp NPC_PLAGUED_*.
+    class NothPlaguedAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        NothPlaguedAddsNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "noth plagued adds nearby",
+                { 16981, 16982, 16983, 16984 }, 80.0f) {}
+    };
 }
