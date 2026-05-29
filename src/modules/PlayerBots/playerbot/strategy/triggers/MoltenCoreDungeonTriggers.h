@@ -128,6 +128,41 @@ namespace ai
         GarrEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end garr fight", "garr", 12057) {}
     };
 
+    // Eruption (19497) is cast by Garr on a random Firesworn add (entry 12099)
+    // when it dies, making the corpse explosion-detonate for ~5k fire AOE.
+    //
+    // Earlier rev tried to detect Garr's cast via `GetCurrentSpell == 19497`
+    // but Eruption is fired from `JustDied` (`boss_garr.cpp:170-178`) on the
+    // dying Firesworn — by the time the cast is observable the creature is
+    // already gone (the observation window is microseconds, see code-review
+    // 2026-05-29 note 4).
+    //
+    // More robust proxy: any Firesworn at < 25% HP within 20y. The explosion
+    // splash is ~15y so by the time a Firesworn is near-dead we want ranged to
+    // already be 20y away. Healers and ranged bots react every tick; mêlée
+    // tanks/dps eat the splash regardless.
+    class GarrFireswornEruptionTrigger : public Trigger
+    {
+    public:
+        GarrFireswornEruptionTrigger(PlayerbotAI* ai) : Trigger(ai, "garr firesworn eruption") {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 12099, 20.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 20.0f);
+            for (Unit* u : units)
+            {
+                if (!u || !u->IsAlive()) continue;
+                uint32 maxHp = u->GetMaxHealth();
+                if (maxHp == 0) continue;
+                if (u->GetHealth() * 4 < maxHp)  // < 25%
+                    return true;
+            }
+            return false;
+        }
+    };
+
     // --- Baron Geddon (12056) ---
     class BaronGeddonStartFightTrigger : public StartBossFightTrigger
     {
@@ -188,6 +223,15 @@ namespace ai
     {
     public:
         SulfuronEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end sulfuron fight", "sulfuron", 12098) {}
+    };
+
+    // Sulfuron Demoralizing Shout (19778) — debuff is magic, dispelable. Reduces
+    // melee AP on the raid; high-priority strip for healers/priest dispel.
+    class SulfuronDemoralizingShoutTrigger : public Trigger
+    {
+    public:
+        SulfuronDemoralizingShoutTrigger(PlayerbotAI* ai) : Trigger(ai, "sulfuron demoralizing shout", 2) {}
+        bool IsActive() override { return ai->HasAura(19778, bot); }
     };
 
     // --- Golemagg (11988) ---

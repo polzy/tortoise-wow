@@ -155,6 +155,17 @@ namespace ai
     };
 
     // --- BWL boss enable/disable strategies ---
+    class RazorgoreEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        RazorgoreEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable razorgore fight strategy", "+razorgore") {}
+    };
+    class RazorgoreDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        RazorgoreDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable razorgore fight strategy", "-razorgore") {}
+    };
+
     class VaelastraszEnableFightStrategyAction : public ChangeAllStrategyAction
     {
     public:
@@ -201,6 +212,50 @@ namespace ai
     {
     public:
         ChromaggusDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable chromaggus fight strategy", "-chromaggus") {}
+    };
+
+    class FiremawEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        FiremawEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable firemaw fight strategy", "+firemaw") {}
+    };
+    class FiremawDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        FiremawDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable firemaw fight strategy", "-firemaw") {}
+    };
+
+    class EbonrocEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        EbonrocEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable ebonroc fight strategy", "+ebonroc") {}
+    };
+    class EbonrocDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        EbonrocDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable ebonroc fight strategy", "-ebonroc") {}
+    };
+
+    class FlamegorEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        FlamegorEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable flamegor fight strategy", "+flamegor") {}
+    };
+    class FlamegorDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        FlamegorDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable flamegor fight strategy", "-flamegor") {}
+    };
+
+    class NefarianEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        NefarianEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable nefarian fight strategy", "+nefarian") {}
+    };
+    class NefarianDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        NefarianDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable nefarian fight strategy", "-nefarian") {}
     };
 
     class DisarmSuppressionDeviceAction : public Action

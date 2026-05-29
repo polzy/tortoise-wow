@@ -173,15 +173,20 @@ struct boss_razorgoreAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         DEBUG_RAZOR("Razor JustDied");
+        // MCWoW skip patch: any death = encounter DONE. Vanilla penalty
+        // (kill Razorgore in P1 -> raid-wide Explosion + boss respawn) is
+        // disabled for two reasons:
+        //   1. Reconnects mid-MC can cause Razorgore to die outside the
+        //      script's expectations (no MCer alive -> bots aggro and
+        //      kill him while channelers are still up). Vanilla then
+        //      softlocks the instance with TYPE_RAZORGORE=FAIL.
+        //   2. We allow small groups to skip the encounter — Penqle's
+        //      egg-phase requires 5+ MCers in rotation and bots can't
+        //      take the orb yet.
+        // The case TYPE_RAZORGORE=DONE branch in instance_blackwing_lair.cpp
+        // (around line 646) handles opening the exit door automatically.
         if (m_pInstance)
-        {
-            if (m_pInstance->GetData64(DATA_EGG) == DONE)
-            {
-                m_pInstance->SetData(TYPE_RAZORGORE, DONE);
-                return;
-            }
-        }
-        MortPhaseUn();
+            m_pInstance->SetData(TYPE_RAZORGORE, DONE);
     }
 
     void JustReachedHome() override

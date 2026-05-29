@@ -1,6 +1,7 @@
 #include "PlayerbotMgr.h"
 #include "playerbot/playerbot.h"
 #include "playerbot/PerformanceMonitor.h"
+#include "playerbot/BotStatusBroadcaster.h"
 #include <stdarg.h>
 #include <iomanip>
 
@@ -717,6 +718,22 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         SC_PHASE("UpdateAI.YieldAIInternalThread", bot ? bot->GetName() : "(null)");
         YieldAIInternalThread(min);
     }
+
+    // MCWoWBots addon channel — throttled strategy snapshot + current action.
+    // ~2s cadence is plenty for a "what is each bot doing" UI; both calls
+    // re-send only on change. Skipped if there's no master (random bot on its
+    // own).
+    m_statusBroadcastAcc += elapsed;
+    if (m_statusBroadcastAcc >= 2000)
+    {
+        m_statusBroadcastAcc = 0;
+        if (master)
+        {
+            BotStatusBroadcaster::BroadcastStrategies(this, m_lastStrategySnapshot);
+            BotStatusBroadcaster::BroadcastAction(this, m_lastActionName);
+        }
+    }
+
     SC_PHASE("UpdateAI.exit", bot ? bot->GetName() : "(null)");
 }
 

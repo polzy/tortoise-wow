@@ -1,6 +1,7 @@
 #pragma once
 #include "DungeonActions.h"
 #include "ChangeStrategyAction.h"
+#include "AttackAction.h"
 
 namespace ai
 {
@@ -106,15 +107,18 @@ namespace ai
             const float len = sqrt(dx * dx + dy * dy);
             if (len < 1.0f)
                 return false;  // raid is already on top of the boss, nothing to fix
-            const float TANK_DISTANCE = 5.0f;  // melee + a bit of buffer
+            // Onyxia is a huge boss (combat_reach ~10-12y). A 5y TANK_DISTANCE
+            // placed the tank's destination INSIDE her hitbox, which the path
+            // generator refuses and which would put the tank in her cleave/tail
+            // swipe arc anyway. 14y is melee-reach on her outer perimeter with a
+            // small buffer for push-back. Tolerance bumped to 5y so the tank
+            // doesn't jitter trying to hit an exact spot at the longer range.
+            const float TANK_DISTANCE = 14.0f;
             const float tx = bx + (dx / len) * TANK_DISTANCE;
             const float ty = by + (dy / len) * TANK_DISTANCE;
             const float tz = boss->GetPositionZ();
 
-            // Only move if we're not already in roughly the right spot — avoids
-            // jitter when the bot is already opposite the raid (e.g. tank pulled
-            // boss to the wall and the raid is behind).
-            if (sServerFacade.GetDistance2d(bot, tx, ty) < 3.0f)
+            if (sServerFacade.GetDistance2d(bot, tx, ty) < 5.0f)
                 return false;
 
             return MoveTo(myMap, tx, ty, tz);
@@ -140,17 +144,21 @@ namespace ai
     // current-target / tank-target / dps-assist target selection. Used in P2 so
     // ranged/heal bots keep DPSing the boss while whelps engage them — without
     // this, they reactively switch to whatever whelp is hitting them and never
-    // touch Onyxia again. The action sets the bot's current target to her and
-    // routes through the standard AttackAction execute path (move-to-spell-range +
-    // auto-cast).
-    class AttackOnyxiaAction : public Action
+    // touch Onyxia again.
+    //
+    // Inherits AttackAction so we re-use its Attack(requester, target) which
+    // handles: SetSelectionGuid, old/current target values, pet attack,
+    // facing, bot->Attack(), OnCombatStarted. Previously the class extended
+    // raw Action and called ChangeEngine() inline — the cast pipeline never
+    // fired, and the engine swap was re-entrant (same crash class as the AI
+    // re-entrancy gate).
+    class AttackOnyxiaAction : public AttackAction
     {
     public:
-        AttackOnyxiaAction(PlayerbotAI* ai) : Action(ai, "attack onyxia") {}
+        AttackOnyxiaAction(PlayerbotAI* ai) : AttackAction(ai, "attack onyxia") {}
 
         bool Execute(Event& event) override
         {
-            // Find Onyxia within 120y (covers the whole instance).
             std::list<Unit*> units;
             MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 10184, 120.0f);
             MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
@@ -168,20 +176,17 @@ namespace ai
             if (!onyxia)
                 return false;
 
-            // Pin the AI context target to Onyxia and let the bot's existing
-            // ranged-cast pipeline (reach spell, cast, etc.) handle the rest.
-            context->GetValue<ObjectGuid>("attack target")->Set(onyxia->GetObjectGuid());
-            context->GetValue<Unit*>("current target")->Set(onyxia);
-            // Update selection so spell targeting uses Onyxia.
-            bot->SetSelectionGuid(onyxia->GetObjectGuid());
-            ai->ChangeEngine(BotState::BOT_STATE_COMBAT);
-            return true;
+            // Pin "attack target" so downstream DPS / heal-on-target / spell
+            // actions see Onyxia. Attack() also sets "current target" and the
+            // bot's selection.
+            SET_AI_VALUE(ObjectGuid, "attack target", onyxia->GetObjectGuid());
+
+            Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+            return Attack(requester, onyxia);
         }
 
         bool isUseful() override
         {
-            // Only useful if a live Onyxia is actually in sight; otherwise let the
-            // regular target-selection path stay in charge.
             std::list<Unit*> units;
             MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 10184, 120.0f);
             MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);

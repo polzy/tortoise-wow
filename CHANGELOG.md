@@ -5,6 +5,224 @@ All notable changes to this fork. Format inspired by [Keep a Changelog](https://
 Upstream tortoise-wow doesn't keep a changelog file — entries below cover only what
 this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-playerbots`.
 
+## [Unreleased] — 2026-05-29
+
+### Added — pro-engage extensions + minimap drag
+- AQ20 Rajaxx wave commanders pro-engage. All 7 named officers
+  (Colonel Zerran 15385 / Major Yeggeth 15386 / Major Pakkon 15388 /
+  Captain Drenn 15389 / Captain Xurrem 15390 / Captain Qeez 15391 /
+  Captain Tuubid 15392). Wired in `RuinsOfAhnQirajDungeonStrategy`
+  priority 85 — covers the entire 7-wave cycle.
+- ZG Mandokir Ohgan (14988) pro-engage at 40y. Burning Ohgan first
+  makes Mandokir take +25% dmg per ScriptDev2 — priority 90.
+  Wired in `ZulGurubDungeonStrategy`.
+- Addon: `MCWoWBotsMinimap.lua` (new file). Right-click drag on the
+  MCWoWBots minimap button repositions it; position saved in
+  `MCWoWBotsV2DB.minimapPos`. Tooltip extended with the drag hint.
+
+### Added — AQ20 pro-engage + dungeon strategy
+- New `RuinsOfAhnQirajDungeon{Triggers,Actions,Strategies}.h/.cpp` files
+  (map 509, auto-enable wired in DungeonStrategy.cpp).
+- Pro-engage triggers + actions:
+  - Moam Mana Fiend (15527) — priority 90 (fight-defining mana drain).
+  - Buru Hivezara Hatchling (15521) — priority 85.
+  - Ayamiss adds (Larva 15555 / Hornet 15934 / Swarmer 15546) — priority 85.
+
+### Added — broadcaster ‹current action› payload
+- `BotStatusBroadcaster::BroadcastAction` — emits `MCWBS\tA|<name>|<action>`
+  whenever the bot's current engine's last-executed action name changes.
+- `PlayerbotAI::m_lastActionName` member + UpdateAI hook (same 2s
+  throttling as the strategies snapshot).
+- Addon `MCWoWBotsStatus.lua` parses the new `A|` payload into
+  `botData[name].action`. V2 Combat tab cell now reads
+  `[<action>] > <target>`; V2 Strategy tab header shows
+  `State: ... Target: ... Action: ...`.
+
+### Fixed — code review pass (post-deploy review by background agent)
+- **Razorgore P1 trigger never fired** (CRITICAL). `RazorgorePhase1Trigger`
+  was checking `HasAura(23014)` but Razorgore actually carries
+  SPELL_POSSESS_ORB **19832** (boss_razorgore.cpp:44,
+  instance_blackwing_lair.cpp:622). 23014 is the channel-spell value used
+  cosmetically on the trigger creature, not a real aura on Razorgore.
+  Corrected to 19832 — bots now properly switch to add-only in P1.
+- **Four Horsemen mark dispel chain** disabled. Marks 28832-28835 aren't
+  classified as magic in vanilla DBC; `dispel magic` / `cleanse magic`
+  no-op on them. Chain removed (trigger kept registered for diagnostics).
+- **Garr Firesworn Eruption detection** rewritten. Cast-based observation
+  (`GetCurrentSpell == 19497`) had a microsecond window because Eruption
+  is fired from `JustDied`. New proxy: any Firesworn within 20y at <25%
+  HP triggers the move-away. More reliable.
+- **MCWoWBotsStatus.lua hook chain** now gated by `MCWoWBotsStatus._hooked`
+  flag. Each `/reload` was previously adding 1 extra indirection to
+  `ChatFrame_OnEvent`; long sessions had O(N) chain depth per whisper.
+
+### Added — Étape 1: pro-engage triggers (proactive add detection)
+- New `playerbot/strategy/triggers/ProEngageTriggers.h` — generic
+  `NearbyHostileCreaturesTrigger` (entries[], rangeY) plus per-encounter
+  subclasses for Razorgore (Dragonkin 12422 / Grethok 12420 /
+  Captain 14036), Garr (Firesworn 12099), Sulfuron (Priestess 12099),
+  Onyxia (Whelps 11262), Ragnaros (Sons of Flame 12143).
+- New `playerbot/strategy/actions/ProEngageActions.h` — `EngageNearbyAddAction`
+  inherits `AttackAction`, finds closest add of an entry list, pins
+  `attack target` and calls `Attack(requester, target)`. Subclasses for
+  each of the 5 encounters above.
+- Wired into:
+  - `RazorgoreFightStrategy` priority 95 (above the existing P1 'attack
+    least hp target' at 90 which only works on already-aggroed adds).
+  - `GarrFightStrategy` priority 70 — OTs grab Firesworn on spawn before
+    the 50%-HP eruption routine fires.
+  - `SulfuronFightStrategy` priority 80 — OTs grab Priestesses before
+    they cast Heal (Inspire) on Sulfuron.
+  - `OnyxiaFightStrategy` priority 75 — P2 whelps focus on landing.
+  - `RagnarosFightStrategy` priority 85 — Sons of Flame on submerge wave.
+  - `SarturaFightStrategy` priority 80 — Royal Guards (AQ40, 15984).
+  - `NaxxramasDungeonStrategy` (dungeon-level) priorities 85/80 — Anub'Rekhan
+    Crypt Guards (16573) and Faerlina Worshippers/Followers (16505/16506).
+  This complements the existing reactive triggers (HasAura debuff, lost
+  aggro) — the pro-engage layer pre-empts the wave by entry-scanning the
+  cell window so tanks/DPS pull adds BEFORE they aggro a random target.
+
+### Added — server→addon Status channel (Phase A)
+- `playerbot/BotStatusBroadcaster.h/.cpp` — server-side. Whispers the
+  master with `MCWBS\t` prefix every 2s when the bot's current-engine
+  strategy snapshot changes. Encoding: `S|<botname>|<STATE>:<strats>`.
+- `PlayerbotAI.h` — added `m_lastStrategySnapshot` (string) +
+  `m_statusBroadcastAcc` (uint32 ms accumulator).
+- `PlayerbotAI::UpdateAI` — hooks the throttled call to BroadcastStrategies
+  after the main tick.
+
+### Added — MCWoWBots addon V2 + Status panel (Phase B + C)
+- Client addon `MCWoWBots` (in `D:\MCWow\client\twmoa_1181_cn\twmoa_1181\
+  Interface\AddOns\MCWoWBots\`) gained 3 new Lua files:
+  - `MCWoWBotsStatus.lua` — hooks `ChatFrame_OnEvent` to intercept the
+    `MCWBS\t` whispers, parse them into `MCWoWBotsStatus.botData[name]`,
+    and SUPPRESS the chat display. Slash `/mcwbs all|<name>|clear|help`.
+  - `MCWoWBotsStatusPanel.lua` — standalone draggable panel POC (Phase C).
+    `/mcwbpanel` or `/mcwbp`.
+  - `MCWoWBotsV2.lua` — full tabbed window (Phase B). 5 tabs:
+    Roster / Combat / Gear / Strategy / Logs. Saved variables for frame
+    position and last-tab. Slash `/mcwb`.
+- `MCWoWBots.toc` updated with `SavedVariables: MCWoWBotsV2DB` and the
+  3 new files.
+- `MCWoWBots.xml` — minimap button moved from TOPLEFT (conflictful with
+  other addons) to TOPRIGHT (-4, -78); OnClick now routes to V2 with
+  V1 fallback.
+
+### Fixed — `.recall` AV (CheckLevelFor)
+- `PlayerbotSecurity.cpp` — `CheckLevelFor` now goes through
+  `SehSafeLevelFor` + `SehSafeProbe(from)` wrappers. The previous
+  DENY_ALL short-circuit guard only caught some of the dangling-`from`
+  derefs; crash_20260529_125238 hit READ at Player+0x350 inside
+  `CheckLevelFor+0x77`, BEFORE the guard. Now any AV on `from` during
+  LevelFor or the early deref converts to a clean "deny safely" without
+  the world thread crashing.
+
+### Fixed — Razorgore reconnect softlock + skip patch
+- `src/scripts/dungeons/blackwing_lair/boss_razorgore.cpp` — `JustDied`
+  unconditionally `SetData(TYPE_RAZORGORE, DONE)`. Vanilla penalty (kill
+  Razorgore in P1 → raid-wide SPELL_EXPLOSION + boss respawn) disabled.
+  Reasons: reconnects mid-MC softlock the instance (bots aggro and kill
+  Razorgore while no MCer is alive → TYPE_RAZORGORE=FAIL → EXIT door
+  stays closed permanently); small groups can't roster 5+ MCers and bots
+  can't take the orb yet.
+
+
+
+### Added — BWL drake trio + Nefarian
+- Firemaw (11983), Ebonroc (14601), Flamegor (11981) — separate
+  `*FightStrategy` per drake. Common fire-prot pot. Flamegor's
+  Frenzy (23342) wires hunter Tranquilizing Shot via
+  `FlamegorFrenzyTrigger`. Other drake mechanics (Wing Buffet threat
+  reset, Flame Buffet tank-swap, Shadow of Ebonroc heal-aura) require a
+  multi-tank coord framework we don't have — documented in
+  `BlackwingLairDungeonStrategies.h`.
+- Nefarian P2 (11583) — `NefarianFightStrategy` with fire-prot pot +
+  Bellowing Roar (22686) fear-break chain (`will of the forsaken` →
+  `berserker rage fear`), mirroring the Onyxia P3 trigger. Class Calls
+  (23397/23398/23401/23410/23414/23418/23425/23427/23436) require
+  per-class fear/MC handling beyond this strategy.
+
+### Added — Naxx Sapphiron + Four Horsemen
+- Sapphiron (15989) — `SapphironFightStrategy` with Life Drain (28542)
+  magic dispel chain. Frost Aura (28529) handled by `.bot frostres`
+  gear; Frost Breath / Ice Block hide mechanics need a GO finder
+  primitive — TODO.
+- Four Horsemen mark danger trigger — collapsed all four marks
+  (28832/28833/28834/28835) into one trigger that routes through the
+  raid dispel chain. Stack-count detection isn't currently exposed; the
+  trigger fires on any mark presence. ScriptDev2 uses Mograine as the
+  Unholy mark (NPC 16062) — not Rivendare which is TBC-only.
+
+### Added — AQ40 Sartura + Huhuran
+- New `TempleOfAhnQirajDungeon{Triggers,Actions,Strategies}.h/.cpp`
+  files with parent dungeon strategy (map 531).
+- Battleguard Sartura (15516) — Whirlwind (26083) ranged stay-out
+  trigger `sartura too close` (12y radius) → `move away from sartura`.
+  Threat resets during Whirlwind mean any in-range non-tank is a target
+  candidate.
+- Princess Huhuran (15509) — Frenzy (26051) → hunter Tranquilizing
+  Shot. Noxious Poison (26053) → druid `cure poison` chain. Nature
+  resist gear via existing `.bot natres`.
+- Skeram / Twin Emperors / Ouro / C'Thun / Viscidus / Bug Trio skipped
+  — phase mechanics (MC retake, mutate swap, burrow/dirt, eye phase,
+  frozen/shatter, healer-MC) require frameworks we don't yet expose.
+
+### Added — Zul'Gurub Hakkar
+- New `ZulGurubDungeon{Triggers,Actions,Strategies}.h/.cpp` files with
+  parent dungeon strategy (map 309).
+- Hakkar (14834) Aspects fall-through chain:
+  - Marli stun (24686) + Jeklik silence (24687) → `dispel magic` /
+    `cleanse`.
+  - Venoxis poison (24688) → `cure poison` / `cleanse`.
+  - Thekal enrage on Hakkar himself (24689) → Tranquilizing Shot.
+  Cause Insanity (24327) charm + Bloodsiphon (24322-24324) untreated
+  (charm requires party-target plumbing; Bloodsiphon non-dispellable).
+
+### Fixed — auto-enable for Naxx + AQ40 + ZG dungeon strategies
+- `DungeonStrategy::InitCombatTriggers` and `InitNonCombatTriggers`
+  were missing the enter/leave wiring for Naxxramas — so the
+  `NaxxramasDungeonStrategy` only ever fired if the admin manually
+  ran `+naxxramas`. Same for the newly-added AQ40 and ZG dungeons.
+  Wired all three so the parent dungeon strategy activates on map
+  entry like Onyxia/MC/BWL/Karazhan already did.
+
+### Added — MC / BWL boss mechanics fill-in
+- Garr (12057) Firesworn Eruption (19497) dodge. Detection is cast-based
+  (`GarrFireswornEruptionTrigger` scans 12099 adds within 35y for the
+  spell's currentGenericSpell). Ranged/heal bots `move away from garr
+  firesworn` (20y around the Firesworn) — mêlée eats the splash.
+- Sulfuron Harbinger (12098) Demoralizing Shout (19778) dispel. Magic
+  debuff → existing `dispel magic` / `cleanse` class-routed chain at
+  prio 80. Spell ID was wrong on the README earlier (23511 was TBC); the
+  vanilla ScriptDev2 const SPELL_DEMORALIZINGSHOUT confirms 19778.
+- Razorgore the Untamed (12435) Phase 1 awareness. New
+  `RazorgoreFightStrategy` + `RazorgorePhase1Trigger` (boss HasAura
+  23014 Possess). During the egg-orb phase ranged/melee bots prioritize
+  `attack least hp target` (the dragonkin/Grethok adds) over the
+  default tank-target / dps-assist selection. P2 falls through to
+  normal tank-and-spank.
+
+### Fixed — code review pass (Onyxia strategy)
+- `TankOnyxiaFaceAwayAction` TANK_DISTANCE 5.0f → 14.0f. The previous value
+  placed the MT's move-target inside Onyxia's combat hitbox
+  (combat_reach ~10y), so MoveTo refused to path or dropped the tank in her
+  cleave/tail-swipe arc. Skip-already-placed tolerance bumped 3y → 5y to
+  prevent jitter at the longer range. (`OnyxiasLairDungeonActions.h:109`)
+- `AttackOnyxiaAction` re-rooted on `AttackAction` (was raw `Action`). The
+  upstream comment claimed it 'routed through the standard AttackAction
+  execute path' but the class didn't inherit from it — meaning the actual
+  bot->Attack() / facing / pet-attack / OnCombatStarted pipeline never
+  fired. Likely explains the user-reported 'un seul mage tape Onyxia en P2'
+  on the previous build. Now calls `Attack(requester, onyxia)` after
+  pinning 'attack target', re-using the proven AttackAction logic.
+  (`OnyxiasLairDungeonActions.h:146`)
+- Removed `ai->ChangeEngine(BOT_STATE_COMBAT)` from
+  `AttackOnyxiaAction::Execute`. Re-entrant engine swap from inside an
+  Execute() loop matches the AI re-entrancy crash class already covered by
+  the `g_readyAIs` gate. Pinning the target via `SET_AI_VALUE` is enough —
+  the combat tick picks it up on the next iteration.
+  (`OnyxiasLairDungeonActions.h:177`)
+
 ## [Unreleased] — 2026-05-28
 
 ### Added — bot lifecycle / gear

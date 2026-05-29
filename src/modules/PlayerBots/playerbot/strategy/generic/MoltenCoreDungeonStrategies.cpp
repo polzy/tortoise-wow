@@ -202,6 +202,22 @@ void GarrFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Firesworn Eruption (19497) — detection is cast-based. Any class can react;
+    // mêlée typically can't outrun it (1.5s cast) but ranged/heal should.
+    Player* bot = ai->GetBot();
+    if (ai->IsRanged(bot) || ai->IsHeal(bot))
+    {
+        triggers.push_back(new TriggerNode(
+            "garr firesworn eruption",
+            NextAction::array(0, new NextAction("move away from garr firesworn", 100.0f), NULL)));
+    }
+
+    // Pro-engage: OTs grab Firesworn on spawn (50y scan) before they cluster
+    // around Garr and the 50%-HP eruption routine triggers en masse.
+    triggers.push_back(new TriggerNode(
+        "garr firesworn nearby",
+        NextAction::array(0, new NextAction("engage garr firesworn", 70.0f), NULL)));
 }
 
 void GarrFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -291,6 +307,23 @@ void SulfuronFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
+
+    // Demoralizing Shout (19778) — magic debuff, dispelable. Priest 'dispel magic'
+    // or paladin 'cleanse' both work; chain falls through silently otherwise.
+    // Priority 80 to match Lucifron curse cadence.
+    triggers.push_back(new TriggerNode(
+        "sulfuron demoralizing shout",
+        NextAction::array(0,
+            new NextAction("dispel magic", 80.0f),
+            new NextAction("cleanse magic", 80.0f),
+            NULL)));
+
+    // Pro-engage: OTs grab Priestesses of Shahram (NPC 12099 — same entry
+    // model as Garr Firesworn but distinct mob in this room) at 40y so they
+    // never reach Sulfuron to cast Heal (Inspire).
+    triggers.push_back(new TriggerNode(
+        "sulfuron priestess nearby",
+        NextAction::array(0, new NextAction("engage sulfuron priestess", 80.0f), NULL)));
 }
 
 void SulfuronFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -408,6 +441,14 @@ void RagnarosFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "ragnaros submerge",
         NextAction::array(0, new NextAction("attack least hp target", 80.0f), NULL)));
+
+    // Pro-engage: Sons of Flame (12143) detection via entry scan — fires on
+    // spawn regardless of submerge aura status (the aura takes a tick or two
+    // to propagate; the entry-based scan catches the wave the same instant
+    // they exist in-world). 60y covers Ragnaros's circular spawn pattern.
+    triggers.push_back(new TriggerNode(
+        "ragnaros sons nearby",
+        NextAction::array(0, new NextAction("engage ragnaros son", 85.0f), NULL)));
 }
 
 void RagnarosFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

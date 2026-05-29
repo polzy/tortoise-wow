@@ -584,6 +584,17 @@ public:
     // invariant tied to its value beyond "nonnegative").
     uint32 scboteHeartbeatAcc = 0;
 
+    // MCWoWBots companion addon status channel — see BotStatusBroadcaster.h.
+    // m_statusBroadcastAcc is a ms-accumulator throttled in UpdateAI to fire
+    // the broadcast roughly every 2 seconds. m_lastStrategySnapshot caches the
+    // last sent strategy-list string so we re-send only on change (no spam
+    // when nothing moved). Both nonnegative invariants are trivial.
+    uint32 m_statusBroadcastAcc = 0;
+    std::string m_lastStrategySnapshot;
+    // Last action name we broadcast (per-engine current action). Throttled
+    // the same way as the snapshot — sends only when it differs.
+    std::string m_lastActionName;
+
     // One-shot "needs level/gear sync" flag. Set by OnBotSummoned
     // when the bot logs in; cleared by TickHeartbeat after the sync runs.
     // Reason for the deferral: at OnBotLogin time the bot's master link is

@@ -78,6 +78,10 @@
 #include "BlackwingLairDungeonActions.h"
 #include "KarazhanDungeonActions.h"
 #include "NaxxramasDungeonActions.h"
+#include "TempleOfAhnQirajDungeonActions.h"
+#include "ZulGurubDungeonActions.h"
+#include "ProEngageActions.h"
+#include "RuinsOfAhnQirajDungeonActions.h"
 
 #ifdef GenerateBotTests
 #include "../tests/TestAction.h"
@@ -375,6 +379,7 @@ namespace ai
             creators["enable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarEnableFightStrategyAction(ai); };
             creators["disable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarDisableFightStrategyAction(ai); };
             creators["move away from magmadar"] = [](PlayerbotAI* ai) { return new MagmadarMoveAwayAction(ai); };
+            creators["move away from garr firesworn"] = [](PlayerbotAI* ai) { return new GarrFireswornMoveAwayAction(ai); };
 
             // Majordomo + Ragnaros (new fight strategies)
             creators["enable majordomo fight strategy"] = [](PlayerbotAI* ai) { return new MajordomoEnableFightStrategyAction(ai); };
@@ -382,6 +387,10 @@ namespace ai
             creators["enable ragnaros fight strategy"] = [](PlayerbotAI* ai) { return new RagnarosEnableFightStrategyAction(ai); };
             creators["disable ragnaros fight strategy"] = [](PlayerbotAI* ai) { return new RagnarosDisableFightStrategyAction(ai); };
             creators["move away from ragnaros wrath"] = [](PlayerbotAI* ai) { return new RagnarosWrathMoveAwayAction(ai); };
+
+            // BWL boss actions — Razorgore first since it's encounter #1
+            creators["enable razorgore fight strategy"] = [](PlayerbotAI* ai) { return new RazorgoreEnableFightStrategyAction(ai); };
+            creators["disable razorgore fight strategy"] = [](PlayerbotAI* ai) { return new RazorgoreDisableFightStrategyAction(ai); };
 
             // BWL boss actions
             creators["enable vaelastrasz fight strategy"] = [](PlayerbotAI* ai) { return new VaelastraszEnableFightStrategyAction(ai); };
@@ -391,6 +400,14 @@ namespace ai
             creators["disable broodlord fight strategy"] = [](PlayerbotAI* ai) { return new BroodlordDisableFightStrategyAction(ai); };
             creators["enable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusEnableFightStrategyAction(ai); };
             creators["disable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusDisableFightStrategyAction(ai); };
+            creators["enable firemaw fight strategy"] = [](PlayerbotAI* ai) { return new FiremawEnableFightStrategyAction(ai); };
+            creators["disable firemaw fight strategy"] = [](PlayerbotAI* ai) { return new FiremawDisableFightStrategyAction(ai); };
+            creators["enable ebonroc fight strategy"] = [](PlayerbotAI* ai) { return new EbonrocEnableFightStrategyAction(ai); };
+            creators["disable ebonroc fight strategy"] = [](PlayerbotAI* ai) { return new EbonrocDisableFightStrategyAction(ai); };
+            creators["enable flamegor fight strategy"] = [](PlayerbotAI* ai) { return new FlamegorEnableFightStrategyAction(ai); };
+            creators["disable flamegor fight strategy"] = [](PlayerbotAI* ai) { return new FlamegorDisableFightStrategyAction(ai); };
+            creators["enable nefarian fight strategy"] = [](PlayerbotAI* ai) { return new NefarianEnableFightStrategyAction(ai); };
+            creators["disable nefarian fight strategy"] = [](PlayerbotAI* ai) { return new NefarianDisableFightStrategyAction(ai); };
 
             // Naxx boss actions
             creators["enable patchwerk fight strategy"] = [](PlayerbotAI* ai) { return new PatchwerkEnableFightStrategyAction(ai); };
@@ -399,6 +416,45 @@ namespace ai
             creators["disable loatheb fight strategy"] = [](PlayerbotAI* ai) { return new LoathebDisableFightStrategyAction(ai); };
             creators["enable kelthuzad fight strategy"] = [](PlayerbotAI* ai) { return new KelThuzadEnableFightStrategyAction(ai); };
             creators["disable kelthuzad fight strategy"] = [](PlayerbotAI* ai) { return new KelThuzadDisableFightStrategyAction(ai); };
+            creators["enable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironEnableFightStrategyAction(ai); };
+            creators["disable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironDisableFightStrategyAction(ai); };
+
+            // Temple of Ahn'Qiraj (AQ40)
+            creators["enable temple of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajEnableDungeonStrategyAction(ai); };
+            creators["disable temple of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajDisableDungeonStrategyAction(ai); };
+            creators["enable sartura fight strategy"] = [](PlayerbotAI* ai) { return new SarturaEnableFightStrategyAction(ai); };
+            creators["disable sartura fight strategy"] = [](PlayerbotAI* ai) { return new SarturaDisableFightStrategyAction(ai); };
+            creators["move away from sartura"] = [](PlayerbotAI* ai) { return new SarturaMoveAwayAction(ai); };
+            creators["enable huhuran fight strategy"] = [](PlayerbotAI* ai) { return new HuhuranEnableFightStrategyAction(ai); };
+            creators["disable huhuran fight strategy"] = [](PlayerbotAI* ai) { return new HuhuranDisableFightStrategyAction(ai); };
+
+            // Zul'Gurub (ZG)
+            creators["enable zulgurub strategy"] = [](PlayerbotAI* ai) { return new ZulGurubEnableDungeonStrategyAction(ai); };
+            creators["disable zulgurub strategy"] = [](PlayerbotAI* ai) { return new ZulGurubDisableDungeonStrategyAction(ai); };
+            creators["enable hakkar fight strategy"] = [](PlayerbotAI* ai) { return new HakkarEnableFightStrategyAction(ai); };
+            creators["disable hakkar fight strategy"] = [](PlayerbotAI* ai) { return new HakkarDisableFightStrategyAction(ai); };
+
+            // Pro-engage actions (Étape 1)
+            creators["engage razorgore add"] = [](PlayerbotAI* ai) { return new EngageRazorgoreAddAction(ai); };
+            creators["engage garr firesworn"] = [](PlayerbotAI* ai) { return new EngageGarrFireswornAction(ai); };
+            creators["engage onyxia whelp"] = [](PlayerbotAI* ai) { return new EngageOnyxiaWhelpAction(ai); };
+            creators["engage sulfuron priestess"] = [](PlayerbotAI* ai) { return new EngageSulfuronPriestessAction(ai); };
+            creators["engage ragnaros son"] = [](PlayerbotAI* ai) { return new EngageRagnarosSonAction(ai); };
+            creators["engage sartura royal guard"] = [](PlayerbotAI* ai) { return new EngageSarturaRoyalGuardAction(ai); };
+            creators["engage anubrekhan crypt guard"] = [](PlayerbotAI* ai) { return new EngageAnubrekhanCryptGuardAction(ai); };
+            creators["engage faerlina worshipper"] = [](PlayerbotAI* ai) { return new EngageFaerlinaWorshipperAction(ai); };
+            creators["engage gluth zombie chow"] = [](PlayerbotAI* ai) { return new EngageGluthZombieChowAction(ai); };
+            creators["engage fankriss add"] = [](PlayerbotAI* ai) { return new EngageFankrissAddAction(ai); };
+            // AQ20
+            creators["engage moam mana fiend"] = [](PlayerbotAI* ai) { return new EngageMoamManaFiendAction(ai); };
+            creators["engage buru hatchling"] = [](PlayerbotAI* ai) { return new EngageBuruHatchlingAction(ai); };
+            creators["engage ayamiss add"] = [](PlayerbotAI* ai) { return new EngageAyamissAddAction(ai); };
+            creators["engage rajaxx wave commander"] = [](PlayerbotAI* ai) { return new EngageRajaxxWaveCommanderAction(ai); };
+            creators["engage mandokir ohgan"] = [](PlayerbotAI* ai) { return new EngageMandokirOhganAction(ai); };
+
+            // AQ20 dungeon strategy enable/disable
+            creators["enable ruins of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnableDungeonStrategyAction(ai); };
+            creators["disable ruins of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajDisableDungeonStrategyAction(ai); };
 
             creators["enable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronEnableFightStrategyAction(ai); };
             creators["disable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronDisableFightStrategyAction(ai); };

@@ -56,6 +56,9 @@
 #include "generic/BlackwingLairDungeonStrategies.h"
 #include "generic/KarazhanDungeonStrategies.h"
 #include "generic/NaxxramasDungeonStrategies.h"
+#include "generic/TempleOfAhnQirajDungeonStrategies.h"
+#include "generic/ZulGurubDungeonStrategies.h"
+#include "generic/RuinsOfAhnQirajDungeonStrategies.h"
 
 namespace ai
 {
@@ -182,12 +185,24 @@ namespace ai
             creators["golemagg"] = [](PlayerbotAI* ai) { return new GolemaggFightStrategy(ai); };
             creators["majordomo"] = [](PlayerbotAI* ai) { return new MajordomoFightStrategy(ai); };
             creators["ragnaros"] = [](PlayerbotAI* ai) { return new RagnarosFightStrategy(ai); };
+            creators["razorgore"] = [](PlayerbotAI* ai) { return new RazorgoreFightStrategy(ai); };
             creators["vaelastrasz"] = [](PlayerbotAI* ai) { return new VaelastraszFightStrategy(ai); };
             creators["broodlord"] = [](PlayerbotAI* ai) { return new BroodlordFightStrategy(ai); };
             creators["chromaggus"] = [](PlayerbotAI* ai) { return new ChromaggusFightStrategy(ai); };
+            creators["firemaw"] = [](PlayerbotAI* ai) { return new FiremawFightStrategy(ai); };
+            creators["ebonroc"] = [](PlayerbotAI* ai) { return new EbonrocFightStrategy(ai); };
+            creators["flamegor"] = [](PlayerbotAI* ai) { return new FlamegorFightStrategy(ai); };
+            creators["nefarian"] = [](PlayerbotAI* ai) { return new NefarianFightStrategy(ai); };
             creators["patchwerk"] = [](PlayerbotAI* ai) { return new PatchwerkFightStrategy(ai); };
             creators["loatheb"] = [](PlayerbotAI* ai) { return new LoathebFightStrategy(ai); };
             creators["kel'thuzad"] = [](PlayerbotAI* ai) { return new KelThuzadFightStrategy(ai); };
+            creators["sapphiron"] = [](PlayerbotAI* ai) { return new SapphironFightStrategy(ai); };
+            creators["temple of ahnqiraj"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajDungeonStrategy(ai); };
+            creators["sartura"] = [](PlayerbotAI* ai) { return new SarturaFightStrategy(ai); };
+            creators["huhuran"] = [](PlayerbotAI* ai) { return new HuhuranFightStrategy(ai); };
+            creators["zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubDungeonStrategy(ai); };
+            creators["hakkar"] = [](PlayerbotAI* ai) { return new HakkarFightStrategy(ai); };
+            creators["ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajDungeonStrategy(ai); };
             creators["suppression room"] = [](PlayerbotAI* ai) { return new SuppressionRoomStrategy(ai); };
             creators["netherspite"] = [](PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); };
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };

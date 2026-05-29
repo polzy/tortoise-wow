@@ -112,4 +112,13 @@ void OnyxiaFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("will of the forsaken", 100.0f),
                           new NextAction("berserker rage fear", 100.0f),
                           NULL)));
+
+    // Pro-engage: P2 whelps (11262) spawn in two waves from the side tunnels.
+    // 50y scan picks them up the instant they land — OTs/AOE-DPS focus before
+    // the swarm reaches ranged. Lower priority (75) than "attack onyxia" so
+    // casters don't drop their boss DPS to chase a single whelp, but high
+    // enough that idle bots (e.g. OTs without a current target) go.
+    triggers.push_back(new TriggerNode(
+        "onyxia whelps nearby",
+        NextAction::array(0, new NextAction("engage onyxia whelp", 75.0f), NULL)));
 }

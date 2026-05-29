@@ -41,6 +41,15 @@ namespace ai
         MagmadarMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from magmadar", 11982, 31.0f) {}
     };
 
+    // Garr Firesworn (12099) Eruption — when a Firesworn detonates, anyone within
+    // ~15y eats ~5k fire. 20y radius gives a safety margin since the cast finishes
+    // before move-to completes. Used by ranged/heal bots; mêlée tank/dps stays in.
+    class GarrFireswornMoveAwayAction : public MoveAwayFromCreature
+    {
+    public:
+        GarrFireswornMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from garr firesworn", 12099, 20.0f) {}
+    };
+
     class MoveToMCRuneAction : public MoveToAction
     {
     public:

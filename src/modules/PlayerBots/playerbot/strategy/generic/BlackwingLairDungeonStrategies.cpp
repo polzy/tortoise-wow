@@ -4,6 +4,45 @@
 
 using namespace ai;
 
+// ========== Razorgore the Untamed (12435) ==========
+
+void RazorgoreFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // P1: boss is mind-controlled. Switch to attacking adds (lowest-HP attacker).
+    // This priority overrides the default tank-target / dps-assist selection so
+    // ranged stay on adds even if Razorgore aggros them via tail/AOE.
+    triggers.push_back(new TriggerNode(
+        "razorgore phase 1",
+        NextAction::array(0, new NextAction("attack least hp target", 90.0f), NULL)));
+
+    // Pro-engage: the moment a Dragonkin or Grethok mage walks through one of
+    // the 4 doors (60y scan), tanks/dps grab it before it reaches the orb-
+    // bound player. Priority 95 ranks above "attack least hp target" because
+    // pro-engage works on a creature NOT YET in our threat list (which the
+    // least-hp action can't pick).
+    triggers.push_back(new TriggerNode(
+        "razorgore adds nearby",
+        NextAction::array(0, new NextAction("engage razorgore add", 95.0f), NULL)));
+
+    // P2 has no special bot-side mechanic — tank-and-spank handles it via the
+    // class strategies. Future: Conflagration (23023) disorient dispel,
+    // Fireball Volley (22425) ranged spread.
+}
+
+void RazorgoreFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end razorgore fight",
+        NextAction::array(0, new NextAction("disable razorgore fight strategy", 100.0f), NULL)));
+}
+
+void RazorgoreFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end razorgore fight",
+        NextAction::array(0, new NextAction("disable razorgore fight strategy", 100.0f), NULL)));
+}
+
 // ========== Vaelastrasz the Corrupt (13020) ==========
 
 void VaelastraszFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -67,6 +106,117 @@ void BroodlordFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("disable broodlord fight strategy", 100.0f), NULL)));
 }
 
+// ========== Nefarian (11583) ==========
+
+void NefarianFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 50.0f), NULL)));
+
+    // Bellowing Roar (22686) — 8s AoE fear. Race/class self-breaks: WotF for
+    // Forsaken, Berserker Rage for warrior. Mirrors Onyxia Bellowing Roar
+    // priority. Cast = ~2s so the chain can fire before the fear actually
+    // lands if we detect it in time (currently we read the aura on bot, so
+    // the break fires while feared, ending it early).
+    triggers.push_back(new TriggerNode(
+        "nefarian bellowing roar",
+        NextAction::array(0,
+            new NextAction("will of the forsaken", 100.0f),
+            new NextAction("berserker rage fear", 100.0f),
+            NULL)));
+}
+
+void NefarianFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end nefarian fight",
+        NextAction::array(0, new NextAction("disable nefarian fight strategy", 100.0f), NULL)));
+}
+
+void NefarianFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end nefarian fight",
+        NextAction::array(0, new NextAction("disable nefarian fight strategy", 100.0f), NULL)));
+}
+
+// ========== Firemaw (11983) ==========
+
+void FiremawFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 50.0f), NULL)));
+}
+
+void FiremawFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end firemaw fight",
+        NextAction::array(0, new NextAction("disable firemaw fight strategy", 100.0f), NULL)));
+}
+
+void FiremawFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end firemaw fight",
+        NextAction::array(0, new NextAction("disable firemaw fight strategy", 100.0f), NULL)));
+}
+
+// ========== Ebonroc (14601) ==========
+
+void EbonrocFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 50.0f), NULL)));
+}
+
+void EbonrocFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ebonroc fight",
+        NextAction::array(0, new NextAction("disable ebonroc fight strategy", 100.0f), NULL)));
+}
+
+void EbonrocFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ebonroc fight",
+        NextAction::array(0, new NextAction("disable ebonroc fight strategy", 100.0f), NULL)));
+}
+
+// ========== Flamegor (11981) ==========
+
+void FlamegorFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "fire protection potion ready",
+        NextAction::array(0, new NextAction("fire protection potion", 50.0f), NULL)));
+
+    // Hunter Tranquilizing Shot (19801) — only the action node exists; non-hunters
+    // silently no-op on the chain. Priority 90 matches existing Lucifron-class
+    // class-routed dispel cadence.
+    triggers.push_back(new TriggerNode(
+        "flamegor frenzy",
+        NextAction::array(0, new NextAction("tranquilizing shot", 90.0f), NULL)));
+}
+
+void FlamegorFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end flamegor fight",
+        NextAction::array(0, new NextAction("disable flamegor fight strategy", 100.0f), NULL)));
+}
+
+void FlamegorFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end flamegor fight",
+        NextAction::array(0, new NextAction("disable flamegor fight strategy", 100.0f), NULL)));
+}
+
 // ========== Chromaggus (14020) ==========
 
 void ChromaggusFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -107,6 +257,9 @@ void BlackwingLairDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 
     // BWL boss auto-start triggers
     triggers.push_back(new TriggerNode(
+        "start razorgore fight",
+        NextAction::array(0, new NextAction("enable razorgore fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
         "start vaelastrasz fight",
         NextAction::array(0, new NextAction("enable vaelastrasz fight strategy", 100.0f), NULL)));
     triggers.push_back(new TriggerNode(
@@ -115,6 +268,18 @@ void BlackwingLairDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "start chromaggus fight",
         NextAction::array(0, new NextAction("enable chromaggus fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "start firemaw fight",
+        NextAction::array(0, new NextAction("enable firemaw fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "start ebonroc fight",
+        NextAction::array(0, new NextAction("enable ebonroc fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "start flamegor fight",
+        NextAction::array(0, new NextAction("enable flamegor fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "start nefarian fight",
+        NextAction::array(0, new NextAction("enable nefarian fight strategy", 100.0f), NULL)));
 }
 
 void BlackwingLairDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

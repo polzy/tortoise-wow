@@ -218,20 +218,73 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
     return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL;
 #endif // legacy slow path
 
+// SEH catch-all wrapper around the early derefs of CheckLevelFor. We've seen
+// AVs even after the DENY_ALL short-circuit (crash_20260529_125238: READ at
+// Player+0x350 inside CheckLevelFor+0x77) because LevelFor doesn't probe
+// every codepath that reaches `from->...`. Rather than refactor every
+// individual deref behind probes, we do one early SEH-wrapped call to
+// LevelFor and a guarded deref of `from->GetPlayerbotAI()` and bail out if
+// anything throws.
+static PlayerbotSecurityLevel SehSafeLevelFor(PlayerbotSecurity* self, Player* from, DenyReason* reason, bool ignoreGroup, bool* outOk)
+{
+    *outOk = false;
+#if defined(_MSC_VER) && !defined(__clang__)
+    __try
+    {
+        PlayerbotSecurityLevel r = self->LevelFor(from, reason, ignoreGroup);
+        *outOk = true;
+        return r;
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL;
+    }
+#else
+    PlayerbotSecurityLevel r = self->LevelFor(from, reason, ignoreGroup);
+    *outOk = true;
+    return r;
+#endif
+}
+
+// Probe a single Player* deref behind SEH.  Used for `from->GetPlayerbotAI()`
+// — the field that crash_20260529_125238 hit at offset 0x350 — and any other
+// suspect Player member access. Returns true if the deref succeeded.
+static bool SehSafeProbe(Player* p)
+{
+    if (!p) return false;
+#if defined(_MSC_VER) && !defined(__clang__)
+    __try
+    {
+        volatile auto* probe = p->GetPlayerbotAI();
+        (void)probe;
+        return true;
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return false;
+    }
+#else
+    return true;
+#endif
+}
+
 bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent, Player* from, bool ignoreGroup)
 {
     DenyReason reason = DenyReason::PLAYERBOT_DENY_NONE;
-    PlayerbotSecurityLevel realLevel = LevelFor(from, &reason, ignoreGroup);
+    bool levelOk = false;
+    PlayerbotSecurityLevel realLevel = SehSafeLevelFor(this, from, &reason, ignoreGroup, &levelOk);
+    if (!levelOk)
+        return false;  // LevelFor threw — `from` is dangling. Deny safely.
+
     if (realLevel >= level || from == bot)
         return true;
 
-    // When LevelFor returned DENY_ALL after the SEH probe caught a dangling `from`,
-    // the rest of this function still dereferences `from` (GetPlayerbotAI, GetSession,
-    // etc.) and would AV on the same dead Player*. Short-circuit on DENY_ALL so we
-    // never touch `from` again — without this guard the previous fix only postponed
-    // the crash to the next deref (observed crash_20260528_205013: AV at offset 0x328 =
-    // Player::m_playerbotAI, inside CheckLevelFor+0x76, after LevelFor itself was safe).
     if (realLevel == PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL)
+        return false;
+
+    // crash_20260529_125238 hit here — probing `from` before any further
+    // deref keeps the code self-contained without changing the surface.
+    if (!SehSafeProbe(from))
         return false;
 
     //Do not report security errors to bots.

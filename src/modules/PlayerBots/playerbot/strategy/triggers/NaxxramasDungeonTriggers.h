@@ -72,4 +72,48 @@ namespace ai
         KelThuzadManaDetonationTrigger(PlayerbotAI* ai) : Trigger(ai, "kelthuzad mana detonation", 1) {}
         bool IsActive() override { return ai->HasAura(27819, bot); }
     };
+
+    // --- Sapphiron (15989) ---
+    class SapphironStartFightTrigger : public StartBossFightTrigger
+    {
+    public:
+        SapphironStartFightTrigger(PlayerbotAI* ai) : StartBossFightTrigger(ai, "start sapphiron fight", "sapphiron", 15989) {}
+    };
+    class SapphironEndFightTrigger : public EndBossFightTrigger
+    {
+    public:
+        SapphironEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end sapphiron fight", "sapphiron", 15989) {}
+    };
+
+    // Life Drain (28542) — magic debuff, dispelable. Drains 1000 mana per tick
+    // and heals Sapphiron for 4x the amount. Priority dispel for casters.
+    class SapphironLifeDrainTrigger : public Trigger
+    {
+    public:
+        SapphironLifeDrainTrigger(PlayerbotAI* ai) : Trigger(ai, "sapphiron life drain", 1) {}
+        bool IsActive() override { return ai->HasAura(28542, bot); }
+    };
+
+    // --- Four Horsemen mark stacks ---
+    // Marks (28832 Korth'azz fire / 28833 Blaumeux shadow / 28834 Mograine
+    // unholy / 28835 Zeliek holy) stack on every Horseman cast (~12s). At 4
+    // stacks the next stack lands as 5 and the dmg is lethal — players swap to
+    // the opposite Horseman to drop stacks. Bot side: detect ≥3 stacks of any
+    // mark on bot and route into the dispel chain.
+    // Source: ScriptDev2 boss_four_horsemen.cpp SPELL_MARK_OF_*.
+    class FourHorsemenMarkDangerTrigger : public Trigger
+    {
+    public:
+        FourHorsemenMarkDangerTrigger(PlayerbotAI* ai) : Trigger(ai, "four horsemen mark danger", 2) {}
+        bool IsActive() override
+        {
+            // Mark auras stack; we don't have a stack-count helper exposed via
+            // the bot AI surface here. Detection collapses to "has any of the
+            // four mark auras" — the trigger then fires the dispel chain
+            // every tick the mark is present. Dispellers naturally throttle
+            // (cooldown / global) so this stays cheap and reactive.
+            return ai->HasAura(28832, bot) || ai->HasAura(28833, bot)
+                || ai->HasAura(28834, bot) || ai->HasAura(28835, bot);
+        }
+    };
 }

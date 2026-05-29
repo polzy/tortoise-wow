@@ -57,6 +57,25 @@ namespace ai
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
+    // --- Sapphiron (15989) ---
+    // Massive frost dragon. Frost Aura (28529) raid-wide, requires frost resist
+    // gear (provided by `.bot frostres`). Frost Breath (28524, 7s cast) is the
+    // signature mechanic — players hide behind an Ice Block created by Ice Bolt
+    // (28522). Bot-side, we wire Life Drain (28542) dispel; Frost Breath hide
+    // logic requires pathing to an Ice Block guid which isn't trivial without
+    // a new value/finder primitive — left as TODO.
+    class SapphironFightStrategy : public Strategy
+    {
+    public:
+        SapphironFightStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "sapphiron"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
     // --- Kel'Thuzad (15990) ---
     // Mana Detonation (27819): drain mana + AoE damage on group. Shadow Fissure
     // (27810): targeted void zone, dodge it. Frost Blast (27808): root + AoE damage.

@@ -60,4 +60,15 @@ namespace ai
     public:
         KelThuzadDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable kelthuzad fight strategy", "-kel'thuzad") {}
     };
+
+    class SapphironEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        SapphironEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable sapphiron fight strategy", "+sapphiron") {}
+    };
+    class SapphironDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        SapphironDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable sapphiron fight strategy", "-sapphiron") {}
+    };
 }

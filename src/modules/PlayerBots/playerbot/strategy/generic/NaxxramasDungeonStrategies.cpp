@@ -20,6 +20,25 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "start kelthuzad fight",
         NextAction::array(0, new NextAction("enable kelthuzad fight strategy", 100.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "start sapphiron fight",
+        NextAction::array(0, new NextAction("enable sapphiron fight strategy", 100.0f), NULL)));
+
+    // Pro-engage triggers wired at the dungeon-level (no per-boss strategy
+    // needed): the entry scan only finds adds when we're in the matching
+    // room, so the cost outside is one O(1) cell-visit miss.
+    triggers.push_back(new TriggerNode(
+        "anubrekhan crypt guard nearby",
+        NextAction::array(0, new NextAction("engage anubrekhan crypt guard", 85.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "faerlina worshipper nearby",
+        NextAction::array(0, new NextAction("engage faerlina worshipper", 80.0f), NULL)));
+    // Gluth eats zombies within 10y to heal — pro-engage at 50y so OTs grab
+    // them before they reach the boss. Priority 90 (above the standard
+    // dungeon-level 85) because Gluth's heal is fight-defining.
+    triggers.push_back(new TriggerNode(
+        "gluth zombie chow nearby",
+        NextAction::array(0, new NextAction("engage gluth zombie chow", 90.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -27,6 +46,16 @@ void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 	triggers.push_back(new TriggerNode(
 		"void zone too close",
 		NextAction::array(0, new NextAction("move away from void zone", 100.0f), NULL)));
+
+    // Mark stacks (28832 Korth'azz fire / 28833 Blaumeux shadow / 28834
+    // Mograine unholy / 28835 Zeliek holy). At 5 stacks the mark damage is
+    // lethal — players swap to the opposite Horseman zone to drop stacks.
+    //
+    // The trigger is kept registered (Combat tab + diagnostics) but NOT
+    // wired to a dispel chain: the marks aren't classified as magic in the
+    // vanilla DBC — `dispel magic` / `cleanse magic` no-op on them. The
+    // only real solution is the mark-zone swap which needs a multi-tank
+    // coord framework we don't have. See code-review note 2 (2026-05-29).
 }
 
 void FourHorsemanFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -100,6 +129,39 @@ void LoathebFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("disable loatheb fight strategy", 100.0f), NULL)));
 }
 
+// ========== Sapphiron (15989) ==========
+
+void SapphironFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // Life Drain (28542) is a magic debuff that drains mana and heals Sapphiron.
+    // Same dispel chain as Lucifron Impending Doom — priest/paladin handle it,
+    // others silently no-op.
+    triggers.push_back(new TriggerNode(
+        "sapphiron life drain",
+        NextAction::array(0,
+            new NextAction("dispel magic", 80.0f),
+            new NextAction("cleanse magic", 80.0f),
+            NULL)));
+
+    // Frost Breath dodge / Ice Block hide TODO — needs an Ice Block guid
+    // finder primitive. Currently the raid relies on `.bot frostres` gear
+    // (Frost Aura 28529 is the only frost source that always ticks).
+}
+
+void SapphironFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end sapphiron fight",
+        NextAction::array(0, new NextAction("disable sapphiron fight strategy", 100.0f), NULL)));
+}
+
+void SapphironFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end sapphiron fight",
+        NextAction::array(0, new NextAction("disable sapphiron fight strategy", 100.0f), NULL)));
+}
+
 // ========== Kel'Thuzad (15990) ==========
 
 void KelThuzadFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -120,7 +182,7 @@ void KelThuzadFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         "kelthuzad mana detonation",
         NextAction::array(0,
             new NextAction("dispel magic", 100.0f),
-            new NextAction("cleanse", 100.0f),
+            new NextAction("cleanse magic", 100.0f),
             NULL)));
 }
 

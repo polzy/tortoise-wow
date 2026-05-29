@@ -84,9 +84,10 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Feature                                | Status | Notes |
 |----------------------------------------|--------|-------|
 | DPS assist tank's target               | ✅     | `dps assist` strategy |
-| Tank face-away from raid               | ❌     | Tank stationary, boss faces raid |
+| Tank face-away from raid               | ✅     | Onyxia TankFaceAway (TANK_DISTANCE=14y, centroid-based opposite-side placement) |
 | Tank/OT taunt on aggro loss            | ⚠️    | Trigger fires; needs validation post spell-init fix |
-| OT add pickup                          | ❌     | OT applies MT logic |
+| OT add pickup (reactive)               | ✅     | OffTank target priority biases to lowest-MaxHP attacker (Geddon/Lucifron summons, Garr Firesworn, Onyxia whelps) |
+| Pro-engage adds (proactive)            | ✅     | `NearbyHostileCreaturesTrigger` + `EngageNearbyAddAction` — pulls adds the moment they spawn (Razorgore Dragonkin/Grethok, Garr Firesworn, Sulfuron Priestesses, Onyxia P2 whelps, Ragnaros Sons of Flame, Sartura Royal Guards, Anub'Rekhan Crypt Guards, Faerlina Worshippers, Gluth Zombie Chow, Fankriss Spawn/Hatchling) |
 | Caster stays at range                  | ✅     | `enemy too close for spell` fires for casters even with `follow` active |
 | Hunter pet + ranged shot               | ⚠️    | Ammo fix applied, needs in-game validation |
 | Healer triage                          | ✅     | |
@@ -98,24 +99,42 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Magmadar (MC)                          | ✅     | Caster move away, fire prot potion, lava bomb dodge |
 | Lucifron (MC)                          | ✅     | Fire prot + Curse decurse + Impending Doom dispel |
 | Gehennas (MC)                          | ✅     | Fire prot + Curse decurse |
-| Garr (MC)                              | ⚠️    | Fire prot potion only — Firesworn explosion handling missing |
+| Garr (MC)                              | ✅     | Firesworn Eruption (19497) cast-detect → ranged dodge 20y |
 | Baron Geddon (MC)                      | ✅     | Living Bomb move-away + Inferno avoidance for ranged |
 | Shazzrah (MC)                          | ✅     | Fire prot + Curse decurse |
-| Sulfuron / Golemagg (MC)               | ⚠️    | Fire prot + Magma Splash dodge — healer interrupt missing |
+| Sulfuron / Golemagg (MC)               | ⚠️    | Fire prot + Magma Splash dodge + Demo Shout dispel — Priestess heal interrupts still missing |
 | Majordomo (MC)                         | ✅     | Fire prot — CC discipline left to per-class strategies |
 | Ragnaros (MC)                          | ✅     | Wrath PBAoE dodge, Submerge phase Sons of Flame switch |
 | Onyxia                                 | ✅     | Full 3-phase strat: 8 Deep Breath directions, P2 attack-onyxia, P3 Bellowing Roar |
 | Vaelastrasz (BWL)                      | ✅     | Burning Adrenaline move-away from raid |
 | Broodlord Lashlayer (BWL)              | ✅     | Tank re-taunt priority boost on Knock Away |
 | Chromaggus (BWL)                       | ✅     | Brood Affliction 4-of-5 danger dispel |
-| Firemaw/Ebonroc/Flamegor (BWL)         | ❌     | Drake trio — Shadow Flame + tail swipe TODO |
-| Razorgore / Nefarian (BWL)             | ❌     | Mind Control / Class Calls TODO |
-| AQ20 / AQ40 bosses                     | ❌     | |
+| Firemaw (BWL)                          | ⚠️    | Fire prot pot only. Flame Buffet tank-swap needs multi-tank coord framework |
+| Ebonroc (BWL)                          | ⚠️    | Fire prot pot only. Shadow of Ebonroc self-heal = burst through |
+| Flamegor (BWL)                         | ✅     | Fire prot pot + Frenzy (23342) Tranquilizing Shot |
+| Razorgore (BWL)                        | ✅     | P1 add-priority via 'razorgore phase 1' (Possess 19832) + pro-engage Dragonkin/Grethok at 60y; P2 tank-and-spank. **Skip patch**: kill at any phase = encounter DONE |
+| Nefarian (BWL)                         | ⚠️    | P2: Bellowing Roar fear-break (Will of Forsaken / Berserker Rage). Class Calls 23397-23436 need per-class fear/MC plumbing |
+| Battleguard Sartura (AQ40)             | ✅     | Whirlwind (26083) — ranged stay >12y |
+| Princess Huhuran (AQ40)                | ✅     | Frenzy (26051) tranq + Noxious Poison (26053) druid cure |
+| Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
+| Other AQ40 bosses                      | ❌     | Skeram (MC retake) / Twin Emperors (mutate swap) / Ouro / C'Thun / Viscidus / Bug Trio need phase/mech frameworks |
+| Moam (AQ20)                            | ⚠️    | Pro-engage Mana Fiends (15527) on summon |
+| Buru (AQ20)                            | ⚠️    | Pro-engage Hivezara Hatchlings (15521). Egg-explode mechanic still raid-side |
+| Ayamiss (AQ20)                         | ⚠️    | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
+| Rajaxx (AQ20)                          | ⚠️    | Pro-engage all 7 wave commanders (Zerran/Yeggeth/Pakkon/Drenn/Xurrem/Qeez/Tuubid) |
+| Kurinnaxx / Ossirian (AQ20)            | ❌     | Mortal Wound, tornado-kite shield-break TODO |
+| Hakkar (ZG)                            | ✅     | Marli/Jeklik dispel + Venoxis cure poison + Thekal Tranquilizing Shot |
+| Mandokir (ZG)                          | ⚠️    | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
+| Other ZG bosses                        | ❌     | Venoxis / Jeklik / Marli / Thekal / Arlokk / Jin'do / Hazzarah TODO |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
 | Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation dispel + caster spread |
-| Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO |
-| Other Naxx bosses                      | ❌     | Wings unscripted (Sapphiron ice block, Anub'Rekhan Locust Swarm, etc.) |
+| Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
+| Anub'Rekhan (Naxx)                     | ⚠️    | Pro-engage Crypt Guards (16573). Locust Swarm dodge TODO |
+| Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506). Enrage mechanic relies on add detonation, raid-side |
+| Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
+| Sapphiron (Naxx)                       | ⚠️    | Life Drain dispel + frost resist gear. Ice Block hide pathing TODO |
+| Other Naxx bosses                      | ❌     | Wings unscripted (Heigan dance, Noth teleport waves, Razuvious mind control orbs, Maexxna webs, Gothik teleport, Thaddius polarity) |
 
 ### Server / infra
 | Feature                                | Status | Notes |
@@ -170,6 +189,15 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 
 - **Addon `MCWoWBots`** — separate repository (not bundled with server). Provides the
   Apply Resist picker, Prepare Raid, Smart Roles, Revive All buttons, instance teleport.
+  - **V2 tabbed UI** (`/mcwb`) with Roster / Combat / Gear / Strategy / Logs tabs.
+    Combat & Strategy tabs consume the live bot status fed by
+    `BotStatusBroadcaster` (server-side). Gear tab wraps the legacy V1 buttons.
+  - **Bot Status broadcaster**: server whispers the master with the `MCWBS\t`
+    prefix every 2s (only on snapshot change). Filtered + parsed client-side
+    so the chat stays clean; data is exposed as
+    `MCWoWBotsStatus.botData[name] = { state, target, strategies, lastUpdate }`.
+  - Slash commands: `/mcwb` (V2), `/mcwbpanel`/`/mcwbp` (standalone status
+    panel), `/mcwbs all|<name>|panel|clear|help` (debug).
 - **Strategy cross-reference** — `ike3/mangosbot`, `cmangos/playerbots`,
   `celguar/mangosbot-bots`, `azerothcore/mod-playerbots`. Onyxia is an empty stub upstream
   in all of these. MC has partial implementations worth comparing against ours.

@@ -19,6 +19,10 @@
 #include "BlackwingLairDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "TempleOfAhnQirajDungeonTriggers.h"
+#include "ZulGurubDungeonTriggers.h"
+#include "ProEngageTriggers.h"
+#include "RuinsOfAhnQirajDungeonTriggers.h"
 #include "GlyphTriggers.h"
 #include "WorldBuffTravelTriggers.h"
 
@@ -314,6 +318,10 @@ namespace ai
             creators["end magmadar fight"] = [](PlayerbotAI* ai) { return new MagmadarEndFightTrigger(ai); };
             creators["magmadar lava bomb"] = [](PlayerbotAI* ai) { return new MagmadarLavaBombTrigger(ai); };
 
+            // Additional MC mechanics (Garr Eruption, Sulfuron Demo Shout)
+            creators["garr firesworn eruption"] = [](PlayerbotAI* ai) { return new GarrFireswornEruptionTrigger(ai); };
+            creators["sulfuron demoralizing shout"] = [](PlayerbotAI* ai) { return new SulfuronDemoralizingShoutTrigger(ai); };
+
             // Majordomo + Ragnaros (new boss triggers)
             creators["start majordomo fight"] = [](PlayerbotAI* ai) { return new MajordomoStartFightTrigger(ai); };
             creators["end majordomo fight"] = [](PlayerbotAI* ai) { return new MajordomoEndFightTrigger(ai); };
@@ -323,6 +331,9 @@ namespace ai
             creators["ragnaros submerge"] = [](PlayerbotAI* ai) { return new RagnarosSubmergeTrigger(ai); };
 
             // BWL boss triggers
+            creators["start razorgore fight"] = [](PlayerbotAI* ai) { return new RazorgoreStartFightTrigger(ai); };
+            creators["end razorgore fight"] = [](PlayerbotAI* ai) { return new RazorgoreEndFightTrigger(ai); };
+            creators["razorgore phase 1"] = [](PlayerbotAI* ai) { return new RazorgorePhase1Trigger(ai); };
             creators["start vaelastrasz fight"] = [](PlayerbotAI* ai) { return new VaelastraszStartFightTrigger(ai); };
             creators["end vaelastrasz fight"] = [](PlayerbotAI* ai) { return new VaelastraszEndFightTrigger(ai); };
             creators["vaelastrasz burning adrenaline"] = [](PlayerbotAI* ai) { return new VaelastraszBurningAdrenalineTrigger(ai); };
@@ -331,6 +342,16 @@ namespace ai
             creators["start chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusStartFightTrigger(ai); };
             creators["end chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusEndFightTrigger(ai); };
             creators["chromaggus affliction danger"] = [](PlayerbotAI* ai) { return new ChromaggusAfflictionDangerTrigger(ai); };
+            creators["start firemaw fight"] = [](PlayerbotAI* ai) { return new FiremawStartFightTrigger(ai); };
+            creators["end firemaw fight"] = [](PlayerbotAI* ai) { return new FiremawEndFightTrigger(ai); };
+            creators["start ebonroc fight"] = [](PlayerbotAI* ai) { return new EbonrocStartFightTrigger(ai); };
+            creators["end ebonroc fight"] = [](PlayerbotAI* ai) { return new EbonrocEndFightTrigger(ai); };
+            creators["start flamegor fight"] = [](PlayerbotAI* ai) { return new FlamegorStartFightTrigger(ai); };
+            creators["end flamegor fight"] = [](PlayerbotAI* ai) { return new FlamegorEndFightTrigger(ai); };
+            creators["flamegor frenzy"] = [](PlayerbotAI* ai) { return new FlamegorFrenzyTrigger(ai); };
+            creators["start nefarian fight"] = [](PlayerbotAI* ai) { return new NefarianStartFightTrigger(ai); };
+            creators["end nefarian fight"] = [](PlayerbotAI* ai) { return new NefarianEndFightTrigger(ai); };
+            creators["nefarian bellowing roar"] = [](PlayerbotAI* ai) { return new NefarianBellowingRoarTrigger(ai); };
 
             // Naxx boss triggers
             creators["start patchwerk fight"] = [](PlayerbotAI* ai) { return new PatchwerkStartFightTrigger(ai); };
@@ -340,6 +361,52 @@ namespace ai
             creators["start kelthuzad fight"] = [](PlayerbotAI* ai) { return new KelThuzadStartFightTrigger(ai); };
             creators["end kelthuzad fight"] = [](PlayerbotAI* ai) { return new KelThuzadEndFightTrigger(ai); };
             creators["kelthuzad mana detonation"] = [](PlayerbotAI* ai) { return new KelThuzadManaDetonationTrigger(ai); };
+            creators["start sapphiron fight"] = [](PlayerbotAI* ai) { return new SapphironStartFightTrigger(ai); };
+            creators["end sapphiron fight"] = [](PlayerbotAI* ai) { return new SapphironEndFightTrigger(ai); };
+            creators["sapphiron life drain"] = [](PlayerbotAI* ai) { return new SapphironLifeDrainTrigger(ai); };
+            creators["four horsemen mark danger"] = [](PlayerbotAI* ai) { return new FourHorsemenMarkDangerTrigger(ai); };
+
+            // Temple of Ahn'Qiraj (AQ40, map 531)
+            creators["enter temple of ahnqiraj"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajEnterDungeonTrigger(ai); };
+            creators["leave temple of ahnqiraj"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajLeaveDungeonTrigger(ai); };
+            creators["start sartura fight"] = [](PlayerbotAI* ai) { return new SarturaStartFightTrigger(ai); };
+            creators["end sartura fight"] = [](PlayerbotAI* ai) { return new SarturaEndFightTrigger(ai); };
+            creators["sartura too close"] = [](PlayerbotAI* ai) { return new SarturaTooCloseTrigger(ai); };
+            creators["start huhuran fight"] = [](PlayerbotAI* ai) { return new HuhuranStartFightTrigger(ai); };
+            creators["end huhuran fight"] = [](PlayerbotAI* ai) { return new HuhuranEndFightTrigger(ai); };
+            creators["huhuran frenzy"] = [](PlayerbotAI* ai) { return new HuhuranFrenzyTrigger(ai); };
+            creators["huhuran noxious poison"] = [](PlayerbotAI* ai) { return new HuhuranNoxiousPoisonTrigger(ai); };
+
+            // Zul'Gurub (ZG, map 309)
+            creators["enter zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubEnterDungeonTrigger(ai); };
+            creators["leave zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubLeaveDungeonTrigger(ai); };
+            creators["start hakkar fight"] = [](PlayerbotAI* ai) { return new HakkarStartFightTrigger(ai); };
+            creators["end hakkar fight"] = [](PlayerbotAI* ai) { return new HakkarEndFightTrigger(ai); };
+            creators["hakkar magic aspect"] = [](PlayerbotAI* ai) { return new HakkarMagicAspectTrigger(ai); };
+            creators["hakkar venoxis aspect"] = [](PlayerbotAI* ai) { return new HakkarVenoxisAspectTrigger(ai); };
+            creators["hakkar thekal enrage"] = [](PlayerbotAI* ai) { return new HakkarThekalEnrageTrigger(ai); };
+
+            // Pro-engage triggers (Étape 1 — proactive add detection)
+            creators["razorgore adds nearby"] = [](PlayerbotAI* ai) { return new RazorgoreAddsNearbyTrigger(ai); };
+            creators["garr firesworn nearby"] = [](PlayerbotAI* ai) { return new GarrFireswornNearbyTrigger(ai); };
+            creators["onyxia whelps nearby"] = [](PlayerbotAI* ai) { return new OnyxiaWhelpsNearbyTrigger(ai); };
+            creators["sulfuron priestess nearby"] = [](PlayerbotAI* ai) { return new SulfuronPriestessNearbyTrigger(ai); };
+            creators["ragnaros sons nearby"] = [](PlayerbotAI* ai) { return new RagnarosSonsNearbyTrigger(ai); };
+            creators["sartura royal guard nearby"] = [](PlayerbotAI* ai) { return new SarturaRoyalGuardNearbyTrigger(ai); };
+            creators["anubrekhan crypt guard nearby"] = [](PlayerbotAI* ai) { return new AnubrekhanCryptGuardNearbyTrigger(ai); };
+            creators["faerlina worshipper nearby"] = [](PlayerbotAI* ai) { return new FaerlinaWorshipperNearbyTrigger(ai); };
+            creators["gluth zombie chow nearby"] = [](PlayerbotAI* ai) { return new GluthZombieChowNearbyTrigger(ai); };
+            creators["fankriss adds nearby"] = [](PlayerbotAI* ai) { return new FankrissAddsNearbyTrigger(ai); };
+            // AQ20
+            creators["moam mana fiend nearby"] = [](PlayerbotAI* ai) { return new MoamManaFiendNearbyTrigger(ai); };
+            creators["buru hatchling nearby"] = [](PlayerbotAI* ai) { return new BuruHatchlingNearbyTrigger(ai); };
+            creators["ayamiss adds nearby"] = [](PlayerbotAI* ai) { return new AyamissAddsNearbyTrigger(ai); };
+            creators["rajaxx wave commander nearby"] = [](PlayerbotAI* ai) { return new RajaxxWaveCommanderNearbyTrigger(ai); };
+            creators["mandokir ohgan nearby"] = [](PlayerbotAI* ai) { return new MandokirOhganNearbyTrigger(ai); };
+
+            // AQ20 dungeon enter/leave
+            creators["enter ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnterDungeonTrigger(ai); };
+            creators["leave ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajLeaveDungeonTrigger(ai); };
             creators["magmadar too close"] = [](PlayerbotAI* ai) { return new MagmadarTooCloseTrigger(ai); };
 
             creators["start lucifron fight"] = [](PlayerbotAI* ai) { return new LucifronStartFightTrigger(ai); };
