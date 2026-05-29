@@ -203,4 +203,19 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage noth plagued add",
                 { 16981, 16982, 16983, 16984 }, 80.0f) {}
     };
+
+    class EngageMarliSpawnAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageMarliSpawnAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage marli spawn", { 15041 }, 50.0f) {}
+    };
+
+    class EngageJindoTotemAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageJindoTotemAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage jindo totem",
+                { 15112, 14987 }, 60.0f) {}
+    };
 }

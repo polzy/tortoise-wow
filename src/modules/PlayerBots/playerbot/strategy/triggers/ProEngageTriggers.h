@@ -250,4 +250,26 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "noth plagued adds nearby",
                 { 16981, 16982, 16983, 16984 }, 80.0f) {}
     };
+
+    // ZG High Priestess Marli summons Spawn of Marli (15041) from eggs around
+    // the room. Pro-engage prevents the spawns from stacking on the raid
+    // (they have a 90% poison aura that compounds quickly).
+    class MarliSpawnNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        MarliSpawnNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "marli spawn nearby", { 15041 }, 50.0f) {}
+    };
+
+    // ZG Jin'do summons. Brainwash Totem (15112) MIND-CONTROLS a raid member
+    // every cast — top kill priority. Powerful Healing Ward (14987) heals
+    // Jin'do significantly. Burning both ASAP is fight-defining.
+    // ScriptDev2 boss_jindo.cpp NPC_BRAINWASH_TOTEM / NPC_POWERFULL_HEALING_WARD.
+    class JindoTotemsNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        JindoTotemsNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "jindo totems nearby",
+                { 15112, 14987 }, 60.0f) {}
+    };
 }

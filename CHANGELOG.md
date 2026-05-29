@@ -7,6 +7,13 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — ZG Marli + Jin'do pro-engage (3 more encounters)
+- Marli Spawn of Marli (15041) — pro-engage, poison-aura adds.
+- Jin'do Brainwash Totem (15112) — **MCs raid members**, fight-defining
+  kill priority. Priority 95 (highest pro-engage we have).
+- Jin'do Powerful Healing Ward (14987) — heals Jin'do significantly.
+  Same trigger, priority 95.
+
 ### Added — Naxx wing-bosses pro-engage + 2 dispels (Maexxna, Noth)
 - Pro-engage Maexxna Spiderlings (17055) — 12 spawn at 75/50/25% HP per
   ScriptDev2. Priority 85.

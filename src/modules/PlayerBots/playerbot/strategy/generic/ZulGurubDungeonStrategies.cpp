@@ -15,6 +15,17 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "mandokir ohgan nearby",
         NextAction::array(0, new NextAction("engage mandokir ohgan", 90.0f), NULL)));
+
+    // High Priestess Marli's Spawn of Marli (15041) — adds with poison aura.
+    triggers.push_back(new TriggerNode(
+        "marli spawn nearby",
+        NextAction::array(0, new NextAction("engage marli spawn", 85.0f), NULL)));
+
+    // Jin'do's Brainwash Totem (15112) MCs raid members — critical kill
+    // priority. Powerful Healing Ward (14987) heals Jin'do. Both burn ASAP.
+    triggers.push_back(new TriggerNode(
+        "jindo totems nearby",
+        NextAction::array(0, new NextAction("engage jindo totem", 95.0f), NULL)));
 }
 
 // ========== Hakkar the Soulflayer (14834) ==========

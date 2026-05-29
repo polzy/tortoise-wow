@@ -125,7 +125,9 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Kurinnaxx / Ossirian (AQ20)            | ❌     | Mortal Wound, tornado-kite shield-break TODO |
 | Hakkar (ZG)                            | ✅     | Marli/Jeklik dispel + Venoxis cure poison + Thekal Tranquilizing Shot |
 | Mandokir (ZG)                          | ⚠️    | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
-| Other ZG bosses                        | ❌     | Venoxis / Jeklik / Marli / Thekal / Arlokk / Jin'do / Hazzarah TODO |
+| Marli (ZG)                             | ⚠️    | Pro-engage Spawn of Marli (15041) — adds with poison aura |
+| Jin'do (ZG)                            | ⚠️    | Pro-engage Brainwash Totem (15112, MCs raid members) + Healing Ward (14987). Priority 95 — fight-defining |
+| Other ZG bosses                        | ❌     | Venoxis / Jeklik / Thekal / Arlokk / Hazzarah TODO |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
 | Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation dispel + caster spread |

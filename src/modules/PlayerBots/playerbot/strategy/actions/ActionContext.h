@@ -453,6 +453,8 @@ namespace ai
             creators["engage mandokir ohgan"] = [](PlayerbotAI* ai) { return new EngageMandokirOhganAction(ai); };
             creators["engage maexxna spiderling"] = [](PlayerbotAI* ai) { return new EngageMaexxnaSpiderlingAction(ai); };
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
+            creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };
+            creators["engage jindo totem"] = [](PlayerbotAI* ai) { return new EngageJindoTotemAction(ai); };
 
             // AQ20 dungeon strategy enable/disable
             creators["enable ruins of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnableDungeonStrategyAction(ai); };

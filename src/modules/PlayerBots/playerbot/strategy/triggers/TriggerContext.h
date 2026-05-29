@@ -407,6 +407,8 @@ namespace ai
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };
+            creators["marli spawn nearby"] = [](PlayerbotAI* ai) { return new MarliSpawnNearbyTrigger(ai); };
+            creators["jindo totems nearby"] = [](PlayerbotAI* ai) { return new JindoTotemsNearbyTrigger(ai); };
 
             // AQ20 dungeon enter/leave
             creators["enter ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnterDungeonTrigger(ai); };
