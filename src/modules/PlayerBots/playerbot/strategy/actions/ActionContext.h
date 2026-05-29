@@ -392,6 +392,14 @@ namespace ai
             creators["enable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusEnableFightStrategyAction(ai); };
             creators["disable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusDisableFightStrategyAction(ai); };
 
+            // Naxx boss actions
+            creators["enable patchwerk fight strategy"] = [](PlayerbotAI* ai) { return new PatchwerkEnableFightStrategyAction(ai); };
+            creators["disable patchwerk fight strategy"] = [](PlayerbotAI* ai) { return new PatchwerkDisableFightStrategyAction(ai); };
+            creators["enable loatheb fight strategy"] = [](PlayerbotAI* ai) { return new LoathebEnableFightStrategyAction(ai); };
+            creators["disable loatheb fight strategy"] = [](PlayerbotAI* ai) { return new LoathebDisableFightStrategyAction(ai); };
+            creators["enable kelthuzad fight strategy"] = [](PlayerbotAI* ai) { return new KelThuzadEnableFightStrategyAction(ai); };
+            creators["disable kelthuzad fight strategy"] = [](PlayerbotAI* ai) { return new KelThuzadDisableFightStrategyAction(ai); };
+
             creators["enable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronEnableFightStrategyAction(ai); };
             creators["disable lucifron fight strategy"] = [](PlayerbotAI* ai) { return new LucifronDisableFightStrategyAction(ai); };
 

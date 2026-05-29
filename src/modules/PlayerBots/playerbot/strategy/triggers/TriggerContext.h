@@ -331,6 +331,15 @@ namespace ai
             creators["start chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusStartFightTrigger(ai); };
             creators["end chromaggus fight"] = [](PlayerbotAI* ai) { return new ChromaggusEndFightTrigger(ai); };
             creators["chromaggus affliction danger"] = [](PlayerbotAI* ai) { return new ChromaggusAfflictionDangerTrigger(ai); };
+
+            // Naxx boss triggers
+            creators["start patchwerk fight"] = [](PlayerbotAI* ai) { return new PatchwerkStartFightTrigger(ai); };
+            creators["end patchwerk fight"] = [](PlayerbotAI* ai) { return new PatchwerkEndFightTrigger(ai); };
+            creators["start loatheb fight"] = [](PlayerbotAI* ai) { return new LoathebStartFightTrigger(ai); };
+            creators["end loatheb fight"] = [](PlayerbotAI* ai) { return new LoathebEndFightTrigger(ai); };
+            creators["start kelthuzad fight"] = [](PlayerbotAI* ai) { return new KelThuzadStartFightTrigger(ai); };
+            creators["end kelthuzad fight"] = [](PlayerbotAI* ai) { return new KelThuzadEndFightTrigger(ai); };
+            creators["kelthuzad mana detonation"] = [](PlayerbotAI* ai) { return new KelThuzadManaDetonationTrigger(ai); };
             creators["magmadar too close"] = [](PlayerbotAI* ai) { return new MagmadarTooCloseTrigger(ai); };
 
             creators["start lucifron fight"] = [](PlayerbotAI* ai) { return new LucifronStartFightTrigger(ai); };

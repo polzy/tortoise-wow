@@ -85,7 +85,22 @@ struct ItemPrototype;
 struct SpellEntry;
 typedef ItemPrototype ItemTemplate;
 typedef SpellEffectIndex SpellEffIndex;
-typedef SpellEntry SpellInfo;
+// SpellInfo is forward-declared in BattleGround.h as `class SpellInfo;` which
+// conflicts with `typedef SpellEntry SpellInfo;` (typedef vs class declaration
+// of different underlying types is a hard error). For vanilla Penqle we use
+// SpellEntry directly in the LuaEngine signatures below and keep this typedef
+// commented out. WotLK+ branches of Eluna define SpellInfo as a proper class
+// so re-enable the typedef there if you sync them in.
+// typedef SpellEntry SpellInfo;
+#define SpellInfo SpellEntry
+
+// WotLK+ types referenced in hook signatures we don't fire in vanilla. Forward
+// declare them as empty classes so the prototypes parse but linking them is a
+// no-op because the corresponding ElunaHooks::* implementations are gated behind
+// expansion macros (ELUNA_EXPANSION>=2) that aren't defined for vanilla.
+class AuraEffect;
+class DispelInfo;
+class SpellDestination;
 
 #if defined ELUNA_CMANGOS
 class TemporarySpawn;

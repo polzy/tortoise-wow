@@ -111,7 +111,11 @@ Goal: stable 40-bot raids on Turtle WoW 1.18.1.
 | Firemaw/Ebonroc/Flamegor (BWL)         | ❌     | Drake trio — Shadow Flame + tail swipe TODO |
 | Razorgore / Nefarian (BWL)             | ❌     | Mind Control / Class Calls TODO |
 | AQ20 / AQ40 bosses                     | ❌     | |
-| Naxxramas bosses                       | ⚠️    | Four Horsemen void zone dodge only — rest of wing unscripted |
+| Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
+| Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
+| Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation dispel + caster spread |
+| Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO |
+| Other Naxx bosses                      | ❌     | Wings unscripted (Sapphiron ice block, Anub'Rekhan Locust Swarm, etc.) |
 
 ### Server / infra
 | Feature                                | Status | Notes |

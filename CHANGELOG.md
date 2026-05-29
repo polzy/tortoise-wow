@@ -58,6 +58,27 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
   (Knock Away tank re-taunt priority), Chromaggus (Brood Affliction 4-of-5
   dispel before Chromatic Mutation). Spell IDs lifted from
   `src/scripts/dungeons/blackwing_lair/boss_*.cpp`.
+- Naxx boss strategies: Patchwerk (tank-and-spank, no special mitigation
+  beyond class strategies — placeholder for the Berserk 7-min DPS race),
+  Loatheb (anti-heal mechanic — healers' class cooldowns already match
+  the Corrupted Mind 60s lockout cadence), Kel'Thuzad (Mana Detonation
+  27819 dispel + ranged spread on Frost Blast).
+- Tank face-away positioning. `TankOnyxiaFaceAwayAction` computes the
+  raid centroid and moves the MT to the opposite side of Onyxia so her
+  cleave + tail face the wall instead of the raid. Gated on IsTank &&
+  !IsOffTank, skips P2 (Hover aura), skips when raid <2 members.
+- Eluna integration progress: `src/game/_eluna_compat/` shim tree (48
+  headers) bridges cmangos-style `Globals/SharedDefines.h` /
+  `Entities/Player.h` includes to Penqle's flat layout. Cross-tree shims
+  reach into `src/shared/` and `src/framework/`. Empty stubs for TBC+
+  features (ArenaTeam, Vehicle, etc.). LuaEngine.h patched to use
+  vanilla `SpellEntry` instead of TBC+ `SpellInfo`, forward-declare
+  WotLK+ types (AuraEffect, DispelInfo, SpellDestination) as empty
+  classes — the hooks fire only on expansions we don't have. `Log/Log.h`
+  shim maps `outErrorEluna`/`outBasicEluna` to `outError`/`outBasic`.
+  Remaining blockers (filed as #44 follow-up): `Map::GetEluna()`
+  accessor and `InstanceData::Save/GetData64` overrides need host-side
+  wiring before `BUILD_ELUNA=ON` produces a working binary.
 - AttackOnyxiaAction: P2 fix so ranged/heal bots stay locked on Onyxia
   (entry 10184) instead of switching to whelps that aggro them. Pins the
   AI context's "current target" and selection guid to Onyxia, then routes
