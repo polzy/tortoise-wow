@@ -411,6 +411,8 @@ namespace ai
             creators["jindo totems nearby"] = [](PlayerbotAI* ai) { return new JindoTotemsNearbyTrigger(ai); };
             creators["thekal zealots nearby"] = [](PlayerbotAI* ai) { return new ThekalZealotsNearbyTrigger(ai); };
             creators["thekal tiger nearby"] = [](PlayerbotAI* ai) { return new ThekalTigerNearbyTrigger(ai); };
+            creators["arlokk prowler nearby"] = [](PlayerbotAI* ai) { return new ArlokkProwlerNearbyTrigger(ai); };
+            creators["hazzarah sleep"] = [](PlayerbotAI* ai) { return new HazzarahSleepTrigger(ai); };
 
             // AQ20 dungeon enter/leave
             creators["enter ruins of ahnqiraj"] = [](PlayerbotAI* ai) { return new RuinsOfAhnQirajEnterDungeonTrigger(ai); };

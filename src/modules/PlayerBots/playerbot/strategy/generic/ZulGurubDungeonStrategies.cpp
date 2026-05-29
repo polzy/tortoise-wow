@@ -37,6 +37,19 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "thekal tiger nearby",
         NextAction::array(0, new NextAction("engage thekal tiger", 85.0f), NULL)));
+
+    // Arlokk Zulian Prowlers (15101) — panther adds during vanish phases.
+    triggers.push_back(new TriggerNode(
+        "arlokk prowler nearby",
+        NextAction::array(0, new NextAction("engage arlokk prowler", 80.0f), NULL)));
+
+    // Hazzarah Sleep (24664) dispel — magic.
+    triggers.push_back(new TriggerNode(
+        "hazzarah sleep",
+        NextAction::array(0,
+            new NextAction("dispel magic", 90.0f),
+            new NextAction("cleanse magic", 90.0f),
+            NULL)));
 }
 
 // ========== Hakkar the Soulflayer (14834) ==========

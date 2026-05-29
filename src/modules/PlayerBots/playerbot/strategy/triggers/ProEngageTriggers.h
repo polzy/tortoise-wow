@@ -293,4 +293,13 @@ namespace ai
         ThekalTigerNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "thekal tiger nearby", { 15068 }, 50.0f) {}
     };
+
+    // Arlokk Zulian Prowlers (15101) — panther adds summoned during her
+    // vanish/stealth phases. ScriptDev2 boss_arlokk.cpp NPC_ZULIAN_PROWLER.
+    class ArlokkProwlerNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        ArlokkProwlerNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "arlokk prowler nearby", { 15101 }, 50.0f) {}
+    };
 }

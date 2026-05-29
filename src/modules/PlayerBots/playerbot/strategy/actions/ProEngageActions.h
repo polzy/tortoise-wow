@@ -232,4 +232,11 @@ namespace ai
         EngageThekalTigerAction(PlayerbotAI* ai)
             : EngageNearbyAddAction(ai, "engage thekal tiger", { 15068 }, 50.0f) {}
     };
+
+    class EngageArlokkProwlerAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageArlokkProwlerAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage arlokk prowler", { 15101 }, 50.0f) {}
+    };
 }

@@ -7,6 +7,12 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — ZG Arlokk + Hazzarah
+- Arlokk Zulian Prowlers (15101) — pro-engage panther adds spawned during
+  her vanish phases.
+- Hazzarah Sleep (24664) — magic dispel chain. The sleep takes the
+  affected raid member out of the fight; dispel asap.
+
 ### Added — ZG Thekal pro-engage (P1 zealots + P2 tigers)
 - Thekal Lor'Khan (11347) + Zath (11348) pro-engage — focus all 3 zealots
   together so they die in the 6s rez window.
