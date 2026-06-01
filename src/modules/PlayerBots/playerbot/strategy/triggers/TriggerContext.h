@@ -376,6 +376,7 @@ namespace ai
             creators["end huhuran fight"] = [](PlayerbotAI* ai) { return new HuhuranEndFightTrigger(ai); };
             creators["huhuran frenzy"] = [](PlayerbotAI* ai) { return new HuhuranFrenzyTrigger(ai); };
             creators["huhuran noxious poison"] = [](PlayerbotAI* ai) { return new HuhuranNoxiousPoisonTrigger(ai); };
+            creators["skeram true fulfillment"] = [](PlayerbotAI* ai) { return new SkeramTrueFulfillmentTrigger(ai); };
 
             // Zul'Gurub (ZG, map 309)
             creators["enter zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubEnterDungeonTrigger(ai); };

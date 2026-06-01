@@ -7,6 +7,13 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Skeram True Fulfillment (785) dispel
+- AQ40 The Prophet Skeram MC mechanic. SPELL_TRUE_FULFILLMENT = 785
+  (per boss_skeram.cpp:21) mind-controls the closest raid member each
+  cycle. Magic-school = dispelable. Chain: `dispel magic` (priest) +
+  `cleanse magic` (paladin). Priority 95 — MC'd players wipe the raid
+  fast if not cleansed.
+
 ### Fixed — code-review pass (background reviewer, 3 real bugs)
 - **Sulfuron Priestess entry was wrong** (CRITICAL). The trigger and action
   used 12099 on a "same model as Garr's Firesworn" assumption — incorrect.

@@ -89,4 +89,16 @@ namespace ai
         HuhuranNoxiousPoisonTrigger(PlayerbotAI* ai) : Trigger(ai, "huhuran noxious poison", 1) {}
         bool IsActive() override { return ai->HasAura(26053, bot); }
     };
+
+    // The Prophet Skeram True Fulfillment (785) — MIND-CONTROLS the closest
+    // raid member every cycle. Spell is Magic-school, dispelable. Quick kick
+    // from any priest 'dispel magic' / paladin 'cleanse magic' returns the
+    // MC'd player to the raid before they hit anyone.
+    // ScriptDev2 boss_skeram.cpp:21 SPELL_TRUE_FULFILLMENT = 785.
+    class SkeramTrueFulfillmentTrigger : public Trigger
+    {
+    public:
+        SkeramTrueFulfillmentTrigger(PlayerbotAI* ai) : Trigger(ai, "skeram true fulfillment", 1) {}
+        bool IsActive() override { return ai->HasAura(785, bot); }
+    };
 }

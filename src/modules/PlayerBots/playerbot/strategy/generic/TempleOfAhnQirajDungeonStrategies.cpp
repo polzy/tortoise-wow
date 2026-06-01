@@ -31,6 +31,17 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
     triggers.push_back(new TriggerNode(
         "cthun tentacle nearby",
         NextAction::array(0, new NextAction("engage cthun tentacle", 90.0f), NULL)));
+
+    // Skeram True Fulfillment (785) — MIND-CONTROL the affected raid member.
+    // Magic-school, dispelable. Same chain as Sulfuron Demoralizing Shout.
+    // Priority 95 (just under fight-defining): MC'd players can wipe the raid
+    // quickly so dispel ASAP.
+    triggers.push_back(new TriggerNode(
+        "skeram true fulfillment",
+        NextAction::array(0,
+            new NextAction("dispel magic", 95.0f),
+            new NextAction("cleanse magic", 95.0f),
+            NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========

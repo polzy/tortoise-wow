@@ -135,7 +135,8 @@ host more bot-raids; a box with many slow cores cannot.
 | Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
 | Bug Trio Yauj (AQ40)                   | ⚠️    | Pro-engage Yauj Broods (15621). Vem/Kri healing chain at death = raid coord beyond bot scope |
 | C'Thun P2 (AQ40)                       | ⚠️    | Pro-engage all 4 tentacle types (Eye 15726, Giant Claw 15728, Giant Eye 15334, Flesh 15802) at priority 90 |
-| Other AQ40 bosses                      | ❌     | Skeram (MC retake), Twin Emperors mutate swap (multi-tank coord), Ouro burrow (GO interaction), Viscidus freeze/shatter (frost CD coord) |
+| Skeram (AQ40)                          | ⚠️    | True Fulfillment (785) MC dispel chain — priority 95. Split-clone targeting still requires phase awareness |
+| Other AQ40 bosses                      | ❌     | Twin Emperors mutate swap (multi-tank coord), Ouro burrow (GO interaction), Viscidus freeze/shatter (frost CD coord) |
 | Moam (AQ20)                            | ⚠️    | Pro-engage Mana Fiends (15527) on summon |
 | Buru (AQ20)                            | ⚠️    | Pro-engage Hivezara Hatchlings (15521). Egg-explode mechanic still raid-side |
 | Ayamiss (AQ20)                         | ⚠️    | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
