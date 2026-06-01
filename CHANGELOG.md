@@ -7,6 +7,19 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Sapphiron Ice Block hide (debloque Naxx Sapphiron)
+- Sapphiron casts Frost Breath (28524) every 6s during the air phase, 7s cast
+  AOE that wipes the raid unless LOS'd by GO_ICEBLOCK (181247) — spawned
+  where players hit by Icebolt (28522) stood.
+- New `SapphironFrostBreathTrigger` in NaxxramasDungeonTriggers.h scans for
+  a live Sapphiron (15989) within 100y and checks its
+  CURRENT_GENERIC_SPELL for spell id 28524.
+- New `HideBehindSapphironIceBlockAction` in NaxxramasDungeonActions.h does
+  a `Cell::VisitAllObjects` with `GameObjectsInObjectRangeCheck` to find
+  the nearest ice block GameObject (entry 181247) within 50y and moves the
+  bot to its position. Priority 100 — without this the raid wipes.
+- Wired in SapphironFightStrategy::InitCombatTriggers.
+
 ### Fixed — group-scan dispel chains were wiring SELF-targeting actions (CRITICAL)
 Code review caught a systemic bug in this session's group-scan refactor. The
 triggers were correctly upgraded to scan the party for the aura via

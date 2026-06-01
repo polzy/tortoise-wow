@@ -169,7 +169,7 @@ Impending Doom).
 | Anub'Rekhan (Naxx)                     | ⚠️    | Pro-engage Crypt Guards (16573). Locust Swarm dodge TODO |
 | Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage mechanic relies on add detonation, raid-side |
 | Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
-| Sapphiron (Naxx)                       | ⚠️    | Life Drain (28542) dispel — group-scan (5 random victims) + frost resist gear. Ice Block hide pathing TODO |
+| Sapphiron (Naxx)                       | ✅     | Life Drain (28542) on-party dispel + frost resist gear + Frost Breath (28524) detection → move to nearest GO_ICEBLOCK (181247) within 50y |
 | Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse — group-scan (3 random victims) |
 | Maexxna (Naxx)                         | ⚠️    | Pro-engage Spiderlings (17055) at 60y + Necrotic Poison (28776) cure poison — group-scan (tank only) |
 | Gothik (Naxx)                          | ⚠️    | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |

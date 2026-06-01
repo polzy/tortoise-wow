@@ -2,9 +2,49 @@
 #include "DungeonActions.h"
 #include "ChangeStrategyAction.h"
 #include "UseItemAction.h"
+#include "MovementActions.h"
+#include "Maps/GridNotifiers.h"
+#include "Maps/GridNotifiersImpl.h"
+#include "Maps/CellImpl.h"
+#include "playerbot/strategy/values/NearestGameObjects.h"
 
 namespace ai
 {
+    // Sapphiron Phase 2 (air): casts Frost Breath (28524, 7s) blocked by LOS
+    // via GO_ICEBLOCK (181247) spawned where icebolted players stood. Action
+    // finds nearest ice block within 50y and moves to its position. Bot ends
+    // up next to the ice block, which puts Sapphiron's LOS line through it.
+    // ScriptDev2 boss_sapphiron.cpp:56 GO_ICEBLOCK = 181247.
+    class HideBehindSapphironIceBlockAction : public MovementAction
+    {
+    public:
+        HideBehindSapphironIceBlockAction(PlayerbotAI* ai)
+            : MovementAction(ai, "hide behind sapphiron ice block") {}
+
+        bool Execute(Event& event) override
+        {
+            Player* bot = ai->GetBot();
+            if (!bot) return false;
+
+            std::list<GameObject*> blocks;
+            GameObjectsInObjectRangeCheck check(bot, 50.0f, 181247);
+            MaNGOS::GameObjectListSearcher<GameObjectsInObjectRangeCheck> searcher(blocks, check);
+            Cell::VisitAllObjects(bot, searcher, 50.0f);
+
+            GameObject* closest = nullptr;
+            float bestDist = 1e9f;
+            for (GameObject* go : blocks)
+            {
+                if (!go) continue;
+                float d = bot->GetDistance(go);
+                if (d < bestDist) { bestDist = d; closest = go; }
+            }
+
+            if (!closest) return false;
+            return MoveTo(closest->GetMapId(), closest->GetPositionX(), closest->GetPositionY(), closest->GetPositionZ());
+        }
+    };
+
     class NaxxramasEnableDungeonStrategyAction : public ChangeAllStrategyAction
     {
     public:

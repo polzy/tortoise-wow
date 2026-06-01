@@ -96,6 +96,33 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "sapphiron life drain", 28542, 1) {}
     };
 
+    // Frost Breath (28524) — 7s cast AOE in air phase. Blocked by LOS via
+    // GO_ICEBLOCK (181247) spawned where icebolted players stood. Trigger
+    // fires when a live Sapphiron within 100y is casting Frost Breath.
+    // ScriptDev2 boss_sapphiron.cpp:35 SPELL_FROST_BREATH.
+    class SapphironFrostBreathTrigger : public Trigger
+    {
+    public:
+        SapphironFrostBreathTrigger(PlayerbotAI* ai) : Trigger(ai, "sapphiron frost breath", 1) {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15989, 100.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 100.0f);
+            for (Unit* u : units)
+            {
+                if (!u || !u->IsAlive()) continue;
+                if (Spell* sp = u->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+                {
+                    if (sp->m_spellInfo && sp->m_spellInfo->Id == 28524)
+                        return true;
+                }
+            }
+            return false;
+        }
+    };
+
     // --- Maexxna Necrotic Poison (28776) — poison, 90% healing reduction.
     // Single-target on the main tank (warrior — no self-cleanse). Group-scan
     // so the druid/shaman/paladin fires their cure chain. ---

@@ -418,6 +418,7 @@ namespace ai
             creators["disable kelthuzad fight strategy"] = [](PlayerbotAI* ai) { return new KelThuzadDisableFightStrategyAction(ai); };
             creators["enable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironEnableFightStrategyAction(ai); };
             creators["disable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironDisableFightStrategyAction(ai); };
+            creators["hide behind sapphiron ice block"] = [](PlayerbotAI* ai) { return new HideBehindSapphironIceBlockAction(ai); };
 
             // Temple of Ahn'Qiraj (AQ40)
             creators["enable temple of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajEnableDungeonStrategyAction(ai); };

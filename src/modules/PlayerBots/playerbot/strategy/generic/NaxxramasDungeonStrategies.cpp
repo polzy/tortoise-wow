@@ -185,9 +185,13 @@ void SapphironFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
             new NextAction("cleanse magic on party", 80.0f),
             NULL)));
 
-    // Frost Breath dodge / Ice Block hide TODO — needs an Ice Block guid
-    // finder primitive. Currently the raid relies on `.bot frostres` gear
-    // (Frost Aura 28529 is the only frost source that always ticks).
+    // Frost Breath (28524) — 7s cast AOE in air phase, blocked by LOS via
+    // GO_ICEBLOCK (181247). When Sapphiron starts casting, bots find the
+    // nearest ice block within 50y and reposition next to it. Priority 100
+    // (raid-wide lethal if not LOS'd).
+    triggers.push_back(new TriggerNode(
+        "sapphiron frost breath",
+        NextAction::array(0, new NextAction("hide behind sapphiron ice block", 100.0f), NULL)));
 }
 
 void SapphironFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
