@@ -192,6 +192,18 @@ namespace ai
         }
     };
 
+    // Razorgore Possess Orb (GO 177808) — at fight start one bot must click the
+    // orb to mind-control Razorgore and burn the eggs. Framework #1
+    // UseNearbyGameObjectAction handles GO scan + interact-range MoveTo +
+    // CMSG_GAMEOBJ_USE. Wire on the BWL dungeon strategy when no human master
+    // is available to click manually.
+    class UseRazorgorePossessOrbAction : public UseNearbyGameObjectAction
+    {
+    public:
+        UseRazorgorePossessOrbAction(PlayerbotAI* ai)
+            : UseNearbyGameObjectAction(ai, "use razorgore possess orb", 177808, 80.0f) {}
+    };
+
     class BroodlordEnableFightStrategyAction : public ChangeAllStrategyAction
     {
     public:

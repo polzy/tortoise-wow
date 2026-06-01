@@ -7,6 +7,24 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Razorgore Possess Orb subclass (Framework #1 demo)
+- New `UseRazorgorePossessOrbAction` in BlackwingLairDungeonActions.h
+  subclasses `UseNearbyGameObjectAction` with GO entry 177808
+  (GO_ORBE_DOMINATION per scriptdev2 instance_blackwing_lair.cpp:107) and
+  80y scan range.
+- Registered in ActionContext but NOT auto-wired in BWL strategy — in the
+  standard 1-human-master + bots setup, the master clicks the orb to MC
+  Razorgore manually. The action is available for full-bot raids or for
+  manual command via `.bot do use razorgore possess orb`.
+- Demonstrates Framework #1 lookup-and-use pattern with a real GO entry
+  from current Turtle DB.
+
+### Audit — Vael Burning Adrenaline move-away already wired
+- README "EASY: Vael move-away" task was inaccurate. Action exists in
+  BlackwingLairDungeonActions.h:185 (`VaelastraszBurningAdrenalineMoveAwayAction`),
+  registered in ActionContext.h:398, wired in BlackwingLairDungeonStrategies.cpp:55
+  at priority 100. No work needed.
+
 ### Added — Framework #7: Frost barrage (Viscidus)
 - Viscidus (15299) needs 200 frost hits to freeze (then ~100 melee to
   shatter; repeat until dead). Re-interpreted "frost CD coordination" as

@@ -396,6 +396,7 @@ namespace ai
             creators["enable vaelastrasz fight strategy"] = [](PlayerbotAI* ai) { return new VaelastraszEnableFightStrategyAction(ai); };
             creators["disable vaelastrasz fight strategy"] = [](PlayerbotAI* ai) { return new VaelastraszDisableFightStrategyAction(ai); };
             creators["vael burning adrenaline move away"] = [](PlayerbotAI* ai) { return new VaelastraszBurningAdrenalineMoveAwayAction(ai); };
+            creators["use razorgore possess orb"] = [](PlayerbotAI* ai) { return new UseRazorgorePossessOrbAction(ai); };
             creators["enable broodlord fight strategy"] = [](PlayerbotAI* ai) { return new BroodlordEnableFightStrategyAction(ai); };
             creators["disable broodlord fight strategy"] = [](PlayerbotAI* ai) { return new BroodlordDisableFightStrategyAction(ai); };
             creators["enable chromaggus fight strategy"] = [](PlayerbotAI* ai) { return new ChromaggusEnableFightStrategyAction(ai); };
