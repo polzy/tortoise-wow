@@ -643,6 +643,14 @@ if(BUILD_ELUNA)
         target_include_directories(playerbots PRIVATE
             ${CMAKE_SOURCE_DIR}/src/game/LuaEngine
             ${CMAKE_SOURCE_DIR}/src/game/LuaEngine/hooks
+            ${CMAKE_SOURCE_DIR}/src/game/LuaEngine/methods/CMangos
+            # Eluna uses cmangos-style nested paths ("Globals/SharedDefines.h"
+            # etc.); the _eluna_compat shim tree under src/game/ re-includes
+            # the actual Penqle headers. PlayerBots TUs that #include
+            # ElunaUtility.h pull in these shims, so PlayerBots needs the
+            # compat root on its include path too. Game-lib already gets it
+            # via src/game/CMakeLists.txt:568.
+            ${CMAKE_SOURCE_DIR}/src/game/_eluna_compat
         )
         # PlayerBots/CMakeLists.txt uses the PRIVATE/PUBLIC keyword form, so we
         # have to match it here — CMake forbids mixing keyword and plain

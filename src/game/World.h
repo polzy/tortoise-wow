@@ -891,6 +891,10 @@ private:
 };
 
 /// The World
+#ifdef BUILD_ELUNA
+class Eluna;
+#endif
+
 class World
 {
     public:
@@ -900,6 +904,17 @@ class World
 
         World();
         ~World();
+
+#ifdef BUILD_ELUNA
+        // Eluna host hook. ElunaLoader calls sWorld.GetEluna() to drive
+        // global state reloads. Vanilla doesn't ship with this; we add
+        // a stub Eluna* that lives in World and is initialized lazily.
+        Eluna* GetEluna() const { return m_eluna; }
+        void SetEluna(Eluna* e) { m_eluna = e; }
+    private:
+        Eluna* m_eluna = nullptr;
+    public:
+#endif
 
         // bot calls sWorld.GetLFGQueue() and sWorld.GetCurrentMSTime().
         // Penqle's LFGQueue lives in LFG/LFGMgr.h. Forward to sLFGMgr.

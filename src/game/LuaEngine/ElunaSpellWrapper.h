@@ -70,7 +70,11 @@ public:
     explicit ElunaProcInfo(ProcEventInfo& procInfo, Map* map);
     ~ElunaProcInfo()
     {
-#ifdef TRACKABLE_PTR_NAMESPACE
+        // m_scriptRef only exists under ELUNA_TRINITY (line 62); the
+        // upstream destructor uses TRACKABLE_PTR_NAMESPACE which is a
+        // separate Trinity-only define. Match both gates to avoid
+        // undeclared-identifier errors on cmangos/vanilla.
+#if defined(TRACKABLE_PTR_NAMESPACE) && defined(ELUNA_TRINITY)
         m_scriptRef = nullptr;
 #endif
     }
@@ -130,7 +134,8 @@ public:
     ElunaSpellInfo(uint32 spellId);
     ~ElunaSpellInfo()
     {
-#ifdef TRACKABLE_PTR_NAMESPACE
+        // Same as ElunaProcInfo dtor — see note above.
+#if defined(TRACKABLE_PTR_NAMESPACE) && defined(ELUNA_TRINITY)
         m_scriptRef = nullptr;
 #endif
     }

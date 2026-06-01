@@ -167,9 +167,24 @@ enum MethodFlags : uint32
 #define ELUNA_GAME_API AC_GAME_API
 #else
 #define ELUNA_GAME_API
-#if defined ELUNA_CMANGOS
+// Vanilla cmangos (ELUNA_EXPANSION == 0) lacks MaNGOS::unique_weak_ptr —
+// that template was added in TBC+ ports. Only define TRACKABLE_PTR_
+// NAMESPACE on TBC+ cmangos so vanilla skips all the ConstrainedObjectRef
+// machinery (block at ElunaTemplate.h:57 stays #if'd out).
+#if defined ELUNA_CMANGOS && ELUNA_EXPANSION > 0
 #define TRACKABLE_PTR_NAMESPACE ::MaNGOS::
 #endif
+#endif
+
+// Forward-declare TBC+ proc-info types so vanilla Eluna headers compile.
+// LuaEngine.h declares methods that take ProcEventInfo/DamageInfo by
+// reference (lines 664, 665, 679). The vanilla compat stubs live in
+// _eluna_compat/Spells/ProcEventInfo.h and are pulled by ElunaIncludes.h,
+// but LuaEngine.h is parsed standalone in some TUs.
+#if defined ELUNA_CMANGOS && ELUNA_EXPANSION == 0
+class ProcEventInfo;
+class DamageInfo;
+class HealInfo;
 #endif
 
 class ELUNA_GAME_API Eluna

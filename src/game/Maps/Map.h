@@ -329,6 +329,10 @@ struct ScriptedEvent
 
 class ThreadPool;
 
+#ifdef BUILD_ELUNA
+class Eluna;
+#endif
+
 class Map : public GridRefManager<NGridType>
 {
     friend class MapReference;
@@ -342,6 +346,19 @@ class Map : public GridRefManager<NGridType>
         Map(const Map &) = delete;
         const Map & operator=(const Map &) = delete;
         virtual ~Map() override;
+
+#ifdef BUILD_ELUNA
+        // Eluna host hook. ElunaInstanceAI and other Lua-side state need
+        // a per-Map Eluna pointer to dispatch hook events without having
+        // to walk back through World/Player. Stored on the Map; lifetime
+        // matches the map.
+        Eluna* GetEluna() const { return m_eluna; }
+        void SetEluna(Eluna* e) { m_eluna = e; }
+    private:
+        Eluna* m_eluna = nullptr;
+    public:
+#endif
+
         void PrintInfos(ChatHandler& handler);
         void SpawnActiveObjects();
         // currently unused for normal maps

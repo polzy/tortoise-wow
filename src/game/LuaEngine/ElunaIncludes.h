@@ -104,6 +104,13 @@
 #include "Spells/Spell.h"
 #include "Spells/SpellAuras.h"
 #include "Spells/SpellMgr.h"
+// Vanilla 1.18.1 doesn't define ProcEventInfo/DamageInfo/HealInfo (those
+// are TBC+ types). Pull the MCWoW stub from _eluna_compat so the Eluna
+// hooks compile; stub methods return defaults and runtime calls no-op.
+// See Spells/ProcEventInfo.h for the rationale.
+#if ELUNA_EXPANSION == 0 && defined(ELUNA_CMANGOS)
+#include "Spells/ProcEventInfo.h"
+#endif
 #include "Tools/Language.h"
 #include "Server/SQLStorages.h"
 #if ELUNA_EXPANSION > EXP_CLASSIC

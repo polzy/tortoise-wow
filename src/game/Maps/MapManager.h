@@ -183,6 +183,19 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         template<typename Do>
         void DoForAllMapsWithMapId(uint32 mapId, Do& _do);
 
+#ifdef BUILD_ELUNA
+        // Eluna host hook. ElunaLoader calls sMapMgr.DoForAllMaps(lambda)
+        // to iterate every loaded Map during state reload. Vanilla only
+        // has DoForAllMapsWithMapId — add the general iterator inline so
+        // we don't have to drag std::function into the public API.
+        template<typename Do>
+        void DoForAllMaps(Do _do)
+        {
+            for (auto& kv : i_maps)
+                if (kv.second) _do(kv.second);
+        }
+#endif
+
         void ScheduleInstanceSwitch(Player* player, uint16 newInstance);
         void SwitchPlayersInstances();
 

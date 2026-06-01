@@ -89,7 +89,9 @@ public:
         return Save();
     }
     const char* Save() const;
-#elif defined ELUNA_VMANGOS
+#elif defined ELUNA_VMANGOS || (defined(ELUNA_CMANGOS) && ELUNA_EXPANSION == 0)
+    // Vanilla cmangos (Turtle 1.18.1) has the same InstanceData base as
+    // VMANGOS — Save() is non-const non-override. Treat it the same way.
     const char* Save() const;
 #else
     const char* Save() const override;
@@ -110,14 +112,15 @@ public:
     /*
      * These methods allow non-Lua scripts (e.g. DB, C++) to get/set instance data.
      */
-#if !defined ELUNA_VMANGOS
+#if !defined ELUNA_VMANGOS && !(defined(ELUNA_CMANGOS) && ELUNA_EXPANSION == 0)
     uint32 GetData(uint32 key) const override;
 #else
+    // Vanilla cmangos: same signature, no override.
     uint32 GetData(uint32 key) const;
 #endif
     void SetData(uint32 key, uint32 value) override;
 
-#if !defined ELUNA_VMANGOS
+#if !defined ELUNA_VMANGOS && !(defined(ELUNA_CMANGOS) && ELUNA_EXPANSION == 0)
     uint64 GetData64(uint32 key) const override;
 #else
     uint64 GetData64(uint32 key) const;

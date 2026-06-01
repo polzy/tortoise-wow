@@ -132,6 +132,79 @@ cmangos-zero fork**, and Eluna assumes upstream symbol names:
   unconditional in `LuaEngine.h:664/665/679`. Either Eluna upstream
   bug, or our snapshot drift.
 
+## Port attempt of 2026-06-01 (continued)
+
+User asked for "Option A — port complet". Started iterating. Progress:
+
+### Round 1: low-hanging fixes (30 → 15 errors)
+- ✅ Added `_eluna_compat/DBScripts/ScriptMgr.h` shim
+- ✅ Added `_eluna_compat/GameEvents/GameEventMgr.h` shim
+- ✅ Added `_eluna_compat/AI/BaseAI/UnitAI.h` shim (typedef CreatureAI)
+- ✅ Added `_eluna_compat/AI/BaseAI/CreatureAI.h` shim
+- ✅ Added `_eluna_compat/Spells/ProcEventInfo.h` stubs for vanilla
+  (ProcEventInfo/DamageInfo/HealInfo no-op getters)
+- ✅ Added `sFactionTemplateStore` proxy in `_eluna_compat/Server/DBCStores.h`
+- ✅ Added `Map::GetEluna()` + `Map::SetEluna()` to `src/game/Maps/Map.h`
+- ✅ Added `World::GetEluna()` + `World::SetEluna()` to `src/game/World.h`
+- ✅ Added `MapManager::DoForAllMaps()` template to `src/game/Maps/MapManager.h`
+- ✅ Fixed `ElunaInstanceAI.h` override/const mismatch for vanilla cmangos
+- ✅ Fixed `ElunaSpellWrapper.h` m_scriptRef #ifdef alignment (TRACKABLE_PTR
+  vs ELUNA_TRINITY)
+- ✅ Gated `TRACKABLE_PTR_NAMESPACE` to ELUNA_EXPANSION > 0 only
+- ✅ Forward-declared ProcEventInfo/DamageInfo/HealInfo in LuaEngine.h
+- ✅ Added `_eluna_compat` to PlayerBots include path
+- ✅ Added `BOOST_ROOT` to game-lib include path for ElunaLoader.cpp
+
+### Round 2: deeper API drift (15 → 229 errors)
+After fixing the surface clusters, the next layer surfaced:
+- `Creature::GetEluna()` missing — need same hook on Creature class
+- `CreatureAI::DamageTaken/IsVisible/SpellHit` signatures don't match —
+  ElunaCreatureAI override fails (~12 errors)
+- `Spell::GetSpellInfo()` — vanilla Spell uses `m_spellInfo` member
+  directly, no GetSpellInfo() accessor
+- `SpellMgr::GetSpellInfo()` — vanilla SpellMgr uses `GetSpellEntry()`
+- `HealInfo::SetEffectiveHeal()` — even our stub HealInfo doesn't have it
+- `Aura::GetSpellInfo()` — vanilla Aura: `GetSpellProto()`
+- `Unit::IsStandState/isAuctioner/isGuildMaster` — different method names
+- `EntryKey<Hooks::SpellEvents>` template instantiation cascade
+
+These are real vanilla-vs-newer-cmangos divergences. Each "fix one
+class, reveal three more" — the vendored Eluna is from a newer cmangos
+fork where Unit/Spell/Aura have ~20-50 additional methods that vanilla
+1.18.1 doesn't have.
+
+### Estimate revision
+
+Original estimate (4-8h) was OPTIMISTIC. Realistic estimate now:
+- 229 errors clustering into ~30 unique API gaps
+- Each gap = either add a method to vanilla (touches core), or stub
+  out the Eluna code path (loses feature)
+- Realistic effort: **15-25 hours** of focused work
+
+### Decision
+
+User said "Option A port complet" but a full port at the depth required
+is multi-day work. The progress from this session (architecture
+clarified, ~12 shims created, host hooks added) is committed to the
+fork so the next focused session has a much shorter starting distance.
+
+`BUILD_ELUNA=OFF` is reverted (default) to keep the server build green.
+The shim tree + host hooks stay; they're harmless when Eluna isn't
+compiled and they're a meaningful head start for the next attempt.
+
+### Next-session checklist (in priority order)
+
+1. [ ] Add `Creature::GetEluna()` (same pattern as Map/World)
+2. [ ] Audit `CreatureAI` virtual signatures vs ElunaCreatureAI overrides;
+       either match vanilla or remove `override`
+3. [ ] Add `GetSpellInfo()` accessor to Spell + SpellMgr + Aura (forward
+       to existing m_spellInfo / GetSpellEntry / GetSpellProto)
+4. [ ] Audit `UnitMethods.h` for vanilla method-name diffs (IsStandState,
+       isAuctioner, isGuildMaster, ...)
+5. [ ] Audit `SpellHooks.cpp` EntryKey<SpellEvents> template path
+6. [ ] Audit `HealInfo` stub vs Eluna usage — add missing setters
+7. [ ] Repeat error inventory; expect at least one more layer to surface
+
 ## Why this is deferred
 
 The user shipped 27+ encounter strategies, 11 frameworks, and a

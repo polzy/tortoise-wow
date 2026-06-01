@@ -566,6 +566,11 @@ if(BUILD_ELUNA)
     # stubs for TBC+ features that don't exist in vanilla (ArenaTeam, Vehicle,
     # TemporarySpawn, UniqueTrackablePtr).
     ${CMAKE_CURRENT_SOURCE_DIR}/_eluna_compat
+    # ElunaLoader.cpp uses boost::filesystem to scan lua_scripts/ at startup.
+    # BOOST_ROOT is already discovered by the top-level CMakeLists.txt for the
+    # playerbots module; we re-add it here so game-lib TUs that compile Eluna
+    # sources can find boost/filesystem.hpp.
+    ${BOOST_ROOT}
   )
 endif()
 
