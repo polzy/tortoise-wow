@@ -5,6 +5,78 @@ All notable changes to this fork. Format inspired by [Keep a Changelog](https://
 Upstream tortoise-wow doesn't keep a changelog file — entries below cover only what
 this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-playerbots`.
 
+## [Unreleased] — 2026-06-01 (late session, post-MC raid test)
+
+### Fixed — 3 stability bugs uncovered during live 40-bot raid
+
+1. **PlayerbotHolder::ForEachPlayerbot orphan crash loop** (12,000+ AVs
+   in 16min): at 17:26:40 a `character_pet INSERT` hit a duplicate-
+   primary-key + deadlock combo. The transaction rolled back but
+   `playerBots[guid]` kept its pointer to freed Player memory. Every
+   subsequent UpdateSessions tick AVed on the same dangling ptr,
+   permanently wedging `RandomPlayerbotMgr::UpdateAI` at phase 1. Fix:
+   per-iter SEH guard via static helper `SafeCall_BotCallback`
+   (lambda-with-destructors → C2712 forbids inline `__try`). On AV the
+   orphan entry is cleared so the same bad pointer doesn't repeat. Also
+   snapshot first so callbacks (e.g. `LogoutPlayerBot`) can mutate
+   `playerBots` without invalidating the iterator.
+
+2. **ResetTargetAction AV when LoadQuestTravelTable failed at boot**:
+   live crash on bot Lenlienne phase=9331 trigger='reset travel target'.
+   `RequestTravelTargetAction::Execute` already had the
+   `!sTravelMgr.IsQuestTravelDataLoaded()` guard, but `ResetTargetAction`
+   didn't. Mirrored the guard into both `isUseful()` AND `Execute()`
+   (defense in depth) + added null check on the `TravelTarget*`.
+
+3. **Engine.cpp `s_lastTriggerName` dangling pointer**: previously
+   `static const char* s_lastTriggerName = trigger->getName().c_str()`.
+   But `Trigger::getName()` returns `std::string` BY VALUE — the
+   `c_str()` pointer to the temporary dies at end of expression. Read
+   in the crash handler would dangle. Replaced with `static char[128]`
+   + `memcpy`, so the captured name survives the originating Trigger's
+   destruction even if the heap moves under us.
+
+### Added — 5 new boss-mechanic triggers
+
+DB-verified spell/creature IDs against `tw_world.spell_template` /
+`creature_template`:
+
+- **Grobbulus Mutating Injection (28169)** — Poison-school 12s debuff
+  that AOE-explodes 10y on expiry/dispel. SELF-trigger fires `flee`
+  (run out of raid); group-scan fires `cure poison / cleanse poison
+  on party` AFTER the run-out (lower priority). Self-cleanse would
+  explode in-place — explicitly delegated to OTHER bots' dispels.
+- **Loatheb Corrupted Mind (29185/29194/29196/29198 per class)** —
+  silences healer school 12s, `dispel=0`. Healer self-uses healing
+  potion + use bandage to weather the no-heal window without dying
+  to Inevitable Doom ticks.
+- **Patchwerk Hateful Strike (28308)** — non-tank with `maxHP < 5000`
+  within 8y of Patchwerk (16028) → flee to ranged. Plate melee with
+  high HP fall outside the gate and stay in to soak. School=Physical,
+  no dispel possible — pure positional response.
+- **Maexxna Web Wrap (creature 16486)** — every ~40s a random raider
+  is webbed to the wall and incapacitated. Pro-engage trigger at 80y
+  + 90 priority routes ranged DPS to kill the wrap and free the
+  webbed bot. Without this the webbed bot dies before healers can
+  reach it.
+- **Nefarian Veil of Shadow (22687)** — Shadow-school 90% healing
+  reduction on the main tank during P3. `dispel=Magic` (DB-verified).
+  Group-scan so warrior MT gets stripped by any priest/paladin in the
+  raid. Wired in `NefarianFightStrategy::InitCombatTriggers`. Without
+  removal heals land for 10% normal value and the tank dies in ~3
+  ticks.
+
+### Operational notes
+
+- The 12,000-crash zombie loop showed `mangosd.exe` was still running
+  even though the user closed the console window. **Always verify with
+  `Get-Process mangosd`** before assuming the server is down — closing
+  the console only detaches stdin, the process keeps ticking.
+- `Aelindra` "ne se co jamais" was a SQL-side casualty of the same pet
+  INSERT deadlock: her `online=1` flag stayed set after a failed login.
+  Fix is live SQL `UPDATE tw_char.characters SET online=0 WHERE guid=?`
+  — random mgr re-spawns at next tick cycle. No code change.
+
 ## [Unreleased] — 2026-05-29
 
 ### Fixed — code review round 3 on the 7 frameworks (5 real bugs)

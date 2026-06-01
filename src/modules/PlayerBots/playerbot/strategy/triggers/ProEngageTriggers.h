@@ -268,6 +268,21 @@ namespace ai
                 { 17055 }, 60.0f, 15952 /* NPC_MAEXXNA */) {}
     };
 
+    // Maexxna Web Wrap (creature 16486) — every ~40s Maexxna webs a random
+    // raid member to the wall. The webbed player is incapacitated until the
+    // web breaks (~10s) OR the wrap NPC is killed. Ranged DPS targets the
+    // wrap to free the webbed bot quickly. Without this, healers cycle to
+    // try to heal a target they can't reach and the webbed bot dies.
+    // ScriptDev2 boss_maexxna.cpp NPC_WEB_WRAP = 16486. Gated on Maexxna
+    // alive — wraps only spawn during her fight.
+    class MaexxnaWebWrapNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        MaexxnaWebWrapNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "maexxna web wrap nearby",
+                { 16486 }, 80.0f, 15952 /* NPC_MAEXXNA */) {}
+    };
+
     // Noth's Plagued adds — gated on Noth (15954).
     class NothPlaguedAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
     {

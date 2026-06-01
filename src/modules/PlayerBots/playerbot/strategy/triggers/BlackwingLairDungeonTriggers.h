@@ -266,4 +266,18 @@ namespace ai
             return count >= 4;
         }
     };
+
+    // --- Nefarian Veil of Shadow (22687) — Shadow-school 90% healing
+    // reduction on the main tank. dispel=Magic so any priest/paladin can
+    // strip it. Cast frequently in P3 (40% HP). Without removal the tank
+    // dies because heals land for 10% of normal value. Group-scan because
+    // the warrior MT can't self-cleanse magic.
+    // DB-verified: spell_template entry=22687 school=5 dispel=2 mechanic=0.
+    // ScriptDev2 boss_nefarian.cpp SPELL_VEILOFSHADOW = 22687.
+    class NefarianVeilOfShadowTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        NefarianVeilOfShadowTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "nefarian veil of shadow", 22687, 1) {}
+    };
 }

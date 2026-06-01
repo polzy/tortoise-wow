@@ -158,7 +158,7 @@ to the WotLK-only `wind shear` chain.
 | Ebonroc (BWL)                          | ⚠️    | Fire prot pot only. Shadow of Ebonroc self-heal = burst through |
 | Flamegor (BWL)                         | ✅     | Fire prot pot + Frenzy (23342) Tranquilizing Shot |
 | Razorgore (BWL)                        | ✅     | P1 add-priority via 'razorgore phase 1' (Possess 19832) + pro-engage Dragonkin/Grethok at 60y; P2 tank-and-spank. **Skip patch**: kill at any phase = encounter DONE |
-| Nefarian (BWL)                         | ⚠️    | P2: Bellowing Roar fear-break (Will of Forsaken / Berserker Rage). Class Calls 23397-23436 need per-class fear/MC plumbing |
+| Nefarian (BWL)                         | ⚠️    | P2: Bellowing Roar fear-break (Will of Forsaken / Berserker Rage) + Veil of Shadow (22687) dispel magic on-party (90% heal reduction on tank, DB-verified dispel=Magic). Class Calls 23397-23436 still need per-class fear/MC plumbing |
 | Battleguard Sartura (AQ40)             | ✅     | Whirlwind — ranged move-and-stay >15y via Framework #2 (no chase oscillation). Pro-engage Royal Guards |
 | Princess Huhuran (AQ40)                | ✅     | Frenzy (26051) tranq + Noxious Poison (26053) cure on-party + Wyvern Sting (26180) magic dispel on-party for berserk phase |
 | Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
@@ -183,8 +183,8 @@ to the WotLK-only `wind shear` chain.
 | Hazzarah (ZG)                          | ⚠️    | Sleep (24664) magic dispel — group-scan (slept bot is incapacitated, can't self-cleanse) |
 | Venoxis (ZG)                           | ⚠️    | Pro-engage Razzashi Cobras (11373) |
 | Other ZG bosses                        | ❌     | Jeklik (Bat form / Charge / Screech fear-break covered by class strats) |
-| Patchwerk (Naxx)                       | ✅     | Tank-and-spank — no bot-side mitigation needed beyond class strats |
-| Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
+| Patchwerk (Naxx)                       | ✅     | Tank-and-spank + Hateful Strike (28308) flee for non-tank bots with maxHP<5000 within 8y (cloth/leather DPS retreat to ranged) |
+| Loatheb (Naxx)                         | ✅     | Corrupted Mind (29185/29194/29196/29198 per class) no-heal lockout detection on healers → healing potion + bandage defensive (dispel=0, must survive 12s window) |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel — group-scan + caster spread |
 | Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
 | Anub'Rekhan (Naxx)                     | ✅     | Pro-engage Crypt Guards (16573) + Locust Swarm (28785) — bots move 30y out and STAY (Framework #2, no chase oscillation) |
@@ -192,7 +192,8 @@ to the WotLK-only `wind shear` chain.
 | Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
 | Sapphiron (Naxx)                       | ✅     | Life Drain (28542) on-party dispel + frost resist gear + Frost Breath (28524) detection → move to nearest GO_ICEBLOCK (181247) within 50y |
 | Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse — group-scan (3 random victims) |
-| Maexxna (Naxx)                         | ⚠️    | Pro-engage Spiderlings (17055) at 60y + Necrotic Poison (28776) cure poison — group-scan (tank only) |
+| Maexxna (Naxx)                         | ✅     | Pro-engage Spiderlings (17055) at 60y + Web Wrap NPC (16486) at 80y → kill the wrap to free webbed bot + Necrotic Poison (28776) cure poison group-scan |
+| Grobbulus (Naxx)                       | ✅     | Mutating Injection (28169) — injected bot flees (10y radius explosion on expiry); priest/shaman/paladin dispels poison on-party AFTER the run-out so the explosion fires in safe distance |
 | Gothik (Naxx)                          | ⚠️    | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |
 | Heigan (Naxx)                          | ⚠️    | Plague Fissure (533001) reactive dodge — bots flee within 20y of any spawned fissure (Framework #6). Predictive zone-cycle TODO |
 | Thaddius (Naxx)                        | ⚠️    | Polarity Shift (28089) → Positive (28059) / Negative (28084) charges, same-polarity centroid grouping via Framework #5. Adds phase TODO |

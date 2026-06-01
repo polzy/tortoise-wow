@@ -196,6 +196,16 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage maexxna spiderling", { 17055 }, 60.0f) {}
     };
 
+    // Maexxna Web Wrap (creature 16486) — kill the wrap to free the
+    // webbed bot. Wider scan range (80y) than spiderlings because the
+    // wrap spawns at the wall (away from raid center).
+    class EngageMaexxnaWebWrapAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageMaexxnaWebWrapAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage maexxna web wrap", { 16486 }, 80.0f) {}
+    };
+
     class EngageNothPlaguedAddAction : public EngageNearbyAddAction
     {
     public:

@@ -418,6 +418,8 @@ namespace ai
             creators["rajaxx wave commander nearby"] = [](PlayerbotAI* ai) { return new RajaxxWaveCommanderNearbyTrigger(ai); };
             creators["mandokir ohgan nearby"] = [](PlayerbotAI* ai) { return new MandokirOhganNearbyTrigger(ai); };
             creators["maexxna spiderling nearby"] = [](PlayerbotAI* ai) { return new MaexxnaSpiderlingNearbyTrigger(ai); };
+            creators["maexxna web wrap nearby"] = [](PlayerbotAI* ai) { return new MaexxnaWebWrapNearbyTrigger(ai); };
+            creators["nefarian veil of shadow"] = [](PlayerbotAI* ai) { return new NefarianVeilOfShadowTrigger(ai); };
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };

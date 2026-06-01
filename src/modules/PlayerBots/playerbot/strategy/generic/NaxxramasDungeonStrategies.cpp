@@ -45,6 +45,16 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "maexxna spiderling nearby",
         NextAction::array(0, new NextAction("engage maexxna spiderling", 85.0f), NULL)));
 
+    // Maexxna Web Wrap (creature 16486) — every ~40s a random raider is
+    // pulled to the wall and incapacitated until the wrap NPC is killed
+    // (~10s without DPS otherwise). Ranged-priority engage so casters
+    // free the webbed bot fast. Priority 90 — slightly above standard
+    // dungeon pro-engage because the webbed bot can't heal/dispel until
+    // freed (cascading wipe risk).
+    triggers.push_back(new TriggerNode(
+        "maexxna web wrap nearby",
+        NextAction::array(0, new NextAction("engage maexxna web wrap", 90.0f), NULL)));
+
     // Noth Plagued adds (16981-16984) during teleport phase.
     triggers.push_back(new TriggerNode(
         "noth plagued adds nearby",

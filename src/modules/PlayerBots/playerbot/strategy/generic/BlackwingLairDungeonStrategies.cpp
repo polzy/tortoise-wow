@@ -125,6 +125,18 @@ void NefarianFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
             new NextAction("will of the forsaken", 100.0f),
             new NextAction("berserker rage fear", 100.0f),
             NULL)));
+
+    // Veil of Shadow (22687) — Shadow-school 90% healing reduction on the
+    // main tank. DB: dispel=Magic (2), school=Shadow (5), recurring debuff
+    // cast frequently in P3. Group-scan so warrior MT (no self-cleanse)
+    // gets stripped by priest/paladin before the next heal lands at 10%.
+    // Priority 95 (fight-defining — tank dies without removal).
+    triggers.push_back(new TriggerNode(
+        "nefarian veil of shadow",
+        NextAction::array(0,
+            new NextAction("dispel magic on party", 95.0f),
+            new NextAction("cleanse magic on party", 95.0f),
+            NULL)));
 }
 
 void NefarianFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
