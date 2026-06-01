@@ -43,65 +43,106 @@ uint32 TalentSpec::PointstoLevel(int points) const
 }
 
 //Check the talentspec for errors.
+// Turtle-WoW tolerance: upstream premade spec strings were written for
+// stock vanilla. Turtle modified talent trees (reduced max ranks, replaced
+// talents, custom talents). Rather than reject every spec, we clamp
+// problematic talents to a valid value:
+//   * rank > maxRank        → rank = maxRank
+//   * DependsOn unmet       → rank = 0
+//   * row points unmet      → rank = 0
+// Iterate until stable (clamping one talent may cascade to dependents).
+// Total-point overflow remains a hard reject (level mismatch is structural).
 bool TalentSpec::CheckTalents(uint32 freeTalentPoints, std::ostringstream* out)
 {
+    // Pass 1: clamp over-max ranks.
     for (auto& entry : talents)
     {
         if (entry.rank > entry.maxRank)
         {
             SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(entry.talentInfo->RankID[0]);
-            *out << "spec is not for this class. " << spellInfo->SpellName[0] << " has " << (entry.rank - entry.maxRank) << " points above max rank.";
-            return false;
+            const char* spellName = spellInfo ? spellInfo->SpellName[0].c_str() : "<unknown>";
+            sLog.outDetail("TalentSpec clamp: %s rank %u -> %u (max)", spellName, entry.rank, entry.maxRank);
+            entry.rank = entry.maxRank;
         }
+    }
 
-        if (entry.rank > 0 && entry.talentInfo->DependsOn)
+    // Pass 2: iteratively resolve dep + row violations. Cap iterations to
+    // avoid infinite loops on pathological data.
+    bool changed = true;
+    for (int iter = 0; changed && iter < 10; ++iter)
+    {
+        changed = false;
+
+        // 2a) DependsOn dependency check
+        for (auto& entry : talents)
         {
-            TalentEntry const* talentInfo = sTalentStore.LookupEntry(entry.talentInfo->DependsOn);
-            if (!talentInfo)
-                continue;
+            if (entry.rank > 0 && entry.talentInfo->DependsOn)
+            {
+                TalentEntry const* parent = sTalentStore.LookupEntry(entry.talentInfo->DependsOn);
+                if (!parent) continue;
 
-            bool found = false;
-            SpellEntry const* spellInfodep;
-
-            for (auto& dep : talents)
-                if (dep.talentInfo->TalentID == entry.talentInfo->DependsOn)
+                bool ok = false;
+                for (auto& dep : talents)
                 {
-                    spellInfodep = sServerFacade.LookupSpellInfo(dep.talentInfo->RankID[0]);
-                    if (dep.rank >= (int)entry.talentInfo->DependsOnRank)
-                        found = true;
+                    if (dep.talentInfo->TalentID == entry.talentInfo->DependsOn
+                        && dep.rank >= (int)entry.talentInfo->DependsOnRank)
+                    {
+                        ok = true;
+                        break;
+                    }
                 }
-            if (!found)
-            {
-                SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(entry.talentInfo->RankID[0]);
-                *out << "spec is is invalid. Talent:" << spellInfo->SpellName[0] << " needs: " << spellInfodep->SpellName[0] << " at rank: " << entry.talentInfo->DependsOnRank;
-                return false;
+                if (!ok)
+                {
+                    SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(entry.talentInfo->RankID[0]);
+                    const char* spellName = spellInfo ? spellInfo->SpellName[0].c_str() : "<unknown>";
+                    sLog.outDetail("TalentSpec clamp dep: %s dep unmet, rank %u -> 0", spellName, entry.rank);
+                    entry.rank = 0;
+                    changed = true;
+                }
             }
         }
-    }
 
-    for (int i = 0; i < 3; i++)
-    {
-        std::vector<TalentListEntry> talentTree = GetTalentTree(i);
-        int points = 0;
-
-        for (auto& entry : talentTree)
+        // 2b) Row-prerequisite check per tree
+        for (int tree = 0; tree < 3; ++tree)
         {
-            if (entry.rank > 0 && (int)(entry.talentInfo->Row * 5) > points)
+            std::vector<TalentListEntry> talentTree = GetTalentTree(tree);
+            int pointsInTree = 0;
+            for (auto& entry : talentTree)
             {
-                SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(entry.talentInfo->RankID[0]);
-                *out << "spec is is invalid. Talent " << spellInfo->SpellName[0] << " is selected with only " << points << " in row below it.";
-                return false;
+                if (entry.rank > 0 && (int)(entry.talentInfo->Row * 5) > pointsInTree)
+                {
+                    SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(entry.talentInfo->RankID[0]);
+                    const char* spellName = spellInfo ? spellInfo->SpellName[0].c_str() : "<unknown>";
+                    sLog.outDetail("TalentSpec clamp row: %s in row %u with %d pts below, rank %u -> 0",
+                        spellName, entry.talentInfo->Row, pointsInTree, entry.rank);
+                    // Modify the master talents list, not the tree copy.
+                    for (auto& real : talents)
+                    {
+                        if (real.talentInfo->TalentID == entry.talentInfo->TalentID)
+                        {
+                            real.rank = 0;
+                            changed = true;
+                            break;
+                        }
+                    }
+                    continue;
+                }
+                pointsInTree += entry.rank;
             }
-            points += entry.rank;
         }
     }
 
-    if (points > freeTalentPoints)
+    // Total point budget — sum surviving ranks across all 3 trees.
+    int totalPoints = 0;
+    for (int tree = 0; tree < 3; ++tree)
     {
-        *out << "spec is for a higher level. (" << PointstoLevel(points) << ")";
+        for (auto& entry : GetTalentTree(tree)) totalPoints += entry.rank;
+    }
+    if ((uint32)totalPoints > freeTalentPoints)
+    {
+        *out << "spec is for a higher level. (" << PointstoLevel(totalPoints) << ")";
         return false;
     }
-
     return true;
 }
 

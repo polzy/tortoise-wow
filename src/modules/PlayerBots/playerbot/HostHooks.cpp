@@ -129,9 +129,26 @@ void Player::UpdatePlayerbotHooks(uint32 diff)
         {
             extern uint32 PlayerbotAI_GetCrashPhase();
             extern const char* Engine_GetLastActionName();
+            // extern "C" linkage block must be at file scope; we use a
+            // forward declaration with implicit C++ linkage here. The
+            // implementation in Engine.cpp is marked `extern "C"` but the
+            // declaration site can match name-only (different scopes, same
+            // mangled symbol since extern "C" disables mangling).
+            extern const char* PlayerbotAI_GetLastTriggerName();
             static uint32 botCrashLogCount = 0;
             if (++botCrashLogCount <= 10)
-                sLog.outError("[PLAYERBOTS] Bot %s AI crash phase=%u action='%s'", GetName(), PlayerbotAI_GetCrashPhase(), Engine_GetLastActionName());
+            {
+                uint32 phase = PlayerbotAI_GetCrashPhase();
+                // Phase 9331 = ProcessTriggers loop. The last-set trigger
+                // name is the culprit. For other phases, last action is more
+                // useful (set behind, move, etc.).
+                if (phase == 9331)
+                    sLog.outError("[PLAYERBOTS] Bot %s AI crash phase=%u trigger='%s' lastAction='%s'",
+                        GetName(), phase, PlayerbotAI_GetLastTriggerName(), Engine_GetLastActionName());
+                else
+                    sLog.outError("[PLAYERBOTS] Bot %s AI crash phase=%u action='%s'",
+                        GetName(), phase, Engine_GetLastActionName());
+            }
         }
     }
     if (m_playerbotMgr)

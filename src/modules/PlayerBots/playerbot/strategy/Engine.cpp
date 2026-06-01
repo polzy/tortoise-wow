@@ -694,6 +694,15 @@ Strategy* Engine::GetStrategy(const std::string& name) const
     return nullptr;
 }
 
+// Track which trigger we last attempted, so if SafeCall_BotAI's outer SEH
+// catches a crash with phase=9331 we can also dump the trigger name from the
+// log even though we can't SEH-wrap individual Check() calls here (Event has
+// a destructor → MSVC rejects __try inside this function).
+static const char* s_lastTriggerName = "<none>";
+// Plain C++ linkage; HostHooks.cpp forward-declares the same signature
+// (both are C++ TUs so mangling matches).
+const char* PlayerbotAI_GetLastTriggerName() { return s_lastTriggerName; }
+
 void Engine::ProcessTriggers(bool minimal)
 {
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
@@ -716,10 +725,14 @@ void Engine::ProcessTriggers(bool minimal)
             if (minimal && node->getFirstRelevance() < 100)
                 continue;
             auto pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), ai);
+            // Update the last-trigger marker BEFORE calling Check(). If
+            // Check() throws an AV, the outer SafeCall_BotAI catches it and
+            // the host hook logger reads s_lastTriggerName via the extern.
+            s_lastTriggerName = trigger->getName().c_str();
             Event event = trigger->Check();
 
 #ifdef PLAYERBOT_ELUNA
-            // used by eluna    
+            // used by eluna
             if (Eluna* e = ai->GetBot()->GetEluna())
                 e->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
 #endif
