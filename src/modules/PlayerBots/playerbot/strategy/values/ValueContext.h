@@ -123,6 +123,7 @@ namespace ai
             // Framework #3 phase awareness — qualified values, see BossPhaseValues.h.
             creators["boss hp pct"] = [](PlayerbotAI* ai) { return new BossHpPctValue(ai); };
             creators["boss has aura"] = [](PlayerbotAI* ai) { return new BossHasAuraValue(ai); };
+            creators["boss is casting"] = [](PlayerbotAI* ai) { return new BossIsCastingValue(ai); };
             creators["nearest dynamic objects"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai); };
             creators["nearest dynamic objects no los"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
             creators["closest game objects static los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, INTERACTION_DISTANCE, LOS_STATIC); };

@@ -176,6 +176,56 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage buru egg", { 15514 }, 60.0f) {}
     };
 
+    // Skeram split-phase retarget — clones and real boss share entry
+    // 15263. When 2+ are alive AND one is at low HP, the bot's current
+    // target may be a clone the raid already burned through. This action
+    // re-targets the CLOSEST live 15263 — if the real boss is closer the
+    // raid converges on him; if a clone is closer they finish it fast and
+    // then the trigger fires again next tick on the next closest.
+    // Trigger gate: SkeramSplitPhaseTrigger fires only during split.
+    class EngageNearestSkeramAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageNearestSkeramAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage nearest skeram", { 15263 }, 100.0f) {}
+    };
+
+    // Framework #8 — Twin Emperors pair-swap.
+    //
+    // Vek'lor (15276) and Vek'nilash (15275) teleport-swap positions every
+    // ~30s. Each tank needs to retarget the OTHER twin after the swap.
+    // EngageOtherTwinAction inspects the bot's current target; if it's
+    // one of the twins, retarget to the OTHER one. If bot has no twin
+    // target yet (just arrived at the fight), retarget to the closest
+    // live twin. Idempotent — re-fires harmlessly if bot already on
+    // the right twin (closest-pick converges back).
+    class EngageOtherTwinAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageOtherTwinAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage other twin emperor", { 15275, 15276 }, 100.0f) {}
+
+        bool Execute(Event& event) override
+        {
+            Unit* current = AI_VALUE(Unit*, "current target");
+            uint32 myTwin = (current && current->IsAlive()) ? current->GetEntry() : 0;
+
+            // Pick the entry that is NOT my current twin. If I have no
+            // twin target, the closest-pick in base class handles it.
+            std::vector<uint32> wanted;
+            if (myTwin == 15275) wanted.push_back(15276);
+            else if (myTwin == 15276) wanted.push_back(15275);
+            else { wanted.push_back(15275); wanted.push_back(15276); }
+
+            // Temporarily swap entries, run base scan, then restore.
+            std::vector<uint32> saved = m_entries;
+            m_entries = wanted;
+            bool ok = EngageNearbyAddAction::Execute(event);
+            m_entries = saved;
+            return ok;
+        }
+    };
+
     class EngageAyamissAddAction : public EngageNearbyAddAction
     {
     public:

@@ -4,6 +4,15 @@
 #include "playerbot/ServerFacade.h"
 #include "Spells/SpellAuraDefines.h"
 #include "DungeonTriggers.h"
+// Framework #10 GameObject scan needs:
+//   - GameObjectsInObjectRangeCheck (defined in NearestGameObjects.h)
+//   - Maps grid notifier templates
+// The warlock/DK TUs that drag in GenericTriggers.h via the strategy
+// chain don't get these transitively, so include here explicitly.
+#include "playerbot/strategy/values/NearestGameObjects.h"
+#include "Maps/GridNotifiers.h"
+#include "Maps/GridNotifiersImpl.h"
+#include "Maps/CellImpl.h"
 
 namespace ai
 {
@@ -763,6 +772,33 @@ namespace ai
     protected:
         uint32 m_spellId;
         uint32 m_minStacks;
+    };
+
+    // Framework #10 primitive: hazard-GO proximity trigger. Fires when a
+    // GameObject of `goEntry` is within `range` yards of the bot. Pair
+    // with MoveAwayFromGameObject in the action chain so the bot kites
+    // the hazard. Use for Ossirian / Kurinnaxx sand traps, Ouro burrow
+    // mounds, dummy ground-targeted-spell GOs.
+    class NearbyHazardGameObjectTrigger : public Trigger
+    {
+    public:
+        NearbyHazardGameObjectTrigger(PlayerbotAI* ai, std::string name, uint32 goEntry, float range)
+            : Trigger(ai, name, 1), m_goEntry(goEntry), m_range(range) {}
+
+        bool IsActive() override
+        {
+            std::list<GameObject*> gos;
+            GameObjectsInObjectRangeCheck check(bot, m_range, m_goEntry);
+            MaNGOS::GameObjectListSearcher<GameObjectsInObjectRangeCheck> searcher(gos, check);
+            Cell::VisitAllObjects(bot, searcher, m_range);
+            for (GameObject* go : gos)
+                if (go) return true;
+            return false;
+        }
+
+    protected:
+        uint32 m_goEntry;
+        float m_range;
     };
 
     class TimerTrigger : public Trigger

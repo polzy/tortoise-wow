@@ -460,6 +460,10 @@ namespace ai
             creators["engage maexxna spiderling"] = [](PlayerbotAI* ai) { return new EngageMaexxnaSpiderlingAction(ai); };
             creators["engage maexxna web wrap"] = [](PlayerbotAI* ai) { return new EngageMaexxnaWebWrapAction(ai); };
             creators["engage buru egg"] = [](PlayerbotAI* ai) { return new EngageBuruEggAction(ai); };
+            creators["engage nearest skeram"] = [](PlayerbotAI* ai) { return new EngageNearestSkeramAction(ai); };
+            creators["move away from kurinnaxx sand trap"] = [](PlayerbotAI* ai) { return new MoveAwayFromKurinnaxxSandTrapAction(ai); };
+            creators["move away from ossirian sand vortex"] = [](PlayerbotAI* ai) { return new MoveAwayFromOssirianSandVortexAction(ai); };
+            creators["engage other twin emperor"] = [](PlayerbotAI* ai) { return new EngageOtherTwinAction(ai); };
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
             creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };
             creators["engage jindo totem"] = [](PlayerbotAI* ai) { return new EngageJindoTotemAction(ai); };

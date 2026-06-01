@@ -421,6 +421,13 @@ namespace ai
             creators["maexxna web wrap nearby"] = [](PlayerbotAI* ai) { return new MaexxnaWebWrapNearbyTrigger(ai); };
             creators["buru egg nearby"] = [](PlayerbotAI* ai) { return new BuruEggNearbyTrigger(ai); };
             creators["nefarian veil of shadow"] = [](PlayerbotAI* ai) { return new NefarianVeilOfShadowTrigger(ai); };
+            creators["faerlina enraged"] = [](PlayerbotAI* ai) { return new FaerlinaEnragedTrigger(ai); };
+            creators["skeram split phase"] = [](PlayerbotAI* ai) { return new SkeramSplitPhaseTrigger(ai); };
+            creators["heigan eruption cast"] = [](PlayerbotAI* ai) { return new HeiganEruptionCastTrigger(ai); };
+            creators["loatheb corrupted mind cast"] = [](PlayerbotAI* ai) { return new LoathebCorruptedMindCastTrigger(ai); };
+            creators["kurinnaxx sand trap nearby"] = [](PlayerbotAI* ai) { return new KurinnaxxSandTrapNearbyTrigger(ai); };
+            creators["ossirian sand vortex nearby"] = [](PlayerbotAI* ai) { return new OssirianSandVortexNearbyTrigger(ai); };
+            creators["twin emperors teleport cast"] = [](PlayerbotAI* ai) { return new TwinEmperorsTeleportCastTrigger(ai); };
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };

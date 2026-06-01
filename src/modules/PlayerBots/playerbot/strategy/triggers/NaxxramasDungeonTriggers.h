@@ -193,6 +193,34 @@ namespace ai
         bool IsActive() override { return ai->HasAura(28796, bot); }
     };
 
+    // --- Faerlina Enrage (28798) — self-buff on the boss giving +150% atk
+    // speed + dmg. Cast on a timer. The only way to remove is to kill a
+    // Worshipper (16505) within 8y of Faerlina, which triggers Widow's
+    // Embrace (28732) on the boss and clears Enrage for 60s. We pro-engage
+    // worshippers always (priority 80) but during Enrage they become
+    // emergency-priority — fight-defining. The trigger gates on Faerlina
+    // herself carrying the aura (boss-scan via AllCreaturesOfEntryInRange).
+    // ScriptDev2 boss_faerlina.cpp SPELL_RAIN_OF_FIRE_NO_LONGER_ENRAGED
+    // = 28798; SPELL_WIDOWS_EMBRACE = 28732.
+    class FaerlinaEnragedTrigger : public Trigger
+    {
+    public:
+        FaerlinaEnragedTrigger(PlayerbotAI* ai) : Trigger(ai, "faerlina enraged", 2) {}
+        bool IsActive() override
+        {
+            std::list<Unit*> bosses;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15953 /* NPC_FAERLINA */, 60.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(bosses, check);
+            Cell::VisitAllObjects(bot, searcher, 60.0f);
+            for (Unit* boss : bosses)
+            {
+                if (boss && boss->IsAlive() && boss->HasAura(28798))
+                    return true;
+            }
+            return false;
+        }
+    };
+
     // --- Noth Curse of Plaguebringer (29213) — curse on 3 random raid
     // members per cast. Group-scan: the 3 might not include a druid/mage. ---
     class NothCursePlaguebringerTrigger : public PartyHasAuraBySpellIdTrigger
@@ -246,6 +274,42 @@ namespace ai
             // has the class-specific infected aura.
             return ai->HasAura(29185, bot) || ai->HasAura(29194, bot)
                 || ai->HasAura(29196, bot) || ai->HasAura(29198, bot);
+        }
+    };
+
+    // --- Heigan Eruption cast (29371) — PREDICTIVE dance start ---
+    // Framework #11 demo. The reactive HeiganFissureNearby trigger fires
+    // only when a fissure has ALREADY spawned + lives long enough for the
+    // bot to react (50ms despawn vs 100-300ms tick → ~50% miss rate). The
+    // predictive trigger watches Heigan (15936) for an Eruption cast in
+    // progress; the cast time is 2.0-3.0s so we get a real heads up
+    // BEFORE the fissures land. Bots can then preemptively reposition to
+    // the safe zone instead of dodging after damage starts.
+    // ScriptDev2 boss_heigan.cpp SPELL_ERUPTION = 29371.
+    class HeiganEruptionCastTrigger : public Trigger
+    {
+    public:
+        HeiganEruptionCastTrigger(PlayerbotAI* ai) : Trigger(ai, "heigan eruption cast", 1) {}
+        bool IsActive() override
+        {
+            return AI_VALUE2(bool, "boss is casting", "15936:29371");
+        }
+    };
+
+    // --- Loatheb Corrupted Mind cast (29201) — PREDICTIVE healer prep ---
+    // Framework #11 demo. The reactive trigger only fires after Corrupted
+    // Mind has landed and silenced the healer for 12s. By detecting the
+    // boss CAST (Corrupted Mind has a ~1.5-2.5s cast time per SD2), the
+    // healer gets a window to pre-stack heals before the silence kicks in.
+    // Pair with the reactive `loatheb corrupted mind healer` trigger that
+    // routes to defensives DURING the silence.
+    class LoathebCorruptedMindCastTrigger : public Trigger
+    {
+    public:
+        LoathebCorruptedMindCastTrigger(PlayerbotAI* ai) : Trigger(ai, "loatheb corrupted mind cast", 1) {}
+        bool IsActive() override
+        {
+            return AI_VALUE2(bool, "boss is casting", "16011:29201");
         }
     };
 

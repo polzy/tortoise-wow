@@ -276,6 +276,61 @@ bool MoveAwayFromCreature::isPossible()
     return false;
 }
 
+// Framework #10: GO-region kiting. Scan for the configured GO entry
+// within `range`, pick the closest, send the bot to a safe point on
+// the opposite side. Mirrors MoveAwayFromCreature but for GameObjects
+// (which IsHazardNearby's HazardPosition stream doesn't cover —
+// HazardPosition is for spell-effect AOEs, not generic GOs).
+bool MoveAwayFromGameObject::Execute(Event& event)
+{
+    std::list<GameObject*> hazards;
+    GameObjectsInObjectRangeCheck check(bot, range, goEntry);
+    MaNGOS::GameObjectListSearcher<GameObjectsInObjectRangeCheck> searcher(hazards, check);
+    Cell::VisitAllObjects(bot, searcher, range);
+
+    GameObject* closest = nullptr;
+    float closestDistSq = range * range + 1.0f;
+    for (GameObject* go : hazards)
+    {
+        if (!go) continue;
+        float d = bot->GetDistance(go);
+        float dsq = d * d;
+        if (dsq < closestDistSq)
+        {
+            closestDistSq = dsq;
+            closest = go;
+        }
+    }
+    if (!closest) return false;
+
+    // Move to a point on the opposite side of the closest GO. Offset
+    // = range + 3y safety margin. Vector from GO to bot, extended.
+    float botX = bot->GetPositionX();
+    float botY = bot->GetPositionY();
+    float dx = botX - closest->GetPositionX();
+    float dy = botY - closest->GetPositionY();
+    float dist = sqrtf(dx * dx + dy * dy);
+    if (dist < 0.01f)
+    {
+        // Bot is on top of the GO — pick an arbitrary direction so we
+        // don't divide by zero. Random offset 90° from boss-facing.
+        dx = cosf(bot->GetOrientation()); dy = sinf(bot->GetOrientation());
+        dist = 1.0f;
+    }
+    float scale = (range + 3.0f) / dist;
+    float targetX = closest->GetPositionX() + dx * scale;
+    float targetY = closest->GetPositionY() + dy * scale;
+    float targetZ = closest->GetPositionZ();
+    bot->UpdateGroundPositionZ(targetX, targetY, targetZ);
+
+    return MoveTo(closest->GetMapId(), targetX, targetY, targetZ);
+}
+
+bool MoveAwayFromGameObject::isPossible()
+{
+    return MovementAction::isPossible() && ai->CanMove();
+}
+
 bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const std::list<Creature*>& creatures, const std::list<HazardPosition>& hazards)
 {
     // Check if the point is not near other game objects

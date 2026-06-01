@@ -134,4 +134,85 @@ namespace ai
         uint32 creatureID;
         float range;
     };
+
+    // ====================================================================
+    // Framework #9 scaffold: MC charm orchestration (Razuvious).
+    // ====================================================================
+    //
+    // STATUS: scaffold only — wiring deferred until charm-pet command
+    // primitives land. Documented here so a future session has the
+    // architecture map without re-discovering it.
+    //
+    // The Razuvious fight (Naxx, NPC 16061) requires 2-4 charmed Death
+    // Knight Understudies (NPC 16803) to tank the boss. Players cannot
+    // tank Razuvious directly — his Disrupting Shout one-shots casters
+    // and Unbalancing Strike crits melee for ~9k. The boss MUST be
+    // tanked by an Understudy that the raid Mind Controls via Tribute
+    // Orbs (4 GOs in the room, charges-based).
+    //
+    // BOT-SIDE PIPELINE (target architecture):
+    //
+    //   1. Detect orb GO nearby → trigger `razuvious orb available`
+    //      (consumes Framework #10 NearbyHazardGameObjectTrigger but
+    //      inverted: "orb to use" not "hazard to avoid").
+    //      Orb GO entry: TBD — Turtle DB lookup did not surface a
+    //      Razuvious-specific orb; standard SD2 references unclear.
+    //      Probable entry: 181605 ("Tribute Chest") or a Naxx-specific
+    //      entry that needs DB inspection on a populated server.
+    //
+    //   2. Priest uses orb via Framework #1 UseNearbyGameObjectAction.
+    //      Orb grants a channeled MC spell (mind-control charge).
+    //
+    //   3. Priest casts MC on nearest Understudy (16803).
+    //      → NEEDS: a charm-cast action that targets a creature by
+    //        entry. Existing actions either target current target or
+    //        a party member; charm-targeting NPCs by entry is new.
+    //
+    //   4. Charmed Understudy auto-tanks Razuvious.
+    //      → NEEDS: pet-command primitive that sends CMSG_PET_ACTION
+    //        to attack a specific GUID. Hunter pet AI already does
+    //        this for its summoned pet; the Razuvious case reuses the
+    //        same opcode but the "pet" is a charmed NPC.
+    //
+    // ALL OTHER MC MECHANICS BENEFIT: same pipeline serves Hex Lord
+    // (TBC raid), any future "charm-and-command" boss. Building it once
+    // here unlocks the pattern.
+    //
+    // For 2026-06-01 the bot-controlled Razuvious remains ❌ in README.
+    // The standard workaround is: a HUMAN priest operates the orbs;
+    // bots provide DPS / healing. The trigger names below are reserved
+    // for the future implementation:
+    //
+    //   - trigger "razuvious orb available"   (orb GO nearby, alive priest)
+    //   - action  "use razuvious orb"         (UseNearbyGameObject subclass)
+    //   - action  "charm razuvious understudy" (MC cast on 16803)
+    //   - action  "command pet attack razuvious" (CMSG_PET_ACTION)
+    //
+    // ====================================================================
+
+    // Framework #10 primitive: GO-region kiting.
+    //
+    // MoveAwayFromGameObject: GameObject equivalent of MoveAwayFromCreature.
+    // When any GO of `goEntry` is within `range` yards of the bot, flee
+    // perpendicular to the nearest GO until safe. Use for hazard
+    // GameObjects: Ossirian tornadoes, Kurinnaxx sand traps, Ouro burrow
+    // mounds, dummy ground-target spells that drop a GO (e.g. Geddon
+    // Living Bomb projectile).
+    //
+    // The Cell visitor scans GOs by entry within range. Picks the closest,
+    // then sends the bot to a point `range + 5y` away on the opposite side
+    // (simple back-away — fancier kiting can subclass and override the
+    // direction logic).
+    class MoveAwayFromGameObject : public MovementAction
+    {
+    public:
+        MoveAwayFromGameObject(PlayerbotAI* ai, std::string name, uint32 goEntry, float range)
+            : MovementAction(ai, name), goEntry(goEntry), range(range) {}
+        bool Execute(Event& event) override;
+        bool isPossible() override;
+
+    private:
+        uint32 goEntry;
+        float range;
+    };
 }

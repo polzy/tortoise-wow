@@ -92,6 +92,15 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
             new NextAction("cleanse poison on party", 85.0f),
             NULL)));
 
+    // Faerlina Enrage (28798) — fight-defining; the only counter is killing
+    // a Worshipper next to her to trigger Widow's Embrace (28732). Boost
+    // the existing "engage faerlina worshipper" to priority 100 (overrides
+    // the standard 80 pro-engage). Trigger fires only while Faerlina
+    // carries the enrage aura.
+    triggers.push_back(new TriggerNode(
+        "faerlina enraged",
+        NextAction::array(0, new NextAction("engage faerlina worshipper", 100.0f), NULL)));
+
     // Anub'Rekhan Locust Swarm (28785) — 20s self-buff that AOE-ticks ~20y
     // around Anub. Cast every 80-120s. All bots move 30y+ out at priority 100
     // (fight-defining — bots in the AOE die in seconds).
@@ -106,6 +115,30 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "heigan fissure nearby",
         NextAction::array(0, new NextAction("move away from heigan fissure", 100.0f), NULL)));
+
+    // Heigan Eruption PREDICTIVE — Framework #11. Boss-cast detection
+    // fires while Heigan (15936) is mid-cast of Eruption (29371, ~2-3s
+    // cast). Pre-emptive flee to clear the spawn zone before fissures
+    // land, fixing the 50ms despawn race the reactive trigger lost. Same
+    // action chain (move-away-from-fissure works on any existing fissure
+    // creature too; in practice the bot just flees-away).
+    triggers.push_back(new TriggerNode(
+        "heigan eruption cast",
+        NextAction::array(0, new NextAction("flee", 99.0f), NULL)));
+
+    // Loatheb Corrupted Mind PREDICTIVE — Framework #11. Boss-cast
+    // detection fires while Loatheb (16011) is mid-cast of Corrupted Mind
+    // (29201, ~1.5-2.5s cast). Pre-stack defensives BEFORE the silence
+    // lands: healer queues a healing potion + bandage NOW so they're
+    // either ticking or available 1s into the no-heal window. Pair with
+    // the reactive `loatheb corrupted mind healer` trigger that runs
+    // DURING the silence.
+    triggers.push_back(new TriggerNode(
+        "loatheb corrupted mind cast",
+        NextAction::array(0,
+            new NextAction("healing potion", 95.0f),
+            new NextAction("use bandage", 90.0f),
+            NULL)));
 
     // Thaddius polarity (28059 Positive / 28084 Negative) — Polarity Shift
     // (28089) every ~30s re-rolls everyone. Same-polarity bots stack;

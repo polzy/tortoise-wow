@@ -41,6 +41,18 @@ void RuinsOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>&
         "ossirian curse of tongues",
         NextAction::array(0, new NextAction("remove curse on party", 80.0f), NULL)));
 
+    // Framework #10 wires — Kurinnaxx Sand Trap + Ossirian Sand Vortex.
+    // Sand Trap is a GO (180647) that roots + ticks dmg if standing in
+    // it. Ossirian's Sand Vortex is a creature (15428) that chases the
+    // raid and removes Ossirian's elemental weakness if it touches him —
+    // bots must stay out of its path.
+    triggers.push_back(new TriggerNode(
+        "kurinnaxx sand trap nearby",
+        NextAction::array(0, new NextAction("move away from kurinnaxx sand trap", 95.0f), NULL)));
+    triggers.push_back(new TriggerNode(
+        "ossirian sand vortex nearby",
+        NextAction::array(0, new NextAction("move away from ossirian sand vortex", 95.0f), NULL)));
+
     // Kurinnaxx Mortal Wound (25646) — tank-swap on 4+ stacks (Framework #4).
     // Each stack -10% healing. OT taunts so old MT's stacks decay.
     triggers.push_back(new TriggerNode(

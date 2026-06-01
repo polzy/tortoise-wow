@@ -40,4 +40,28 @@ namespace ai
         BossHasAuraValue(PlayerbotAI* ai) : CalculatedValue<bool>(ai, "boss has aura", 1), Qualified() {}
         bool Calculate() override;
     };
+
+    // Framework #11 primitive: predictive boss-cast detection.
+    //
+    // BossIsCastingValue returns true if a boss with the given entry within
+    // 100y is currently casting (GENERIC, CHANNELED, or AUTOREPEAT slot)
+    // the specified spell id. Use for PREDICTIVE responses — Heigan's
+    // Eruption cast tells us the dance is about to fire BEFORE the fissure
+    // creature spawns; Loatheb's Corrupted Mind cast tells us the no-heal
+    // window is about to start so healers can pre-stack HoTs / drop big
+    // heals while the cast is in flight.
+    //
+    // Cast lookahead = spell GetCastedTime() − tick latency. For a 2.5s
+    // Eruption cast detected at +0ms, bots get a ~2s heads up vs the 50ms
+    // fissure-creature window of the reactive trigger.
+    //
+    // Qualifier format: "<bossEntry>:<spellId>" — identical to BossHasAura.
+    // Cached at 1s checkInterval (sub-second cast resolution would over-
+    // tick this hot path; per-tick re-fire of the action chain is fine).
+    class BossIsCastingValue : public CalculatedValue<bool>, public Qualified
+    {
+    public:
+        BossIsCastingValue(PlayerbotAI* ai) : CalculatedValue<bool>(ai, "boss is casting", 1), Qualified() {}
+        bool Calculate() override;
+    };
 }

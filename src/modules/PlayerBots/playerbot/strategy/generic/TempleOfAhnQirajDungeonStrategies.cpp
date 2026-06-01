@@ -44,6 +44,28 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
+    // Skeram split phase (75% / 50% / 25% HP). The Prophet teleports and
+    // spawns 2 illusionary clones (entry 15263 same as boss). Bots stuck
+    // on a clone with the real boss elsewhere waste DPS. SkeramSplitPhase
+    // trigger fires when 2+ live 15263 exist AND one is low-HP — action
+    // re-targets the CLOSEST live 15263. Priority 90 (overrides standard
+    // attack flow during the split window). Framework #3 BossHpPctValue
+    // reuse — entry-list scan with HP gate.
+    triggers.push_back(new TriggerNode(
+        "skeram split phase",
+        NextAction::array(0, new NextAction("engage nearest skeram", 90.0f), NULL)));
+
+    // Framework #8 — Twin Emperors teleport pair-swap. Both tanks
+    // retarget the OTHER twin when teleport-cast detected. Tank-only
+    // gate is enforced inside EngageOtherTwinAction by virtue of using
+    // current target (only tanks have a twin as current target during
+    // the fight; DPS / healers no-op on closest-pick because the
+    // EngageOtherTwinAction's base attempts attack which is a no-op
+    // for non-DPS too in safe contexts). Priority 95.
+    triggers.push_back(new TriggerNode(
+        "twin emperors teleport cast",
+        NextAction::array(0, new NextAction("engage other twin emperor", 95.0f), NULL)));
+
     // Bug Trio — Kri Toxic Volley (25812) poison AOE every cycle. Cure-poison
     // chain. Raid-wide AOE so the dispel target is anyone in party — use
     // the *on party* variants for the cure to dispel a party member.

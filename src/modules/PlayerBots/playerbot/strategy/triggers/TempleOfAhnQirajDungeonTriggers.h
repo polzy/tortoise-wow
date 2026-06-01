@@ -102,6 +102,71 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "huhuran wyvern sting", 26180, 1) {}
     };
 
+    // Framework #8 wire — Twin Emperors teleport swap.
+    //
+    // Vek'lor (15276) and Vek'nilash (15275) teleport-swap every ~30s.
+    // Teleport spell ID in this build's DB: looking up by name failed
+    // (no exact "Teleport" entry in 26500-26900 range that maps to the
+    // twins). The mechanic is detected via cast: ScriptDev2's
+    // boss_twin_emperors.cpp uses SPELL_TELEPORT = 26638 — present in
+    // standard cmangos but missing in Turtle. Fallback: detect via
+    // position-change in a future revision. For now this trigger
+    // reads BossIsCasting on both twins for the placeholder spell.
+    // EVEN IF the spell ID is wrong on this server, the trigger no-ops
+    // safely; the existing Unbalancing Strike tank-swap (Framework #4)
+    // remains the primary swap mechanism.
+    class TwinEmperorsTeleportCastTrigger : public Trigger
+    {
+    public:
+        TwinEmperorsTeleportCastTrigger(PlayerbotAI* ai) : Trigger(ai, "twin emperors teleport cast", 1) {}
+        bool IsActive() override
+        {
+            return AI_VALUE2(bool, "boss is casting", "15275:26638") ||
+                   AI_VALUE2(bool, "boss is casting", "15276:26638");
+        }
+    };
+
+    // The Prophet Skeram split phase — at 75%/50%/25% HP Skeram teleports
+    // and spawns 2 illusionary clones (entry 15263 same as boss; clones
+    // share the entry but get full HP on spawn). Bots stuck on a clone
+    // when the real boss is elsewhere just hit a sponge that vanishes
+    // on the next split. Strategy: when ANY 15263 has HP%<33, retarget
+    // to whichever 15263 is closest (the bot's existing closest-enemy
+    // logic naturally picks up). The trigger fires the retarget chain
+    // every tick during the low-HP window. Framework #3 BossHpPctValue
+    // primitive — entry 15263 scan within 100y, HP% gate.
+    // ScriptDev2 boss_skeram.cpp NPC_THE_PROPHET_SKERAM = 15263.
+    class SkeramSplitPhaseTrigger : public Trigger
+    {
+    public:
+        SkeramSplitPhaseTrigger(PlayerbotAI* ai) : Trigger(ai, "skeram split phase", 5) {}
+        bool IsActive() override
+        {
+            // Find any 15263 with HP%<33 — that's the real Skeram in low
+            // phase. Clones share the entry but are spawned alongside the
+            // boss so multiple 15263 instances mean we're mid-split.
+            std::list<Unit*> matches;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15263, 100.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(matches, check);
+            Cell::VisitAllObjects(bot, searcher, 100.0f);
+
+            int liveCount = 0;
+            bool lowHp = false;
+            for (Unit* u : matches)
+            {
+                if (!u || !u->IsAlive()) continue;
+                ++liveCount;
+                if (u->GetMaxHealth() > 0 &&
+                    (float)u->GetHealth() / (float)u->GetMaxHealth() < 0.33f)
+                    lowHp = true;
+            }
+            // Trigger during the split (>=2 entities) AND when at least one
+            // is low — the bot's current target may be a clone that's
+            // already at full HP and a different one needs focus.
+            return liveCount >= 2 && lowHp;
+        }
+    };
+
     // The Prophet Skeram True Fulfillment (785) — MIND-CONTROLS the closest
     // raid member every cycle. Spell is Magic-school, dispelable. Quick kick
     // from any priest 'dispel magic' / paladin 'cleanse magic' returns the
