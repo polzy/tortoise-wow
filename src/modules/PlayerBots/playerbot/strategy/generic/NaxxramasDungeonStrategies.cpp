@@ -233,12 +233,18 @@ void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     // Mark stacks (28832 Korth'azz fire / 28833 Blaumeux shadow / 28834
     // Mograine unholy / 28835 Zeliek holy). At 5 stacks the mark damage is
     // lethal — players swap to the opposite Horseman zone to drop stacks.
-    //
-    // The trigger is kept registered (Combat tab + diagnostics) but NOT
-    // wired to a dispel chain: the marks aren't classified as magic in the
-    // vanilla DBC — `dispel magic` / `cleanse magic` no-op on them. The
-    // only real solution is the mark-zone swap which needs a multi-tank
-    // coord framework we don't have. See code-review note 2 (2026-05-29).
+    // Framework #8 multi-tank zone coord wire: when bot has any of the
+    // 4 marks (FourHorsemenMarkDangerTrigger), retarget the OPPOSITE
+    // Horseman:
+    //   Korth'azz fire   → Blaumeux  (16065)
+    //   Blaumeux shadow  → Korth'azz (16064)
+    //   Mograine unholy  → Zeliek    (16063)
+    //   Zeliek holy      → Mograine  (16062)
+    // EngageOppositeHorsemanAction reads bot's mark aura and re-targets.
+    // Priority 100 — fight-defining (5 stacks = instant death).
+    triggers.push_back(new TriggerNode(
+        "four horsemen mark danger",
+        NextAction::array(0, new NextAction("engage opposite horseman", 100.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

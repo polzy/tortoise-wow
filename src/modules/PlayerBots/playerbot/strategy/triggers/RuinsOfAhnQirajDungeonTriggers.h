@@ -59,6 +59,28 @@ namespace ai
                 180647 /* GO_SAND_TRAP */, 8.0f) {}
     };
 
+    // Framework #1 + boss-presence wire — fires every tick during the
+    // Ossirian fight (boss 15339 alive within 100y). Pair with
+    // `use ossirian crystal` action; the action no-ops if no crystal
+    // is in range, so the trigger can fire every tick cheaply and the
+    // action only runs when a crystal is actually clickable. Without
+    // crystal use, Ossirian is immune to damage.
+    class OssirianAliveTrigger : public Trigger
+    {
+    public:
+        OssirianAliveTrigger(PlayerbotAI* ai) : Trigger(ai, "ossirian alive", 2) {}
+        bool IsActive() override
+        {
+            std::list<Unit*> bosses;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15339 /* NPC_OSSIRIAN */, 100.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(bosses, check);
+            Cell::VisitAllObjects(bot, searcher, 100.0f);
+            for (Unit* b : bosses)
+                if (b && b->IsAlive()) return true;
+            return false;
+        }
+    };
+
     // Ossirian Sand Vortex (creature 15428, not a GO). Chases raid, gives
     // Ossirian back his weakness immunity if it touches him. Bots within
     // 12y need to move out so the vortex doesn't path-find onto the boss.

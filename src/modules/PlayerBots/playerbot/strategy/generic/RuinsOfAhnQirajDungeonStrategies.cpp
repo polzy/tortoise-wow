@@ -53,6 +53,16 @@ void RuinsOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>&
         "ossirian sand vortex nearby",
         NextAction::array(0, new NextAction("move away from ossirian sand vortex", 95.0f), NULL)));
 
+    // Ossirian Crystal click — every tick during the fight, click any
+    // nearby crystal (GO 180619) to apply a weakness debuff to the boss
+    // (he is otherwise damage-immune). UseOssirianCrystalAction returns
+    // false when no crystal in range, so the per-tick fire is cheap and
+    // self-limiting. Priority 90 — non-fight-defining but high-value
+    // (without crystals, fight is unwinnable).
+    triggers.push_back(new TriggerNode(
+        "ossirian alive",
+        NextAction::array(0, new NextAction("use ossirian crystal", 90.0f), NULL)));
+
     // Kurinnaxx Mortal Wound (25646) — tank-swap on 4+ stacks (Framework #4).
     // Each stack -10% healing. OT taunts so old MT's stacks decay.
     triggers.push_back(new TriggerNode(

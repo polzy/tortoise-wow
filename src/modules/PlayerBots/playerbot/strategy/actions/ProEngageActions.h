@@ -209,6 +209,42 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage nearest skeram", { 15263 }, 100.0f) {}
     };
 
+    // Framework #8 wire — Four Horsemen mark zone swap.
+    //
+    // Each Horseman applies a stacking mark on their threat targets:
+    //   28832 Korth'azz fire    ↔ swap to Blaumeux (16065)
+    //   28833 Blaumeux shadow   ↔ swap to Korth'azz (16064)
+    //   28834 Mograine unholy   ↔ swap to Zeliek    (16063)
+    //   28835 Zeliek holy       ↔ swap to Mograine  (16062)
+    // At 3+ stacks the next tick is lethal — players must reset stacks
+    // by moving to the OPPOSITE-corner Horseman. Marks aren't magic-
+    // dispelable (vanilla DBC), so the zone-swap is the only counter.
+    // This action reads the bot's current mark and retargets the
+    // corresponding opposite Horseman.
+    class EngageOppositeHorsemanAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageOppositeHorsemanAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage opposite horseman",
+                { 16062, 16063, 16064, 16065 }, 100.0f) {}
+
+        bool Execute(Event& event) override
+        {
+            std::vector<uint32> wanted;
+            if      (ai->HasAura(28832, bot)) wanted.push_back(16065);
+            else if (ai->HasAura(28833, bot)) wanted.push_back(16064);
+            else if (ai->HasAura(28834, bot)) wanted.push_back(16063);
+            else if (ai->HasAura(28835, bot)) wanted.push_back(16062);
+            else return false;  // No mark → no swap needed.
+
+            std::vector<uint32> saved = m_entries;
+            m_entries = wanted;
+            bool ok = EngageNearbyAddAction::Execute(event);
+            m_entries = saved;
+            return ok;
+        }
+    };
+
     // Framework #8 — Twin Emperors pair-swap.
     //
     // Vek'lor (15276) and Vek'nilash (15275) teleport-swap positions every

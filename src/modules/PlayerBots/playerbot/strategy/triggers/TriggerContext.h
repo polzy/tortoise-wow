@@ -427,6 +427,7 @@ namespace ai
             creators["loatheb corrupted mind cast"] = [](PlayerbotAI* ai) { return new LoathebCorruptedMindCastTrigger(ai); };
             creators["kurinnaxx sand trap nearby"] = [](PlayerbotAI* ai) { return new KurinnaxxSandTrapNearbyTrigger(ai); };
             creators["ossirian sand vortex nearby"] = [](PlayerbotAI* ai) { return new OssirianSandVortexNearbyTrigger(ai); };
+            creators["ossirian alive"] = [](PlayerbotAI* ai) { return new OssirianAliveTrigger(ai); };
             creators["twin emperors teleport cast"] = [](PlayerbotAI* ai) { return new TwinEmperorsTeleportCastTrigger(ai); };
             creators["kt frost blast self"] = [](PlayerbotAI* ai) { return new KTFrostBlastSelfTrigger(ai); };
             creators["kt frost blast party"] = [](PlayerbotAI* ai) { return new KTFrostBlastPartyTrigger(ai); };

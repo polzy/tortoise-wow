@@ -172,7 +172,7 @@ to the WotLK-only `wind shear` chain.
 | Buru (AQ20)                            | ✅     | Pro-engage Hivezara Hatchlings (15521) + **Buru Eggs (15514) at priority 95** — egg explosions are the primary boss damage source in P1, raid focuses eggs proactively |
 | Ayamiss (AQ20)                         | ✅     | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
 | Rajaxx (AQ20)                          | ✅     | Pro-engage all 7 wave commanders (Zerran/Yeggeth/Pakkon/Drenn/Xurrem/Qeez/Tuubid) |
-| Ossirian (AQ20)                        | ⚠️    | Curse of Tongues (25195) remove curse — group-scan (tank can't self-cleanse). Tornado-kite shield-break TODO |
+| Ossirian (AQ20)                        | ✅     | Curse of Tongues (25195) remove curse on-party + Sand Vortex (creature 15428) move-and-stay 12y + Crystal click (GO 180619) every tick via `ossirian alive` trigger. Crystal applies the school weakness Ossirian needs to take damage |
 | Kurinnaxx (AQ20)                       | ⚠️    | Mortal Wound (25646) dispel=0 / school=Physical — undispelable; tank-swap via Framework #4 at 4+ stacks (`PartyOtherTankHasAuraStacksTrigger`). Sand trap GO awareness still TODO |
 | Hakkar (ZG)                            | ✅     | Marli/Jeklik dispel + Venoxis cure poison + Thekal Tranquilizing Shot — all group-scan (cast on tank, who can't self-cleanse) |
 | Mandokir (ZG)                          | ✅     | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
@@ -186,7 +186,7 @@ to the WotLK-only `wind shear` chain.
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank + Hateful Strike (28308) flee for non-tank bots with maxHP<5000 within 8y (cloth/leather DPS retreat to ranged) |
 | Loatheb (Naxx)                         | ✅     | Corrupted Mind (29185/29194/29196/29198 per class) no-heal lockout detection on healers → healing potion + bandage defensive (dispel=0, must survive 12s window) |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel + Frost Blast (27808) flee chain — SELF and PARTY scan both route to `flee` so cluster disperses before 10y AOE expiry. Chains of KT (28410) is dispel=0, broken by damage |
-| Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
+| Four Horsemen (Naxx)                   | ✅     | Void zone dodge + Framework #8 mark zone swap. EngageOppositeHorsemanAction reads the bot's mark aura (28832/28833/28834/28835) and re-targets the OPPOSITE Horseman to drop stacks. Prio 100 (5 stacks = instant death). Marks aren't magic-dispelable; zone swap is the only counter |
 | Anub'Rekhan (Naxx)                     | ✅     | Pro-engage Crypt Guards (16573) + Locust Swarm (28785) — bots move 30y out and STAY (Framework #2, no chase oscillation) |
 | Grand Widow Faerlina (Naxx)            | ✅     | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage (28798) is dispel=0 — broken by Widow's Embrace (28732) when a worshipper dies (already pro-engaged) |
 | Gluth (Naxx)                           | ✅     | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate (28374) is dispel=0, raid heal up handled by class healers (5% HP triggers high-priority self-heal chain) |
