@@ -155,11 +155,14 @@ namespace ai
             if (ai->GetState() != BotState::BOT_STATE_COMBAT)
                 return false;
 
-            if (ai->HasActivePlayerMaster())
-                return false;
-
-            if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
-                return false;
+            // REMOVED gates (live MC test 2026-06-01): the original code
+            // disabled stuck detection when the master was a real player
+            // ("manual cleanup expected") and when the group leader was a
+            // human. In a 40-bot raid that's impractical — bots knocked
+            // back by Ragnaros Wrath (or similar) get stuck and the user
+            // can't manage each one individually. With the gates removed,
+            // stuck detection fires for any bot regardless of master type;
+            // the 5-min threshold below still prevents false positives.
 
             if (!ai->AllowActivity(ALL_ACTIVITY))
                 return false;
@@ -167,7 +170,7 @@ namespace ai
             WorldPosition botPos(bot);
 
             uint32 timeSinceCombatChange = AI_VALUE2(uint32, "time since last change", "combat::self target");
-           
+
             if (timeSinceCombatChange > 5 * MINUTE)
             {
                 ai->TellDebug(ai->GetMaster(), "Stuck: Combat did not change for " + std::to_string(timeSinceCombatChange) + " seconds.", "debug stuck");
@@ -196,11 +199,8 @@ namespace ai
             if (ai->GetState() != BotState::BOT_STATE_COMBAT)
                 return false;
 
-            if (ai->HasActivePlayerMaster())
-                return false;
-
-            if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
-                return false;
+            // Player-master gates removed — see CombatStuckTrigger above for
+            // rationale. 15-min threshold still prevents false positives.
 
             if (!ai->AllowActivity(ALL_ACTIVITY))
                 return false;
