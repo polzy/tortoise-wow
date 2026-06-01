@@ -140,6 +140,16 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "yauj fear", 19408, 1) {}
     };
 
+    // Twin Emperors Unbalancing Strike (26613) — Veknilash melee debuff, strips
+    // armor stacks on MT. At 3+ stacks the MT takes too much physical, OT
+    // taunts. Framework #4 pattern.
+    class TwinEmperorsUnbalancingStrikeSwapTrigger : public PartyOtherTankHasAuraStacksTrigger
+    {
+    public:
+        TwinEmperorsUnbalancingStrikeSwapTrigger(PlayerbotAI* ai)
+            : PartyOtherTankHasAuraStacksTrigger(ai, "twin emperors unbalancing strike swap", 26613, 3, 1) {}
+    };
+
     // Viscidus (15299) — needs 200 frost hits to freeze, then ~100 physical
     // hits to shatter. Trigger fires when bot's current target is Viscidus
     // and he's NOT frozen yet (SPELL_VISCIDUS_FREEZE 25937 absent). Caster

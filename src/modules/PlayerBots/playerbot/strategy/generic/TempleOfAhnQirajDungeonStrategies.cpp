@@ -74,6 +74,13 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
+    // Twin Emperors Unbalancing Strike (26613) tank-swap on 3+ stacks
+    // (Framework #4). Veknilash's melee debuff strips armor; MT takes
+    // amplified physical damage. OT taunts at threshold.
+    triggers.push_back(new TriggerNode(
+        "twin emperors unbalancing strike swap",
+        NextAction::array(0, new NextAction("taunt", 95.0f), NULL)));
+
     // Viscidus (15299) frost phase — needs 200 frost-school hits to freeze.
     // Only mage (frostbolt) and shaman (frost shock) actually deal frost
     // damage in vanilla. Druid moonfire is Arcane school and would NOT

@@ -30,4 +30,10 @@ void RuinsOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>&
     triggers.push_back(new TriggerNode(
         "ossirian curse of tongues",
         NextAction::array(0, new NextAction("remove curse on party", 80.0f), NULL)));
+
+    // Kurinnaxx Mortal Wound (25646) — tank-swap on 4+ stacks (Framework #4).
+    // Each stack -10% healing. OT taunts so old MT's stacks decay.
+    triggers.push_back(new TriggerNode(
+        "kurinnaxx mortal wound swap",
+        NextAction::array(0, new NextAction("taunt", 95.0f), NULL)));
 }

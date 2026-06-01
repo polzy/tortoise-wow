@@ -38,4 +38,14 @@ namespace ai
         OssirianCurseOfTonguesTrigger(PlayerbotAI* ai)
             : PartyHasAuraBySpellIdTrigger(ai, "ossirian curse of tongues", 25195, 1) {}
     };
+
+    // Kurinnaxx Mortal Wound (25646) — physical debuff stacks on MT, each
+    // stack reduces healing by 10%. Threshold 4: at that point heals are
+    // -40% effective, OT taunts so MT's stacks decay. Framework #4 pattern.
+    class KurinnaxxMortalWoundSwapTrigger : public PartyOtherTankHasAuraStacksTrigger
+    {
+    public:
+        KurinnaxxMortalWoundSwapTrigger(PlayerbotAI* ai)
+            : PartyOtherTankHasAuraStacksTrigger(ai, "kurinnaxx mortal wound swap", 25646, 4, 1) {}
+    };
 }

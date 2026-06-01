@@ -345,6 +345,8 @@ namespace ai
             creators["start firemaw fight"] = [](PlayerbotAI* ai) { return new FiremawStartFightTrigger(ai); };
             creators["end firemaw fight"] = [](PlayerbotAI* ai) { return new FiremawEndFightTrigger(ai); };
             creators["firemaw flame buffet swap"] = [](PlayerbotAI* ai) { return new FiremawFlameBuffetSwapTrigger(ai); };
+            creators["kurinnaxx mortal wound swap"] = [](PlayerbotAI* ai) { return new KurinnaxxMortalWoundSwapTrigger(ai); };
+            creators["twin emperors unbalancing strike swap"] = [](PlayerbotAI* ai) { return new TwinEmperorsUnbalancingStrikeSwapTrigger(ai); };
             creators["start ebonroc fight"] = [](PlayerbotAI* ai) { return new EbonrocStartFightTrigger(ai); };
             creators["end ebonroc fight"] = [](PlayerbotAI* ai) { return new EbonrocEndFightTrigger(ai); };
             creators["start flamegor fight"] = [](PlayerbotAI* ai) { return new FlamegorStartFightTrigger(ai); };
