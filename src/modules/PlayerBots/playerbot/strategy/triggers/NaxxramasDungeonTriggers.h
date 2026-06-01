@@ -64,13 +64,14 @@ namespace ai
         KelThuzadEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end kelthuzad fight", "kel'thuzad", 15990) {}
     };
 
-    // Mana Detonation (27819): magic debuff that drains mana and explodes on the
-    // target for AoE damage. Dispel asap to interrupt both.
-    class KelThuzadManaDetonationTrigger : public Trigger
+    // Mana Detonation (27819): magic debuff chained to 3 targets that drains
+    // mana and explodes for AoE. Group-scan so non-affected priests/paladins
+    // still trigger their dispel chain.
+    class KelThuzadManaDetonationTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        KelThuzadManaDetonationTrigger(PlayerbotAI* ai) : Trigger(ai, "kelthuzad mana detonation", 1) {}
-        bool IsActive() override { return ai->HasAura(27819, bot); }
+        KelThuzadManaDetonationTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "kelthuzad mana detonation", 27819, 1) {}
     };
 
     // --- Sapphiron (15989) ---
@@ -85,24 +86,28 @@ namespace ai
         SapphironEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end sapphiron fight", "sapphiron", 15989) {}
     };
 
-    // Life Drain (28542) — magic debuff, dispelable. Drains 1000 mana per tick
-    // and heals Sapphiron for 4x the amount. Priority dispel for casters.
-    class SapphironLifeDrainTrigger : public Trigger
+    // Life Drain (28542) — magic debuff, dispelable. Hits 5 random raid
+    // members per cast. Group-scan: if the 5 don't include a priest/paladin,
+    // self-aura check would skip the dispel chain entirely.
+    class SapphironLifeDrainTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        SapphironLifeDrainTrigger(PlayerbotAI* ai) : Trigger(ai, "sapphiron life drain", 1) {}
-        bool IsActive() override { return ai->HasAura(28542, bot); }
+        SapphironLifeDrainTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "sapphiron life drain", 28542, 1) {}
     };
 
-    // --- Maexxna Necrotic Poison (28776) — poison, 90% healing reduction. ---
-    class MaexxnaNecroticPoisonTrigger : public Trigger
+    // --- Maexxna Necrotic Poison (28776) — poison, 90% healing reduction.
+    // Single-target on the main tank (warrior — no self-cleanse). Group-scan
+    // so the druid/shaman/paladin fires their cure chain. ---
+    class MaexxnaNecroticPoisonTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        MaexxnaNecroticPoisonTrigger(PlayerbotAI* ai) : Trigger(ai, "maexxna necrotic poison", 1) {}
-        bool IsActive() override { return ai->HasAura(28776, bot); }
+        MaexxnaNecroticPoisonTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "maexxna necrotic poison", 28776, 1) {}
     };
 
-    // --- Faerlina Poison Bolt Volley (28796) — poison, dispelable. ---
+    // --- Faerlina Poison Bolt Volley (28796) — poison, raid-wide AOE.
+    // Self-aura is fine (many bots affected, dispeller ticks too). ---
     class FaerlinaPoisonBoltTrigger : public Trigger
     {
     public:
@@ -110,12 +115,13 @@ namespace ai
         bool IsActive() override { return ai->HasAura(28796, bot); }
     };
 
-    // --- Noth Curse of Plaguebringer (29213) — curse, lethal damage tick. ---
-    class NothCursePlaguebringerTrigger : public Trigger
+    // --- Noth Curse of Plaguebringer (29213) — curse on 3 random raid
+    // members per cast. Group-scan: the 3 might not include a druid/mage. ---
+    class NothCursePlaguebringerTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        NothCursePlaguebringerTrigger(PlayerbotAI* ai) : Trigger(ai, "noth curse plaguebringer", 1) {}
-        bool IsActive() override { return ai->HasAura(29213, bot); }
+        NothCursePlaguebringerTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "noth curse plaguebringer", 29213, 1) {}
     };
 
     // --- Four Horsemen mark stacks ---

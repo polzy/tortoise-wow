@@ -7,17 +7,22 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
-### Fixed — single-target dispel trigger scope (code-review 2026-06-01)
+### Fixed — single-target dispel trigger scope sweep (code-review 2026-06-01)
 - New base `PartyHasAuraBySpellIdTrigger` in GenericTriggers.h scans the bot's
   whole group for the named aura before firing.
-- Skeram True Fulfillment (785) was wired with a self-aura check — the MC'd
-  bot is charmed and can't run dispel logic, so the chain never executed.
-  Fixed to fire on any group member's aura.
-- Ossirian Curse of Tongues (25195) lands on the current victim (typically
-  the warrior tank — no `remove curse`). Same self-aura bug; fixed to fire on
-  any group member's aura so the druid/mage cleanses the tank.
-- Stale BWL doc comment still listed phantom NPC 14036; removed (was cargo-
-  culted, removed from code in commit ff51266).
+- Initial fix (commit 7e81c2c): Skeram True Fulfillment (785), Ossirian Curse
+  of Tongues (25195). Stale BWL doc comment phantom 14036 removed.
+- Follow-up sweep — audited every `ai->HasAura(<id>, bot)` dispel trigger
+  against ScriptDev2 source to classify single-target vs raid-wide AOE.
+  Six more triggers needed the group-scan refactor:
+  - Sapphiron Life Drain (28542) — 5 random raid members per cast.
+  - KT Mana Detonation (27819) — chains to 3 targets.
+  - Maexxna Necrotic Poison (28776) — tank-only.
+  - Noth Curse of Plaguebringer (29213) — 3 random raid members.
+  - Huhuran Noxious Poison (26053) — tank-only.
+  - Hazzarah Sleep (24664) — single-target; slept bot can't self-cleanse.
+- Faerlina Poison Bolt Volley (28796) verified raid-wide AOE — self-aura
+  trigger is correct (dispellers will tick alongside).
 
 ### Added — Faerlina Poison Bolt + Ossirian Curse of Tongues dispels
 - Naxx Grand Widow Faerlina Poison Bolt Volley (28796) — poison-school,

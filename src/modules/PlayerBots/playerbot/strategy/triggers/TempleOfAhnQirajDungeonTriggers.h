@@ -82,12 +82,13 @@ namespace ai
 
     // Noxious Poison (26053) — nature debuff on a random raid member. Druids
     // 'remove poison' (or shamans 'cure poison') strip it. Bot-side detection
-    // is HasAura on self.
-    class HuhuranNoxiousPoisonTrigger : public Trigger
+    // Single-target on the current victim (tank — typically warrior with no
+    // self-cleanse). Group-scan so druid/shaman/paladin fires the cure chain.
+    class HuhuranNoxiousPoisonTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        HuhuranNoxiousPoisonTrigger(PlayerbotAI* ai) : Trigger(ai, "huhuran noxious poison", 1) {}
-        bool IsActive() override { return ai->HasAura(26053, bot); }
+        HuhuranNoxiousPoisonTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "huhuran noxious poison", 26053, 1) {}
     };
 
     // The Prophet Skeram True Fulfillment (785) — MIND-CONTROLS the closest

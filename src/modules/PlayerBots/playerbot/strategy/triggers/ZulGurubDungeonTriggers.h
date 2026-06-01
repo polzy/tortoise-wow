@@ -62,14 +62,15 @@ namespace ai
     // Aspect of Thekal (24689) is cast on Hakkar himself — short enrage that
     // hunters can strip via Tranquilizing Shot. Detection: a live Hakkar
     // within 40y has the aura.
-    // High Priest Thekal mini-boss Hazzarah Sleep (24664) — magic, dispelable.
-    // Sleeps the affected player; one of the few mechanics where the bot
-    // self-debuff trigger is genuinely actionable. ScriptDev2 boss_hazzarah.cpp.
-    class HazzarahSleepTrigger : public Trigger
+    // High Priest Thekal mini-boss Hazzarah Sleep (24664) — magic, dispelable,
+    // single-target. The slept bot can't act (incapacitated) so the trigger
+    // must group-scan: a healer or paladin elsewhere fires the dispel chain.
+    // ScriptDev2 boss_hazzarah.cpp.
+    class HazzarahSleepTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        HazzarahSleepTrigger(PlayerbotAI* ai) : Trigger(ai, "hazzarah sleep", 1) {}
-        bool IsActive() override { return ai->HasAura(24664, bot); }
+        HazzarahSleepTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "hazzarah sleep", 24664, 1) {}
     };
 
     class HakkarThekalEnrageTrigger : public Trigger
