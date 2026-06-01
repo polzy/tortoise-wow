@@ -455,6 +455,17 @@ namespace ai
         WindShearInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "wind shear") {}
     };
 
+    // Earth Shock interrupt — vanilla 1.12 shaman interrupt (Wind Shear is
+    // WotLK lvl-80). Without this, shaman bots silently no-op the Wind Shear
+    // chain because IsInterruptableSpellCasting checks the bot's spellbook
+    // for "wind shear" → 0 → trigger returns false.
+    class EarthShockInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
+    {
+    public:
+        EarthShockInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai)
+            : InterruptEnemyHealerTrigger(ai, "earth shock") {}
+    };
+
     class CurePoisonTrigger : public NeedCureTrigger
     {
     public:

@@ -194,6 +194,15 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "wind shear on enemy healer",
         NextAction::array(0, new NextAction("wind shear on enemy healer", ACTION_INTERRUPT), NULL)));
+
+    // Vanilla 1.12 interrupt — Wind Shear is WotLK (lvl 80), so this trigger
+    // silently no-ops on vanilla servers. Earth Shock has Interrupt flag set
+    // and is the actual shaman kick on classic. Wired in parallel: if the
+    // bot knows Wind Shear (extended Turtle content), both fire; if not, only
+    // Earth Shock fires.
+    triggers.push_back(new TriggerNode(
+        "earth shock on enemy healer",
+        NextAction::array(0, new NextAction("earth shock on enemy healer", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -674,6 +683,15 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "wind shear on enemy healer",
         NextAction::array(0, new NextAction("wind shear on enemy healer", ACTION_INTERRUPT), NULL)));
+
+    // Vanilla 1.12 interrupt — Wind Shear is WotLK (lvl 80), so this trigger
+    // silently no-ops on vanilla servers. Earth Shock has Interrupt flag set
+    // and is the actual shaman kick on classic. Wired in parallel: if the
+    // bot knows Wind Shear (extended Turtle content), both fire; if not, only
+    // Earth Shock fires.
+    triggers.push_back(new TriggerNode(
+        "earth shock on enemy healer",
+        NextAction::array(0, new NextAction("earth shock on enemy healer", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1180,6 +1198,15 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "wind shear on enemy healer",
         NextAction::array(0, new NextAction("wind shear on enemy healer", ACTION_INTERRUPT), NULL)));
+
+    // Vanilla 1.12 interrupt — Wind Shear is WotLK (lvl 80), so this trigger
+    // silently no-ops on vanilla servers. Earth Shock has Interrupt flag set
+    // and is the actual shaman kick on classic. Wired in parallel: if the
+    // bot knows Wind Shear (extended Turtle content), both fire; if not, only
+    // Earth Shock fires.
+    triggers.push_back(new TriggerNode(
+        "earth shock on enemy healer",
+        NextAction::array(0, new NextAction("earth shock on enemy healer", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

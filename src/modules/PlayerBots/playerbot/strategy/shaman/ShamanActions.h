@@ -462,6 +462,15 @@ namespace ai
         CastWindShearOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "wind shear") {}
     };
 
+    // Vanilla 1.12 interrupt — Earth Shock used as kick on enemy healer.
+    // See EarthShockInterruptEnemyHealerSpellTrigger.
+    class CastEarthShockOnEnemyHealerAction : public CastSpellOnEnemyHealerAction
+    {
+    public:
+        CastEarthShockOnEnemyHealerAction(PlayerbotAI* ai)
+            : CastSpellOnEnemyHealerAction(ai, "earth shock") {}
+    };
+
     class CastCurePoisonAction : public CastCureSpellAction
     {
     public:

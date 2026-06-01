@@ -274,6 +274,7 @@ namespace ai
                 creators["bloodlust"] = [](PlayerbotAI* ai) { return new BloodlustTrigger(ai); };
                 creators["maelstrom weapon"] = [](PlayerbotAI* ai) { return new MaelstromWeaponTrigger(ai); };
                 creators["wind shear on enemy healer"] = [](PlayerbotAI* ai) { return new WindShearInterruptEnemyHealerSpellTrigger(ai); };
+                creators["earth shock on enemy healer"] = [](PlayerbotAI* ai) { return new EarthShockInterruptEnemyHealerSpellTrigger(ai); };
                 creators["cure poison"] = [](PlayerbotAI* ai) { return new CurePoisonTrigger(ai); };
                 creators["party member cure poison"] = [](PlayerbotAI* ai) { return new PartyMemberCurePoisonTrigger(ai); };
                 creators["cure disease"] = [](PlayerbotAI* ai) { return new CureDiseaseTrigger(ai); };
@@ -325,6 +326,7 @@ namespace ai
                 creators["poison cleansing totem"] = [](PlayerbotAI* ai) { return new CastPoisonCleansingTotemAction(ai); };
                 creators["wind shear"] = [](PlayerbotAI* ai) { return new CastWindShearAction(ai); };
                 creators["wind shear on enemy healer"] = [](PlayerbotAI* ai) { return new CastWindShearOnEnemyHealerAction(ai); };
+                creators["earth shock on enemy healer"] = [](PlayerbotAI* ai) { return new CastEarthShockOnEnemyHealerAction(ai); };
                 creators["rockbiter weapon"] = [](PlayerbotAI* ai) { return new CastRockbiterWeaponAction(ai); };
                 creators["flametongue weapon"] = [](PlayerbotAI* ai) { return new CastFlametongueWeaponAction(ai); };
                 creators["frostbrand weapon"] = [](PlayerbotAI* ai) { return new CastFrostbrandWeaponAction(ai); };

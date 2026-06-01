@@ -7,6 +7,24 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — Shaman heal-interrupt was dead code on vanilla
+- `WindShearInterruptEnemyHealerSpellTrigger` checks if the bot knows the
+  "wind shear" spell — but Wind Shear is a WotLK (lvl-80) shaman spell.
+  On vanilla 1.12 (Turtle WoW), no shaman bot has Wind Shear in its
+  spellbook → `IsInterruptableSpellCasting` returns false → trigger never
+  fires → shaman bots silently can't interrupt enemy heals.
+- Added parallel `EarthShockInterruptEnemyHealerSpellTrigger` +
+  `CastEarthShockOnEnemyHealerAction` using the same `INTERRUPT_HEALER_TRIGGER`
+  pattern as warrior pummel / mage counterspell. Wired in ShamanStrategy
+  alongside the wind shear chain (both fire — wind shear silently no-ops
+  if unknown, earth shock fires).
+- Unlocks Heal Brother (7393) interrupt for the Twin Emperors fight: all
+  classes that have "X on enemy healer" wired (mage counterspell, warrior
+  pummel/shield bash, rogue kick, druid bash, hunter silencing shot, priest
+  silence, paladin hammer of justice, warlock spell lock/death coil, shaman
+  earth shock) will now react to either twin casting Heal Brother on the
+  other (positive spell → detected by `EnemyHealerTargetValue`).
+
 ### Added — AQ40 Twin Emperors Mutate Bug dispel
 - Mutate Bug (802) turns the affected raid member into a Qiraji bug for ~8s,
   then detonates (Explodebug 804) for AOE. Magic dispel chain (priest
