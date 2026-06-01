@@ -205,68 +205,81 @@ to the WotLK-only `wind shear` chain.
 | Crash handler with stack walk          | ✅     | Symbolized stack in `crash_*.dmp.txt`, handles NULL PC |
 | Heap-corruption crashes resolved       | ✅     | AddAura double-free, AuraProcHandler NULL, m_antiCheat NULL |
 | `LevelFor` / `CheckLevelFor` dangling Player* | ✅ | `__try` inlined (LTCG-resistant) + DENY_ALL short-circuit |
+| `ForEachPlayerbot` orphan crash loop   | ✅     | SQL Deadlock leaving dangling Player* in playerBots[] caused 12000+ crash loop. Per-iter SEH guard + auto-clear orphan entry (2026-06-01) |
+| `ResetTargetAction` AV on boot         | ✅     | Guarded `isUseful()` + `Execute()` with `IsQuestTravelDataLoaded()` mirror from `RequestTravelTargetAction` |
+| Engine `s_lastTriggerName` dangling    | ✅     | Was `const char*` to `c_str()` of a temporary. Now `static char[128]` + memcpy |
 | Spam errors downgrade                  | ✅     | Dummy aura `EffectTriggered[0]` proc warnings outDetail |
-| MariaDB deadlock on `character_aura`   | ⚠️    | Rare, benign |
+| Discord webhook crash notifier         | ✅     | `MCWoW.DiscordCrashWebhook` in mangosd.conf — POST top frames + bot context as Discord embed on crash. 3s timeout SSL POST |
+| Auto-destroy gray loot (bot bag full)  | ✅     | `BotBagFullTrigger` (≥80% slots) + `AutoDestroyGrayLootAction` in RpgMaintenanceStrategy. ITEM_QUALITY_POOR only, 5/call cap |
+| MariaDB deadlock on `character_aura`   | ⚠️    | Investigated 2026-06-01. `_SaveAuras` DELETE+INSERT pattern can lock-flip under concurrent saves. ForEachPlayerbot SEH guard prevents cascade. Rare + benign |
+| `AttackAnythingAction`                 | 🚫     | Disabled — dangling Unit* CPU drain. Needed for free-world bots not in a raid. Re-enable by fixing Unit* lifecycle |
 
 ### Eluna Lua scripting engine
 | Feature                                | Status | Notes |
 |----------------------------------------|--------|-------|
 | `BUILD_ELUNA` CMake option             | ✅     | Default OFF; build flag wired in `src/game/CMakeLists.txt` |
 | `src/game/LuaEngine/` scaffold         | ✅     | `CMakeLists.txt` collects sources, `hooks/` + `methods/CMangos/` folders ready |
-| Eluna source vendored                  | ⚠️    | Source tree is present (Eluna + hooks/ + methods/CMangos/) but it was vendored from a TBC+ branch. Build with `BUILD_ELUNA=ON` produces ~30 compile errors against vanilla 1.18.1 — missing `sFactionTemplateStore`, `ProcEventInfo`, `DamageInfo`, `Map::GetEluna()`, `Spell::m_scriptRef`, `InstanceData` virtual signature drift. See `src/game/LuaEngine/PORTING_NOTES.md` for the full porting checklist (estimate 4-8h) |
-| `#ifdef BUILD_ELUNA` host hooks        | ❌     | Need to add `Map::GetEluna()` + `Unit::GetEluna()` before the existing hook calls can resolve. See PORTING_NOTES.md item #4 |
+| Eluna source vendored                  | ⚠️    | Source tree present (Eluna + hooks + methods/CMangos). Vendored from TBC+ fork — vanilla port partial |
+| Host hooks (Map / World / MapManager)  | ✅     | Added 2026-06-01: `Map::GetEluna()`, `World::GetEluna()`, `MapManager::DoForAllMaps<>()` gated by `#ifdef BUILD_ELUNA` |
+| `_eluna_compat/` shim tree             | ✅     | 12+ shims added 2026-06-01: DBScripts, GameEvents, AI/BaseAI×2, Spells/ProcEventInfo (vanilla stubs), Server/DBCStores (sFactionTemplateStore proxy) |
+| Build with `BUILD_ELUNA=ON`            | ❌     | Surface reduced 30→15 errors then deeper layer surfaced (229 errors from Turtle/cmangos divergence: `Creature::GetEluna`, `Spell/SpellMgr/Aura::GetSpellInfo`, `Unit::IsStandState`/`isAuctioner`/`isGuildMaster`, ElunaCreatureAI virtuals, EntryKey template cascade). See `src/game/LuaEngine/PORTING_NOTES.md` for full porting checklist (revised estimate 15-25h) |
 
-## Todo (as of 2026-06-01)
+## Todo (as of 2026-06-01 marathon session end)
 
-The Tank face-away / OT add-pickup / Deep Breath / Scale Cloak items previously
-listed here are all delivered (see encounter table). Outstanding work below is
-grouped by required effort, not by raid.
+Marathon session 2026-06-01 closed ~25 items across stability, frameworks,
+strategy wiring, polish, and operational. Outstanding work is now narrow:
+deferred Eluna port, a few `❌` bosses that need new framework work, and
+optional infrastructure niceties.
 
-### Boss strats still ⚠️ or ❌ (real work remaining)
+### Frameworks landed (1-11)
 
-| Boss | Gap | Reason it's hard |
-|------|-----|------------------|
-| Ebonroc (BWL)         | Shadow of Ebonroc self-heal (23340/23394) `dispel=0` | Aura is passive proc — not interruptable, not dispelable. Only path is burning faster (cooldown sync) |
-| Nefarian (BWL)        | Class Calls 23397-23436 per-class plumbing | Each call needs a class-aware response (warrior call → no taunt; mage call → no polymorph; etc). Big switch |
-| Skeram (AQ40)         | Split-clone target swap at 33%/15% HP | Needs `BossHpPctValue` wiring + closest-clone retarget action. Framework #3 primitive exists, ~half-day work |
-| Twin Emperors (AQ40)  | Teleport swap mid-fight (~30s cycle) | Each tank needs to re-position to the OTHER twin when boss teleports. Needs teleport-cast detection + paired tank coord. ~half-day work |
-| Ouro (AQ40)           | Burrow & emerge cycle | Bot needs to detect emerge GO + reposition off Sweep cone. Needs script-side timer access OR delay-based dead-reckoning |
-| Ossirian (AQ20)       | Tornado-kite shield-break | Tornado GO awareness + kite to break shield. Needs GO entry list + path planning |
-| Kurinnaxx (AQ20)      | Sand trap dodge | GO entry list + close-range move-out. Same primitive as Ossirian tornadoes |
-| Four Horsemen (Naxx)  | Mark swap zone change | Marks aren't magic-dispelable; raid swaps sides. Needs multi-tank zone coord + counter-rotation across 4 zones |
-| Heigan (Naxx)         | Predictive zone-cycle (current is 50% reactive) | Read Heigan's internal `Events::EVENT_SAFETY_DANCE` timer to anticipate fissures instead of reacting to spawn |
-| Razuvious (Naxx)      | DK Understudy MC orb operation | Priest takes Understudy via GO orb, tanks Raz with it. Needs MC charm orchestration (Framework #1 only handles GO use) |
-| Kel'Thuzad (Naxx)     | Frost Blast (28478) move-out + Chains of KT (28410) sequence | Currently only Mana Detonation dispel wired |
+All 11 reusable raid-mechanic primitives now in the tree. The session
+landed #8 / #9 / #10 / #11 as new this evening:
 
-### Frameworks needed to unblock the above
+| # | Primitive | Wires |
+|---|-----------|-------|
+| 1 | `UseNearbyGameObjectAction` | Razorgore orb, Ossirian Crystal, Razuvious orbs (future) |
+| 2 | `MoveAwayAndStayFromCreature` | Anub Locust Swarm, Sartura WW, Heigan fissures, Ossirian Sand Vortex |
+| 3 | `BossHpPctValue` + `BossHasAuraValue` | Skeram split phase, future C'Thun P1/P2 |
+| 4 | `PartyOtherTankHasAuraStacksTrigger` | Firemaw Flame Buffet, Kurinnaxx Mortal Wound, Twin Emp Unbalancing Strike |
+| 5 | Multi-player coord (`ThaddiusMoveToSamePolarityAction`) | Thaddius polarity |
+| 6 | Positional rotation reactive (`MoveAwayFromHeiganFissure`) | Heigan dance (reactive) |
+| 7 | Frost barrage (`ViscidusFrostPhaseTrigger`) | Viscidus freeze phase |
+| 8 | Multi-tank pair-swap (`EngageOtherTwinAction` / `EngageOppositeHorsemanAction`) | Twin Emperors teleport, Four Horsemen mark swap |
+| 9 | MC charm orchestration (`CharmPetAttackTargetAction`) | Razuvious Understudy → Razuvious (partial — needs priest orb side) |
+| 10 | GO-region kiting (`MoveAwayFromGameObject` + `NearbyHazardGameObjectTrigger`) | Kurinnaxx Sand Trap, future Ouro burrow GOs |
+| 11 | Boss-cast detection predictive (`BossIsCastingValue`) | Heigan Eruption pre-flee, Loatheb Corrupted Mind pre-stack, Twin teleport MSG |
 
-- **Framework #8 — Multi-tank teleport / zone coord**: paired tank target swap on cast event. Unblocks Twin Emperors + Four Horsemen mark swap.
-- **Framework #9 — MC charm orchestration**: priest takes orb GO → charm-control NPC → tank with it. Unblocks Razuvious + (long-term) C'Thun stomach phase tentacle eating.
-- **Framework #10 — GO-region kiting**: hazard GO list + safe-path planner. Unblocks Ossirian tornadoes + Kurinnaxx sand traps + Ouro burrows.
-- **Framework #11 — Script-side timer read**: hook into boss `Events` timer. Unblocks Heigan predictive dance, Loatheb pre-stack heals before Corrupted Mind.
+### Boss strats still partial or undone
 
-### Polish (no fight impact)
+| Boss | Status | Reason |
+|------|--------|--------|
+| Ebonroc (BWL)         | ❌ impossible bot-side | Shadow of Ebonroc (23340/23394) is `dispel=0` passive proc — not interruptable, not dispelable. Only path is burn faster |
+| Razuvious (Naxx)      | ⚠️ partial | Framework #9 pet-command wired (CommandUnderstudyAttackRazuvious). Priest-side orb chain still manual — Naxx orbs not in Turtle DB |
+| Heigan (Naxx)         | ⚠️ ~85% | Predictive Eruption cast detection landed (Framework #11). Plague Fissure 50ms despawn still beats some bot ticks — predictive zone-cycle would need access to Heigan's internal `Events::EVENT_SAFETY_DANCE` timer |
+| Ossirian (AQ20)       | ⚠️ ~90% | Crystal click + Sand Vortex move-away + Curse of Tongues dispel done. Tornado GO entries not yet identified |
+| Ouro (AQ40)           | ⚠️ ~70% | Dirt Mound pro-engage + Sweep cone non-tank flee done. Burrow mound GO awareness still needs Turtle DB ID lookup |
 
-- Smart Roles context-aware per raid map (Onyxia 1 MT 1 OT vs MC 2 MT vs Naxx 3 MT) — currently caps adapt by raid SIZE not by CONTENT
-- Auto-resist on map enter (`.bot fr *` when master enters MC/Onyxia) — manual button works, no auto trigger
-- Pre-raid buffs auto-dispense (Mark of the Wild, PW: Fortitude, blessings, totems) — bots have spells, no orchestrator
-- Bot inventory cleanup command (`.bot cleanup` to clear non-BiS bag clutter) — bags fill over time
-- Inspect UI (addon click-handler on portrait → `.bot inspect`) — currently chat-dump only
+### Stability / infra deferred
 
-### Stability / infra
+- **Eluna port** (15-25h focused work — see `src/game/LuaEngine/PORTING_NOTES.md`) — 12 shims + 3 host hooks landed this session; remaining: `Creature::GetEluna()`, `CreatureAI` virtual-signature audit, `Spell/SpellMgr/Aura::GetSpellInfo()` accessors, `UnitMethods.h` vanilla-name diffs (`IsStandState`/`isAuctioner`/`isGuildMaster`), `EntryKey<SpellEvents>` template cascade. `BUILD_ELUNA=OFF` default keeps server green.
+- **`AttackAnythingAction` 🚫** — disabled (dangling Unit* CPU drain). Needed for free-world bots not in a raid. Re-enable by fixing the Unit* lifecycle in the action's target picker
+- **MariaDB `character_aura` deadlock** ⚠️ — investigated, rare + benign. `_SaveAuras()` DELETE+INSERT pattern can deadlock under concurrent bot saves. ForEachPlayerbot SEH guard already prevents cascade. Real fix = wrap each `_Save*` in explicit transaction OR switch to `REPLACE INTO`
 
-- **Faerlina Enrage detection trigger** — when she enrages (28798 on boss), boost worshipper kill priority to 100 (currently 80). Quick win.
-- **Skeram split phase trigger** — `BossHpPctValue` < 33 → fire "retarget closest skeram". Framework #3 ready.
-- **`AttackAnythingAction` 🚫 → fix or document** — disabled due to dangling Unit*; needed for free-world bots not in a raid
-- **Eluna vendoring + host hooks** (#44, #63 in task list) — clone Eluna into `src/game/LuaEngine/`, validate sample script
-- **MariaDB `character_aura` deadlock** ⚠️ — rare but happens; investigate transaction scope
+### Operational niceties
 
-### Operational
+- **`.testbots` harness** — init/bis/inspect per class with JSON report; catches regressions automatically
+- **`LearnPenqleClassSpells` benchmark** — confirm ~5-10ms per bot (currently un-measured)
+- **#43 Cross-reference ike3/mangosbot upstream raid strats** — research only, lower priority
 
-- Crash dump Discord webhook (parsed top frame → async monitoring)
-- Auto-test harness `.testbots` (init/bis/inspect per class, JSON-ish report)
-- Benchmark `LearnPenqleClassSpells` (~5-10 ms per bot expected)
-- Cross-reference ike3/mangosbot upstream raid strats (#43 in task list)
+### Next major arc
+
+**Solo Mode pivot** — togglable module, not a fork. See discussion in
+`vision-solo-mode.md` (companion-IA level-sync, iLvl-adaptive gear,
+raid-on-demand). All foundation exists (70% of the work is the bot
+stack we already have); needs level sync hook, quest-helper strategy,
+companion persistence DB row, UI mode picker, loot policy. 4-phase
+roadmap, MVP estimated at 1-2 weeks.
 
 ## Companion repos / external references
 
