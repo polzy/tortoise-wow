@@ -7,6 +7,15 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — AQ40 Bug Trio dispels
+- Kri Toxic Volley (25812) — poison-school AOE on raid every cycle. Cure-
+  poison chain (druid/shaman + paladin) at priority 85. Self-aura trigger
+  (raid-wide, dispeller has it too).
+- Yauj Fear (19408, placeholder for 25807 per ScriptDev2 comment) — magic
+  dispel. Group-scan: feared bot can't act, a non-feared healer fires the
+  dispel chain. Priority 90 (fear pushes bot into the toxic cloud zone).
+- Yauj's Brood (15621) pro-engage already wired prior commit.
+
 ### Fixed — single-target dispel trigger scope sweep (code-review 2026-06-01)
 - New base `PartyHasAuraBySpellIdTrigger` in GenericTriggers.h scans the bot's
   whole group for the named aura before firing.

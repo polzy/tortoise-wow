@@ -42,6 +42,25 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("dispel magic", 95.0f),
             new NextAction("cleanse magic", 95.0f),
             NULL)));
+
+    // Bug Trio — Kri Toxic Volley (25812) poison AOE every cycle. Cure-poison
+    // chain. Priority 85.
+    triggers.push_back(new TriggerNode(
+        "kri toxic volley",
+        NextAction::array(0,
+            new NextAction("cure poison", 85.0f),
+            new NextAction("cleanse poison", 85.0f),
+            NULL)));
+
+    // Bug Trio — Yauj Fear (19408 placeholder for 25807) magic dispel. Group-
+    // scan so non-feared healer fires the chain. Priority 90 (fear is
+    // disruptive — bot runs into the cloud).
+    triggers.push_back(new TriggerNode(
+        "yauj fear",
+        NextAction::array(0,
+            new NextAction("dispel magic", 90.0f),
+            new NextAction("cleanse magic", 90.0f),
+            NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========

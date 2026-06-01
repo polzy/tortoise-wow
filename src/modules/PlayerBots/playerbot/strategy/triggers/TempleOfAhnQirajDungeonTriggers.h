@@ -106,4 +106,26 @@ namespace ai
         SkeramTrueFulfillmentTrigger(PlayerbotAI* ai)
             : PartyHasAuraBySpellIdTrigger(ai, "skeram true fulfillment", 785, 1) {}
     };
+
+    // Bug Trio — Kri Toxic Volley (25812) — POISON-school AOE on raid every
+    // cycle (40y radius around the boss). Dispelable with cure poison
+    // (druid/shaman) / cleanse poison (paladin). Self-aura check is fine —
+    // it's raid-wide so any dispel-capable bot ticks alongside.
+    // ScriptDev2 boss_bug_trio.cpp:23 SPELL_TOXIC_VOLLEY.
+    class KriToxicVolleyTrigger : public Trigger
+    {
+    public:
+        KriToxicVolleyTrigger(PlayerbotAI* ai) : Trigger(ai, "kri toxic volley", 1) {}
+        bool IsActive() override { return ai->HasAura(25812, bot); }
+    };
+
+    // Bug Trio — Yauj Fear (19408 placeholder for 25807). Magic-school,
+    // dispelable. Feared bot can't act → group-scan so a non-feared healer
+    // fires the dispel chain. ScriptDev2 boss_bug_trio.cpp:29 SPELL_FEAR.
+    class YaujFearTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        YaujFearTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "yauj fear", 19408, 1) {}
+    };
 }
