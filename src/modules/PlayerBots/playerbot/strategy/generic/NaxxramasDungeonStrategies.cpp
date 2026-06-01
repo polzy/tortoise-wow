@@ -126,14 +126,17 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
             NULL)));
 
     // Loatheb Corrupted Mind (29185/29194/29196/29198 per class) — silences
-    // healer school for 12s. Cannot be dispelled. Healer-side response is
-    // to use non-class instant CDs (priest fade, shaman nature swiftness +
-    // chain heal, paladin lay on hands) or just survive — there is no
-    // "force" we can apply via direct action chain in vanilla. We DO route
-    // to a defensive: healer self-pots to weather the gap. Priority 90.
+    // healer school for 12s. Cannot be dispelled. Healer-side response: a
+    // class-agnostic survival defensive (healing potion) so the healer
+    // weathers the no-heal window. `healthstone` would have worked only
+    // for lock-summoned items; `healing potion` is universal in vanilla.
+    // Bandage as a no-shared-CD fallback if potion is on CD. Priority 90.
     triggers.push_back(new TriggerNode(
         "loatheb corrupted mind healer",
-        NextAction::array(0, new NextAction("healthstone", 90.0f), NULL)));
+        NextAction::array(0,
+            new NextAction("healing potion", 90.0f),
+            new NextAction("use bandage", 85.0f),
+            NULL)));
 
     // Patchwerk Hateful Strike (28308) — non-tank bots within 8y of Patchwerk
     // with low max HP get one-shot. Action: flee melee back to ranged
