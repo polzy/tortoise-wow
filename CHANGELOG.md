@@ -7,6 +7,20 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #3: Phase awareness primitives (`BossHpPctValue`, `BossHasAuraValue`)
+- New value `boss hp pct` qualified by NPC entry: scans 100y for that
+  creature and returns its `HP / MaxHP * 100`. Returns 100.0 if not in
+  range (no false-fire). Cached 1s.
+- New value `boss has aura` qualified by `<entry>:<spellId>` returns true
+  iff a same-entry creature within 100y has that aura. Use for aura-based
+  phase markers (Sapphiron hover aura, C'Thun body emerge, etc.).
+- Primitives only — no encounter wired yet. Foundation for Skeram split
+  P75/P50/P25 detection, Sapphiron air-vs-ground gate on the Frost Breath
+  trigger, C'Thun P1↔P2 transition, Vael 100→1% threshold, future
+  per-phase strategies.
+- Wired into ValueContext.h. Usage:
+  `AI_VALUE2(float, "boss hp pct", "15263") < 75.0f` // Skeram below 75%
+
 ### Added — Framework #2: AOE-evade non-oscillation (`MoveAwayAndStayFromCreature`)
 - Sustained-AOE mechanics (Anub'Rekhan Locust Swarm 20s, Sartura Whirlwind
   8s) had bots oscillating: MoveAwayFromCreature relocates bot to safe

@@ -2,6 +2,7 @@
 
 #include "ActiveSpellValue.h"
 #include "NearestGameObjects.h"
+#include "BossPhaseValues.h"
 #include "LogLevelValue.h"
 #include "NearestNpcsValue.h"
 #include "PossibleTargetsValue.h"
@@ -119,6 +120,9 @@ namespace ai
             creators["skip spells list"] = [](PlayerbotAI* ai) { return new SkipSpellsListValue(ai); };
             creators["nearest game objects"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai); };
             creators["nearest game objects no los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
+            // Framework #3 phase awareness — qualified values, see BossPhaseValues.h.
+            creators["boss hp pct"] = [](PlayerbotAI* ai) { return new BossHpPctValue(ai); };
+            creators["boss has aura"] = [](PlayerbotAI* ai) { return new BossHasAuraValue(ai); };
             creators["nearest dynamic objects"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai); };
             creators["nearest dynamic objects no los"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
             creators["closest game objects static los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, INTERACTION_DISTANCE, LOS_STATIC); };
