@@ -141,4 +141,15 @@ namespace ai
         TwinEmperorsMutateBugTrigger(PlayerbotAI* ai)
             : PartyHasAuraBySpellIdTrigger(ai, "twin emperors mutate bug", 802, 1) {}
     };
+
+    // Bug Trio — Kri's Toxic Vapors cloud creature (15933) spawns on Kri's
+    // death (boss_bug_trio.cpp:238 SPELL_SUMMON_CLOUD=25786). Anyone within
+    // ~10y of the cloud takes heavy poison ticks. 12y threshold so move-out
+    // completes before the next tick lands.
+    class KriToxicCloudNearbyTrigger : public CloseToCreatureTrigger
+    {
+    public:
+        KriToxicCloudNearbyTrigger(PlayerbotAI* ai)
+            : CloseToCreatureTrigger(ai, "kri toxic cloud nearby", 15933, 12.0f) {}
+    };
 }

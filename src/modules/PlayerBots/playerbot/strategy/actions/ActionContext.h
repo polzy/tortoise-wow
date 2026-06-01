@@ -419,6 +419,7 @@ namespace ai
             creators["enable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironEnableFightStrategyAction(ai); };
             creators["disable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironDisableFightStrategyAction(ai); };
             creators["hide behind sapphiron ice block"] = [](PlayerbotAI* ai) { return new HideBehindSapphironIceBlockAction(ai); };
+            creators["move away from anubrekhan locust swarm"] = [](PlayerbotAI* ai) { return new MoveAwayFromAnubRekhanLocustSwarmAction(ai); };
 
             // Temple of Ahn'Qiraj (AQ40)
             creators["enable temple of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajEnableDungeonStrategyAction(ai); };
@@ -426,6 +427,7 @@ namespace ai
             creators["enable sartura fight strategy"] = [](PlayerbotAI* ai) { return new SarturaEnableFightStrategyAction(ai); };
             creators["disable sartura fight strategy"] = [](PlayerbotAI* ai) { return new SarturaDisableFightStrategyAction(ai); };
             creators["move away from sartura"] = [](PlayerbotAI* ai) { return new SarturaMoveAwayAction(ai); };
+            creators["move away from kri toxic cloud"] = [](PlayerbotAI* ai) { return new MoveAwayFromKriToxicCloudAction(ai); };
             creators["enable huhuran fight strategy"] = [](PlayerbotAI* ai) { return new HuhuranEnableFightStrategyAction(ai); };
             creators["disable huhuran fight strategy"] = [](PlayerbotAI* ai) { return new HuhuranDisableFightStrategyAction(ai); };
 

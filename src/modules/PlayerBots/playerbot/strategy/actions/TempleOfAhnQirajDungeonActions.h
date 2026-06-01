@@ -24,6 +24,16 @@ namespace ai
         SarturaMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from sartura", 15516, 15.0f) {}
     };
 
+    // Bug Trio — Kri spawns a Toxic Vapors cloud creature (15933) on death.
+    // 15y move-out matches the cloud's ~10y tick radius + a buffer for the
+    // bot's path to complete before the next tick.
+    class MoveAwayFromKriToxicCloudAction : public MoveAwayFromCreature
+    {
+    public:
+        MoveAwayFromKriToxicCloudAction(PlayerbotAI* ai)
+            : MoveAwayFromCreature(ai, "move away from kri toxic cloud", 15933, 15.0f) {}
+    };
+
     // Fight enable/disable
     class SarturaEnableFightStrategyAction : public ChangeAllStrategyAction
     {

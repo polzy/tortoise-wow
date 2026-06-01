@@ -96,6 +96,29 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "sapphiron life drain", 28542, 1) {}
     };
 
+    // Anub'Rekhan Locust Swarm (28785) — self-buff on Anub that AOE-damages
+    // anyone within ~20y for 20s. Cast every 80-120s. Bots within 25y must
+    // move 30y+ out. Trigger fires when live Anub (15956) within 100y has
+    // the aura. ScriptDev2 boss_anubrekhan.cpp:21 SPELL_LOCUSTSWARM.
+    class AnubRekhanLocustSwarmTrigger : public Trigger
+    {
+    public:
+        AnubRekhanLocustSwarmTrigger(PlayerbotAI* ai) : Trigger(ai, "anubrekhan locust swarm", 1) {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15956, 100.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 100.0f);
+            for (Unit* u : units)
+            {
+                if (!u || !u->IsAlive()) continue;
+                if (u->HasAura(28785)) return true;
+            }
+            return false;
+        }
+    };
+
     // Frost Breath (28524) — 7s cast AOE in air phase. Blocked by LOS via
     // GO_ICEBLOCK (181247) spawned where icebolted players stood. Trigger
     // fires when a live Sapphiron within 100y is casting Frost Breath.

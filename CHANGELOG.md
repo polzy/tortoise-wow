@@ -7,6 +7,15 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Kri Toxic Cloud dodge + Anub'Rekhan Locust Swarm dodge
+- Bug Trio Kri Toxic Vapors cloud creature (15933) spawns on Kri's death.
+  Bots within 12y trigger move-out to 15y via `MoveAwayFromCreature` at
+  priority 95.
+- Anub'Rekhan Locust Swarm (28785) — 20s self-buff that AOE-ticks ~20y
+  around the boss every 80-120s. New `AnubRekhanLocustSwarmTrigger` scans
+  for live Anub (15956) with aura 28785; all bots move 30y+ out at priority
+  100 (fight-defining).
+
 ### Added — Sapphiron Ice Block hide (debloque Naxx Sapphiron)
 - Sapphiron casts Frost Breath (28524) every 6s during the air phase, 7s cast
   AOE that wipes the raid unless LOS'd by GO_ICEBLOCK (181247) — spawned

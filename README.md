@@ -142,7 +142,7 @@ Impending Doom).
 | Battleguard Sartura (AQ40)             | ✅     | Whirlwind (26083) — ranged stay >12y |
 | Princess Huhuran (AQ40)                | ✅     | Frenzy (26051) tranq + Noxious Poison (26053) cure (group-scan: tank can't self-cleanse) |
 | Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
-| Bug Trio (AQ40)                        | ✅     | Pro-engage Yauj Broods (15621) + Kri Toxic Volley (25812) cure poison + Yauj Fear (19408) magic dispel group-scan |
+| Bug Trio (AQ40)                        | ✅     | Pro-engage Yauj Broods (15621) + Kri Toxic Volley cure poison + Yauj Fear magic dispel + Toxic Vapors cloud (15933) move-out |
 | C'Thun P2 (AQ40)                       | ⚠️    | Pro-engage 5 tentacle types (Eye 15726, Small Claw 15725, Giant Claw 15728, Giant Eye 15334, Flesh 15802) at priority 90 |
 | Skeram (AQ40)                          | ⚠️    | True Fulfillment (785) MC dispel — priority 95, group-scan trigger (MC'd bot can't self-cleanse). Split-clone targeting still requires phase awareness |
 | Twin Emperors (AQ40)                   | ⚠️    | Mutate Bug (802) magic dispel — priority 95, group-scan (polymorphed bot can't act). Multi-tank teleport swap still TODO |
@@ -166,7 +166,7 @@ Impending Doom).
 | Loatheb (Naxx)                         | ✅     | Anti-heal mechanic handled by per-class healer cooldowns |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel — group-scan + caster spread |
 | Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
-| Anub'Rekhan (Naxx)                     | ⚠️    | Pro-engage Crypt Guards (16573). Locust Swarm dodge TODO |
+| Anub'Rekhan (Naxx)                     | ✅     | Pro-engage Crypt Guards (16573) + Locust Swarm (28785) detection → 30y move-out at priority 100 |
 | Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage mechanic relies on add detonation, raid-side |
 | Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
 | Sapphiron (Naxx)                       | ✅     | Life Drain (28542) on-party dispel + frost resist gear + Frost Breath (28524) detection → move to nearest GO_ICEBLOCK (181247) within 50y |

@@ -365,6 +365,7 @@ namespace ai
             creators["end sapphiron fight"] = [](PlayerbotAI* ai) { return new SapphironEndFightTrigger(ai); };
             creators["sapphiron life drain"] = [](PlayerbotAI* ai) { return new SapphironLifeDrainTrigger(ai); };
             creators["sapphiron frost breath"] = [](PlayerbotAI* ai) { return new SapphironFrostBreathTrigger(ai); };
+            creators["anubrekhan locust swarm"] = [](PlayerbotAI* ai) { return new AnubRekhanLocustSwarmTrigger(ai); };
             creators["four horsemen mark danger"] = [](PlayerbotAI* ai) { return new FourHorsemenMarkDangerTrigger(ai); };
 
             // Temple of Ahn'Qiraj (AQ40, map 531)
@@ -381,6 +382,7 @@ namespace ai
             creators["kri toxic volley"] = [](PlayerbotAI* ai) { return new KriToxicVolleyTrigger(ai); };
             creators["yauj fear"] = [](PlayerbotAI* ai) { return new YaujFearTrigger(ai); };
             creators["twin emperors mutate bug"] = [](PlayerbotAI* ai) { return new TwinEmperorsMutateBugTrigger(ai); };
+            creators["kri toxic cloud nearby"] = [](PlayerbotAI* ai) { return new KriToxicCloudNearbyTrigger(ai); };
 
             // Zul'Gurub (ZG, map 309)
             creators["enter zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubEnterDungeonTrigger(ai); };

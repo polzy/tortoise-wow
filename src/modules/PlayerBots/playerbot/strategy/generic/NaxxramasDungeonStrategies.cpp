@@ -81,6 +81,13 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
             new NextAction("cure poison on party", 85.0f),
             new NextAction("cleanse poison on party", 85.0f),
             NULL)));
+
+    // Anub'Rekhan Locust Swarm (28785) — 20s self-buff that AOE-ticks ~20y
+    // around Anub. Cast every 80-120s. All bots move 30y+ out at priority 100
+    // (fight-defining — bots in the AOE die in seconds).
+    triggers.push_back(new TriggerNode(
+        "anubrekhan locust swarm",
+        NextAction::array(0, new NextAction("move away from anubrekhan locust swarm", 100.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -73,6 +73,12 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("dispel magic on party", 95.0f),
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
+
+    // Bug Trio — Kri Toxic Vapors cloud (15933) spawns on Kri's death.
+    // Standing in it ticks heavy poison damage. Move out at priority 95.
+    triggers.push_back(new TriggerNode(
+        "kri toxic cloud nearby",
+        NextAction::array(0, new NextAction("move away from kri toxic cloud", 95.0f), NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========
