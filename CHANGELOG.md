@@ -7,6 +7,34 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — group-scan dispel chains were wiring SELF-targeting actions (CRITICAL)
+Code review caught a systemic bug in this session's group-scan refactor. The
+triggers were correctly upgraded to scan the party for the aura via
+`PartyHasAuraBySpellIdTrigger`, but the wired action chains
+(`dispel magic`, `cleanse magic`, `cure poison`, `cleanse poison`,
+`remove curse`) extend `CastCureSpellAction` whose `GetTargetName()` returns
+`"self target"` — so when the healer's trigger fires correctly on a tank's
+MC/curse/sleep aura, the healer's action checks the *healer's* own auras
+(finds nothing) and no-ops.
+
+Net effect: the whole "group-scan so a non-affected healer fires the chain"
+design was symbolic — pre-refactor self-aura behavior was preserved.
+
+Fix: replaced every wired action name with its `on party` variant in the
+dungeon strategy files. The `on party` actions extend `CurePartyMemberAction`
+which scans the party for any member with the matching dispel type and
+casts on them:
+
+- TempleOfAhnQirajDungeonStrategies.cpp — Skeram, Bug Trio (Kri + Yauj),
+  Twin Emperors
+- ZulGurubDungeonStrategies.cpp — Hazzarah, Hakkar magic/Venoxis aspects
+- RuinsOfAhnQirajDungeonStrategies.cpp — Ossirian Curse of Tongues
+- NaxxramasDungeonStrategies.cpp — Maexxna NP, Noth Curse, Faerlina
+  Poison Bolt, Sapphiron Life Drain, KT Mana Detonation
+
+Also fixes the README entry IDs for Faerlina Worshippers (was 15953/15954
+which are the boss + Noth, actual entries are 16505/16506).
+
 ### Fixed — `IsInterruptableSpellCasting` rejected stun-based interrupts
 Comprehensive audit of every class's `X on enemy healer` chain revealed
 **4 more classes** had dead-code interrupt validators in addition to the

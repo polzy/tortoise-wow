@@ -50,20 +50,20 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "noth plagued adds nearby",
         NextAction::array(0, new NextAction("engage noth plagued add", 85.0f), NULL)));
 
-    // Maexxna Necrotic Poison (28776) — poison, 90% heal reduction. Druid /
-    // shaman / paladin can strip (class-routed action chain).
+    // Maexxna Necrotic Poison (28776) — poison on tank, 90% heal reduction.
+    // *on party* so druid/shaman/paladin strips the tank.
     triggers.push_back(new TriggerNode(
         "maexxna necrotic poison",
         NextAction::array(0,
-            new NextAction("cure poison", 90.0f),
-            new NextAction("cleanse poison", 90.0f),
+            new NextAction("cure poison on party", 90.0f),
+            new NextAction("cleanse poison on party", 90.0f),
             NULL)));
 
-    // Noth Curse of Plaguebringer (29213) — curse, deadly tick. Druid /
-    // mage 'remove curse'.
+    // Noth Curse of Plaguebringer (29213) — curse on 3 random victims,
+    // deadly tick. *on party* so druid/mage strips victims.
     triggers.push_back(new TriggerNode(
         "noth curse plaguebringer",
-        NextAction::array(0, new NextAction("remove curse", 90.0f), NULL)));
+        NextAction::array(0, new NextAction("remove curse on party", 90.0f), NULL)));
 
     // Gothik adds — both live (16124-16126) and dead (16127, 16148-16150)
     // sides. The tank role on each side grabs the heavies; AOE focus on
@@ -72,13 +72,14 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "gothik adds nearby",
         NextAction::array(0, new NextAction("engage gothik add", 85.0f), NULL)));
 
-    // Faerlina Poison Bolt Volley (28796) — poison, raid-wide. Druid/shaman/
-    // paladin cure-poison chain. Priority 85.
+    // Faerlina Poison Bolt Volley (28796) — poison, raid-wide AOE. Use
+    // *on party* variants — the dispeller will pick whoever has the debuff
+    // (typically themselves on a raid-wide cast, but party-scan is safe).
     triggers.push_back(new TriggerNode(
         "faerlina poison bolt",
         NextAction::array(0,
-            new NextAction("cure poison", 85.0f),
-            new NextAction("cleanse poison", 85.0f),
+            new NextAction("cure poison on party", 85.0f),
+            new NextAction("cleanse poison on party", 85.0f),
             NULL)));
 }
 
@@ -180,8 +181,8 @@ void SapphironFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "sapphiron life drain",
         NextAction::array(0,
-            new NextAction("dispel magic", 80.0f),
-            new NextAction("cleanse magic", 80.0f),
+            new NextAction("dispel magic on party", 80.0f),
+            new NextAction("cleanse magic on party", 80.0f),
             NULL)));
 
     // Frost Breath dodge / Ice Block hide TODO — needs an Ice Block guid
@@ -222,8 +223,8 @@ void KelThuzadFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "kelthuzad mana detonation",
         NextAction::array(0,
-            new NextAction("dispel magic", 100.0f),
-            new NextAction("cleanse magic", 100.0f),
+            new NextAction("dispel magic on party", 100.0f),
+            new NextAction("cleanse magic on party", 100.0f),
             NULL)));
 }
 

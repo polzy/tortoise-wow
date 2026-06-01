@@ -43,12 +43,13 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
         "arlokk prowler nearby",
         NextAction::array(0, new NextAction("engage arlokk prowler", 80.0f), NULL)));
 
-    // Hazzarah Sleep (24664) dispel — magic.
+    // Hazzarah Sleep (24664) dispel — magic. *on party* variants so the
+    // non-slept healer strips the slept bot.
     triggers.push_back(new TriggerNode(
         "hazzarah sleep",
         NextAction::array(0,
-            new NextAction("dispel magic", 90.0f),
-            new NextAction("cleanse magic", 90.0f),
+            new NextAction("dispel magic on party", 90.0f),
+            new NextAction("cleanse magic on party", 90.0f),
             NULL)));
 
     // Venoxis Razzashi Cobras (11373) — persistent room adds.
@@ -62,20 +63,21 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void HakkarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     // Marli (24686) stun + Jeklik (24687) silence — magic, prio 80 matches
-    // existing Sulfuron Demo Shout / KT Mana Detonation cadence.
+    // existing Sulfuron Demo Shout / KT Mana Detonation cadence. Aspect lands
+    // on the tank → *on party* so a priest/paladin strips the tank.
     triggers.push_back(new TriggerNode(
         "hakkar magic aspect",
         NextAction::array(0,
-            new NextAction("dispel magic", 80.0f),
-            new NextAction("cleanse magic", 80.0f),
+            new NextAction("dispel magic on party", 80.0f),
+            new NextAction("cleanse magic on party", 80.0f),
             NULL)));
 
-    // Venoxis aspect (24688) poison.
+    // Venoxis aspect (24688) poison — also on tank → *on party*.
     triggers.push_back(new TriggerNode(
         "hakkar venoxis aspect",
         NextAction::array(0,
-            new NextAction("cure poison", 80.0f),
-            new NextAction("cleanse poison", 80.0f),
+            new NextAction("cure poison on party", 80.0f),
+            new NextAction("cleanse poison on party", 80.0f),
             NULL)));
 
     // Thekal aspect on Hakkar (24689) — hunter Tranquilizing Shot strips it.

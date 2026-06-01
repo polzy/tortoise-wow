@@ -167,7 +167,7 @@ Impending Doom).
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel — group-scan + caster spread |
 | Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
 | Anub'Rekhan (Naxx)                     | ⚠️    | Pro-engage Crypt Guards (16573). Locust Swarm dodge TODO |
-| Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (15953/15954) + Poison Bolt Volley (28796) cure poison. Enrage mechanic relies on add detonation, raid-side |
+| Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage mechanic relies on add detonation, raid-side |
 | Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
 | Sapphiron (Naxx)                       | ⚠️    | Life Drain (28542) dispel — group-scan (5 random victims) + frost resist gear. Ice Block hide pathing TODO |
 | Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse — group-scan (3 random victims) |

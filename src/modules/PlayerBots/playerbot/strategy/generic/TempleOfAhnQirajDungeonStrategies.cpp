@@ -33,44 +33,45 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
         NextAction::array(0, new NextAction("engage cthun tentacle", 90.0f), NULL)));
 
     // Skeram True Fulfillment (785) — MIND-CONTROL the affected raid member.
-    // Magic-school, dispelable. Same chain as Sulfuron Demoralizing Shout.
-    // Priority 95 (just under fight-defining): MC'd players can wipe the raid
-    // quickly so dispel ASAP.
+    // Magic-school, dispelable. Uses *on party* actions (CurePartyMemberAction)
+    // because the MC'd bot can't self-dispel — the priest/paladin scans the
+    // party for the magic debuff and strips it on the victim.
+    // Priority 95.
     triggers.push_back(new TriggerNode(
         "skeram true fulfillment",
         NextAction::array(0,
-            new NextAction("dispel magic", 95.0f),
-            new NextAction("cleanse magic", 95.0f),
+            new NextAction("dispel magic on party", 95.0f),
+            new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
     // Bug Trio — Kri Toxic Volley (25812) poison AOE every cycle. Cure-poison
-    // chain. Priority 85.
+    // chain. Raid-wide AOE so the dispel target is anyone in party — use
+    // the *on party* variants for the cure to dispel a party member.
     triggers.push_back(new TriggerNode(
         "kri toxic volley",
         NextAction::array(0,
-            new NextAction("cure poison", 85.0f),
-            new NextAction("cleanse poison", 85.0f),
+            new NextAction("cure poison on party", 85.0f),
+            new NextAction("cleanse poison on party", 85.0f),
             NULL)));
 
     // Bug Trio — Yauj Fear (19408 placeholder for 25807) magic dispel. Group-
-    // scan so non-feared healer fires the chain. Priority 90 (fear is
-    // disruptive — bot runs into the cloud).
+    // scan trigger + party-targeted dispel so the non-feared healer strips
+    // the fear on the feared bot. Priority 90.
     triggers.push_back(new TriggerNode(
         "yauj fear",
         NextAction::array(0,
-            new NextAction("dispel magic", 90.0f),
-            new NextAction("cleanse magic", 90.0f),
+            new NextAction("dispel magic on party", 90.0f),
+            new NextAction("cleanse magic on party", 90.0f),
             NULL)));
 
     // Twin Emperors — Mutate Bug (802) transforms the affected player into
-    // a Qiraji bug that detonates after 8s. Magic dispel via priest/paladin.
-    // Group-scan: polymorphed bot can't act on it. Priority 95 (untreated,
-    // it's fatal AOE on the entire raid stack).
+    // a Qiraji bug that detonates after 8s. Magic dispel via priest/paladin
+    // *on party* — polymorphed bot can't self-dispel. Priority 95.
     triggers.push_back(new TriggerNode(
         "twin emperors mutate bug",
         NextAction::array(0,
-            new NextAction("dispel magic", 95.0f),
-            new NextAction("cleanse magic", 95.0f),
+            new NextAction("dispel magic on party", 95.0f),
+            new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 }
 
