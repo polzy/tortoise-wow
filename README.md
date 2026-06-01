@@ -213,8 +213,8 @@ to the WotLK-only `wind shear` chain.
 |----------------------------------------|--------|-------|
 | `BUILD_ELUNA` CMake option             | ✅     | Default OFF; build flag wired in `src/game/CMakeLists.txt` |
 | `src/game/LuaEngine/` scaffold         | ✅     | `CMakeLists.txt` collects sources, `hooks/` + `methods/CMangos/` folders ready |
-| Eluna source vendored                  | ❌     | Clone https://github.com/ElunaLuaEngine/Eluna into `src/game/LuaEngine/` before building with `-DBUILD_ELUNA=ON` |
-| `#ifdef BUILD_ELUNA` host hooks        | ⚠️    | Partial — to validate once Eluna is cloned and a sample script is wired |
+| Eluna source vendored                  | ⚠️    | Source tree is present (Eluna + hooks/ + methods/CMangos/) but it was vendored from a TBC+ branch. Build with `BUILD_ELUNA=ON` produces ~30 compile errors against vanilla 1.18.1 — missing `sFactionTemplateStore`, `ProcEventInfo`, `DamageInfo`, `Map::GetEluna()`, `Spell::m_scriptRef`, `InstanceData` virtual signature drift. See `src/game/LuaEngine/PORTING_NOTES.md` for the full porting checklist (estimate 4-8h) |
+| `#ifdef BUILD_ELUNA` host hooks        | ❌     | Need to add `Map::GetEluna()` + `Unit::GetEluna()` before the existing hook calls can resolve. See PORTING_NOTES.md item #4 |
 
 ## Todo (as of 2026-06-01)
 
