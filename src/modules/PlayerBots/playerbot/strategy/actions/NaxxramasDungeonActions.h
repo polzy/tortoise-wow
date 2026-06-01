@@ -25,6 +25,53 @@ namespace ai
             : MoveAwayAndStayFromCreature(ai, "move away from anubrekhan locust swarm", 15956, 30.0f) {}
     };
 
+    // Framework #5 demo: Thaddius polarity. Each raid member carries either
+    // Positive Charge (28059) or Negative Charge (28084). Same-polarity bots
+    // must stack within ~10y; different-polarity bots must be >10y apart.
+    // Action: scan group for members with the same polarity as self, compute
+    // their centroid, and move there. The cross-bot read is the multi-player
+    // coordination primitive — each bot reads OTHER bots' aura state via the
+    // shared world, no message bus needed.
+    class ThaddiusMoveToSamePolarityAction : public MovementAction
+    {
+    public:
+        ThaddiusMoveToSamePolarityAction(PlayerbotAI* ai)
+            : MovementAction(ai, "thaddius same polarity") {}
+
+        bool Execute(Event& event) override
+        {
+            Player* bot = ai->GetBot();
+            if (!bot) return false;
+
+            uint32 myAura = 0;
+            if (ai->HasAura(28059, bot)) myAura = 28059;
+            else if (ai->HasAura(28084, bot)) myAura = 28084;
+            else return false;  // No polarity assigned yet
+
+            Group* group = bot->GetGroup();
+            if (!group) return false;
+
+            float sumX = 0.0f, sumY = 0.0f;
+            int count = 0;
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+            {
+                Player* member = ref->getSource();
+                if (!member || member == bot) continue;
+                if (member->GetMapId() != bot->GetMapId()) continue;
+                if (!member->IsAlive()) continue;
+                if (!ai->HasAura(myAura, member)) continue;
+                sumX += member->GetPositionX();
+                sumY += member->GetPositionY();
+                count++;
+            }
+            if (count == 0) return false;  // No same-polarity peers
+
+            float targetX = sumX / count;
+            float targetY = sumY / count;
+            return MoveTo(bot->GetMapId(), targetX, targetY, bot->GetPositionZ());
+        }
+    };
+
     // Hide on the FAR SIDE of the nearest ice block from Sapphiron — standing
     // AT the block leaves LOS clear to the airborne boss. ScriptDev2
     // boss_sapphiron.cpp:56 GO_ICEBLOCK = 181247, boss entry 15989.

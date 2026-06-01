@@ -7,6 +7,20 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #5: Multi-player coordination (Thaddius polarity)
+- New `ThaddiusHasPolarityTrigger` fires when self carries Positive Charge
+  (28059) or Negative Charge (28084).
+- New `ThaddiusMoveToSamePolarityAction` reads OTHER bots' aura state via
+  shared world (no message bus needed), computes the centroid of same-
+  polarity group members, and moves there. The cross-bot read demonstrates
+  the multi-player coord primitive — each bot inspects peers' state
+  directly via `ai->HasAura(spell, member)`.
+- Wired in NaxxramasDungeonStrategy at priority 95. Without this, Thaddius
+  polarity wipes the raid; with it, bots converge on their charge group
+  every 30s when Polarity Shift (28089) re-rolls.
+- Pattern reusable: any "group with same X" / "spread by Y" mechanic where
+  bots need to read peers' state.
+
 ### Added — Framework #4: Tank coordination (`PartyOtherTankHasAuraStacksTrigger`)
 - New base in GenericTriggers.h fires when self is a tank AND any OTHER
   tank in the group (same map, alive) carries a named aura with

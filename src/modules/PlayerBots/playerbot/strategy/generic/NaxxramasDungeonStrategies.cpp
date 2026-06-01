@@ -88,6 +88,15 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "anubrekhan locust swarm",
         NextAction::array(0, new NextAction("move away from anubrekhan locust swarm", 100.0f), NULL)));
+
+    // Thaddius polarity (28059 Positive / 28084 Negative) — Polarity Shift
+    // (28089) every ~30s re-rolls everyone. Same-polarity bots stack;
+    // different-polarity bots eat amped damage from each other's tick.
+    // Framework #5 multi-player coordination: action reads OTHER bots' aura
+    // state, computes same-polarity centroid, moves there. Priority 95.
+    triggers.push_back(new TriggerNode(
+        "thaddius has polarity",
+        NextAction::array(0, new NextAction("thaddius same polarity", 95.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

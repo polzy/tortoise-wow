@@ -119,6 +119,21 @@ namespace ai
         }
     };
 
+    // Thaddius polarity charges (Positive 28059 / Negative 28084) applied
+    // to the whole raid every ~30s via Polarity Shift (28089). Bots with the
+    // same polarity must stack to absorb each other's charge tick; bots with
+    // different polarity must spread or take amped damage. Trigger fires on
+    // self carrying either aura → action computes same-polarity centroid.
+    class ThaddiusHasPolarityTrigger : public Trigger
+    {
+    public:
+        ThaddiusHasPolarityTrigger(PlayerbotAI* ai) : Trigger(ai, "thaddius has polarity", 1) {}
+        bool IsActive() override
+        {
+            return ai->HasAura(28059, bot) || ai->HasAura(28084, bot);
+        }
+    };
+
     // Frost Breath (28524) — 7s cast AOE in air phase. Blocked by LOS via
     // GO_ICEBLOCK (181247) spawned where icebolted players stood. Trigger
     // fires when a live Sapphiron within 100y is casting Frost Breath.

@@ -367,6 +367,7 @@ namespace ai
             creators["sapphiron life drain"] = [](PlayerbotAI* ai) { return new SapphironLifeDrainTrigger(ai); };
             creators["sapphiron frost breath"] = [](PlayerbotAI* ai) { return new SapphironFrostBreathTrigger(ai); };
             creators["anubrekhan locust swarm"] = [](PlayerbotAI* ai) { return new AnubRekhanLocustSwarmTrigger(ai); };
+            creators["thaddius has polarity"] = [](PlayerbotAI* ai) { return new ThaddiusHasPolarityTrigger(ai); };
             creators["four horsemen mark danger"] = [](PlayerbotAI* ai) { return new FourHorsemenMarkDangerTrigger(ai); };
 
             // Temple of Ahn'Qiraj (AQ40, map 531)
