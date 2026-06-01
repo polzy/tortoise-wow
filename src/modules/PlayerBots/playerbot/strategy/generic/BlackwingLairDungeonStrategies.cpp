@@ -137,6 +137,35 @@ void NefarianFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
             new NextAction("dispel magic on party", 95.0f),
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
+
+    // P2/P3 hostile adds — Bone Construct (14605, raised drakonid skeletons)
+    // and Corrupted Infernal (14668, warlock-call spawn). Both need raid
+    // AOE focus to prevent the boss being free-cast on. Pro-engage gated
+    // on Nefarian (11583) alive, prio 95.
+    triggers.push_back(new TriggerNode(
+        "nefarian adds nearby",
+        NextAction::array(0, new NextAction("engage nefarian adds", 95.0f), NULL)));
+
+    // Priest Class Call (23401 Corrupted Healing) — priest's heals become
+    // damage on the heal target. SELF-only trigger on priests. dispel=0,
+    // ride out the 12s window. Action: self-defensives (healing potion +
+    // bandage) — gives the priest something to do that ISN'T harmful.
+    // Priority 100 (fight-defining: a priest who keeps healing during
+    // Corrupted Healing kills the tank).
+    triggers.push_back(new TriggerNode(
+        "nefarian priest call",
+        NextAction::array(0,
+            new NextAction("healing potion", 100.0f),
+            new NextAction("use bandage", 95.0f),
+            NULL)));
+
+    // Shaman Class Call (23425 Corrupted Totems) — shaman's totems damage
+    // the raid instead of buffing them. SELF-only trigger on shamans.
+    // Action: `totemic call` recalls all active totems immediately so the
+    // bleed stops. Priority 100 (raid AOE dmg = wipe risk in P3).
+    triggers.push_back(new TriggerNode(
+        "nefarian shaman call",
+        NextAction::array(0, new NextAction("totemic call", 100.0f), NULL)));
 }
 
 void NefarianFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

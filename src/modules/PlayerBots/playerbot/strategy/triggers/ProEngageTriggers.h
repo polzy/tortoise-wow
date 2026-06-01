@@ -222,6 +222,19 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "buru hatchling nearby", { 15521 }, 50.0f) {}
     };
 
+    // Nefarian P2 + P3 adds (gated on Nefarian 11583 alive).
+    //   - Bone Construct (14605) — P2 raises killed Drakonid corpses
+    //   - Corrupted Infernal (14668) — P3 Warlock-Call spawn (hostile)
+    // Both spawn during the encounter and need raid AOE. ScriptDev2
+    // boss_nefarian.cpp NPC_BONE_CONSTRUCT, NPC_CORRUPTED_INFERNAL.
+    class NefarianAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        NefarianAddsNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "nefarian adds nearby",
+                { 14605, 14668 }, 80.0f, 11583 /* NPC_NEFARIAN */) {}
+    };
+
     // Ouro Dirt Mound (15712) — spawned when Ouro burrows (SUBMERGE_VISUAL
     // aura 26063 on the boss). The raid kills mounds to make Ouro
     // re-emerge. Without pro-engage, bots stand idle while Ouro is

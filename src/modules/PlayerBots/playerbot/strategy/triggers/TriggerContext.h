@@ -431,6 +431,9 @@ namespace ai
             creators["kt frost blast self"] = [](PlayerbotAI* ai) { return new KTFrostBlastSelfTrigger(ai); };
             creators["kt frost blast party"] = [](PlayerbotAI* ai) { return new KTFrostBlastPartyTrigger(ai); };
             creators["ouro dirt mound nearby"] = [](PlayerbotAI* ai) { return new OuroDirtMoundNearbyTrigger(ai); };
+            creators["nefarian adds nearby"] = [](PlayerbotAI* ai) { return new NefarianAddsNearbyTrigger(ai); };
+            creators["nefarian priest call"] = [](PlayerbotAI* ai) { return new NefarianPriestCallTrigger(ai); };
+            creators["nefarian shaman call"] = [](PlayerbotAI* ai) { return new NefarianShamanCallTrigger(ai); };
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };

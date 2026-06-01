@@ -267,6 +267,54 @@ namespace ai
         }
     };
 
+    // --- Nefarian Class Calls (P3, 40% HP) ---
+    //
+    // Shouts a class-specific debuff every 30s on ALL members of that
+    // class. All Calls are Shadow-school, dispel=0 (NOT dispelable).
+    // SD2 boss_nefarian.cpp:45-53 IDs:
+    //   23397 WARRIOR (Berserk — uncontrolled enrage)
+    //   23398 DRUID   (Involuntary Cat Form)
+    //   23401 PRIEST  (Corrupted Healing — heals damage instead of healing)
+    //   23410 MAGE    (Wild Magic — random self-cast)
+    //   23414 ROGUE   (Paralyze)
+    //   23418 PALADIN (Siphon Blessing — blessings backfire)
+    //   23425 SHAMAN  (Corrupted Totems — totems damage raid)
+    //   23427 WARLOCK (Summon Corrupted Infernal 14668 hostile to raid)
+    //   23436 HUNTER  (Corrupt Weapon — weapon-dmg backfires)
+    //
+    // The 3 most impactful bot responses (others are minor passive):
+    //   PRIEST: stop healing → self healing potion (corrupted heals
+    //     would kill the heal target instead of healing them).
+    //   SHAMAN: totemic call → recall all totems so they stop damaging
+    //     raid. The totems themselves do the damage; removing them
+    //     stops the bleed immediately.
+    //   WARLOCK: not a self-debuff — spawns Corrupted Infernal (14668)
+    //     hostile to raid. Pro-engage handles this (see below).
+
+    class NefarianPriestCallTrigger : public Trigger
+    {
+    public:
+        NefarianPriestCallTrigger(PlayerbotAI* ai) : Trigger(ai, "nefarian priest call", 1) {}
+        bool IsActive() override
+        {
+            return bot && bot->getClass() == CLASS_PRIEST && ai->HasAura(23401, bot);
+        }
+    };
+
+    class NefarianShamanCallTrigger : public Trigger
+    {
+    public:
+        NefarianShamanCallTrigger(PlayerbotAI* ai) : Trigger(ai, "nefarian shaman call", 1) {}
+        bool IsActive() override
+        {
+            return bot && bot->getClass() == CLASS_SHAMAN && ai->HasAura(23425, bot);
+        }
+    };
+
+    // Pro-engage for Nefarian P2/P3 adds (Bone Construct 14605, Corrupted
+    // Infernal 14668) lives in ProEngageTriggers.h next to the other
+    // pro-engage triggers — see NefarianAddsNearbyTrigger.
+
     // --- Nefarian Veil of Shadow (22687) — Shadow-school 90% healing
     // reduction on the main tank. dispel=Magic so any priest/paladin can
     // strip it. Cast frequently in P3 (40% HP). Without removal the tank

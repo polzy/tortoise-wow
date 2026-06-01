@@ -465,6 +465,7 @@ namespace ai
             creators["move away from ossirian sand vortex"] = [](PlayerbotAI* ai) { return new MoveAwayFromOssirianSandVortexAction(ai); };
             creators["engage other twin emperor"] = [](PlayerbotAI* ai) { return new EngageOtherTwinAction(ai); };
             creators["engage ouro dirt mound"] = [](PlayerbotAI* ai) { return new EngageOuroDirtMoundAction(ai); };
+            creators["engage nefarian adds"] = [](PlayerbotAI* ai) { return new EngageNefarianAddsAction(ai); };
             creators["command understudy attack razuvious"] = [](PlayerbotAI* ai) { return new CommandUnderstudyAttackRazuviousAction(ai); };
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
             creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };

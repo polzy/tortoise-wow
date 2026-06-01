@@ -176,6 +176,15 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage buru egg", { 15514 }, 60.0f) {}
     };
 
+    // Nefarian P2/P3 adds — Bone Construct (14605, raised drakonids) +
+    // Corrupted Infernal (14668, warlock-call spawn). Both need raid AOE.
+    class EngageNefarianAddsAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageNefarianAddsAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage nefarian adds", { 14605, 14668 }, 80.0f) {}
+    };
+
     // Ouro Dirt Mound (15712) — burrow-phase add. Killing the mound
     // forces Ouro to re-emerge. 80y scan covers the whole pit (mounds
     // can spawn anywhere on the boss arena floor).
