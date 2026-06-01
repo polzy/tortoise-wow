@@ -15,13 +15,14 @@ namespace ai
     // finds nearest ice block within 50y and moves to its position. Bot ends
     // up next to the ice block, which puts Sapphiron's LOS line through it.
     // ScriptDev2 boss_sapphiron.cpp:56 GO_ICEBLOCK = 181247.
-    // Anub'Rekhan Locust Swarm — move 30y from the boss (15956). The AOE
-    // tick is ~20y radius; 30y gives a buffer for path completion.
-    class MoveAwayFromAnubRekhanLocustSwarmAction : public MoveAwayFromCreature
+    // Anub'Rekhan Locust Swarm — move 30y from the boss (15956). Uses the
+    // *AndStay* variant so the bot doesn't oscillate back into the 20s AOE
+    // via re-engaged Chase movement.
+    class MoveAwayFromAnubRekhanLocustSwarmAction : public MoveAwayAndStayFromCreature
     {
     public:
         MoveAwayFromAnubRekhanLocustSwarmAction(PlayerbotAI* ai)
-            : MoveAwayFromCreature(ai, "move away from anubrekhan locust swarm", 15956, 30.0f) {}
+            : MoveAwayAndStayFromCreature(ai, "move away from anubrekhan locust swarm", 15956, 30.0f) {}
     };
 
     // Hide on the FAR SIDE of the nearest ice block from Sapphiron — standing

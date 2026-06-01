@@ -7,6 +7,20 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #2: AOE-evade non-oscillation (`MoveAwayAndStayFromCreature`)
+- Sustained-AOE mechanics (Anub'Rekhan Locust Swarm 20s, Sartura Whirlwind
+  8s) had bots oscillating: MoveAwayFromCreature relocates bot to safe
+  point, but the normal Chase movement re-pulls the bot back into the AOE
+  → take ticks → flee → re-pull. Net ~30-50% AOE exposure.
+- New `MoveAwayAndStayFromCreature` base in DungeonActions: same scan +
+  safe-point logic, but when the bot is already outside `range` of the
+  creature it ACTIVELY clears `UNIT_STAT_CHASE` + `UNIT_STAT_FOLLOW` and
+  calls `ai->StopMoving()` — suppressing the chase that caused
+  oscillation. Trigger fires every tick during the AOE; once it stops
+  firing, the bot's normal threat-driven Chase resumes naturally.
+- Wired for Anub'Rekhan Locust Swarm + Sartura Whirlwind move-away (both
+  upgraded from `MoveAwayFromCreature` to the *AndStay* variant).
+
 ### Added — Framework #1: GameObject interaction primitive
 - New `UseNearbyGameObjectAction` base class in DungeonActions.h. Scans for
   the nearest GO of a given entry within `scanRange` yards, moves to ~4y

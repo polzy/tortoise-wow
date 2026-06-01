@@ -223,6 +223,46 @@ bool MoveAwayFromCreature::Execute(Event& event)
     return false;
 }
 
+// MoveAwayAndStayFromCreature: identical scan + safe-point logic as
+// MoveAwayFromCreature, but if the bot is already outside `range` of every
+// matching creature, it actively clears Chase/Follow state instead of
+// returning false — this is what stops the oscillation on sustained AOEs.
+bool MoveAwayAndStayFromCreature::Execute(Event& event)
+{
+    std::list<Unit*> units;
+    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, creatureID, range);
+    MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, u_check);
+    Cell::VisitAllObjects(bot, searcher, range);
+
+    // If we're already outside `range` of every match, the trigger is still
+    // active (e.g. AOE aura still on boss) but we're physically safe.
+    // Suppress chase so the bot's normal attack loop doesn't pull us back in.
+    if (units.empty())
+    {
+        ai->StopMoving();
+        bot->clearUnitState(UNIT_STAT_CHASE);
+        bot->clearUnitState(UNIT_STAT_FOLLOW);
+        AI_VALUE(LastMovement&, "last movement").Set(NULL);
+        return true;
+    }
+
+    // Otherwise delegate to the standard move-away logic by constructing a
+    // throwaway peer. (We don't inherit because their range/creatureID are
+    // private; cleanest is to inline the scan and use the same outward-pick.)
+    MoveAwayFromCreature delegate(ai, "move away from creature", creatureID, range);
+    return delegate.Execute(event);
+}
+
+bool MoveAwayAndStayFromCreature::isPossible()
+{
+    if (MovementAction::isPossible())
+    {
+        return ai->CanMove();
+    }
+
+    return false;
+}
+
 bool MoveAwayFromCreature::isPossible()
 {
     if (MovementAction::isPossible())

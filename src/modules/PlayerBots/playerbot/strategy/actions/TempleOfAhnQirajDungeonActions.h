@@ -16,12 +16,15 @@ namespace ai
         TempleOfAhnQirajDisableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable temple of ahnqiraj strategy", "-temple of ahnqiraj") {}
     };
 
-    // Move-away from Sartura herself (15516) during Whirlwind — 12y matches the
-    // 'sartura too close' trigger threshold + a small safety buffer.
-    class SarturaMoveAwayAction : public MoveAwayFromCreature
+    // Move-away from Sartura herself (15516) during Whirlwind — 15y matches the
+    // 'sartura too close' trigger threshold + a small safety buffer. Uses the
+    // *AndStay* variant so ranged/healer bots don't oscillate into the WW
+    // pull during the 8s spin.
+    class SarturaMoveAwayAction : public MoveAwayAndStayFromCreature
     {
     public:
-        SarturaMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from sartura", 15516, 15.0f) {}
+        SarturaMoveAwayAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from sartura", 15516, 15.0f) {}
     };
 
     // Bug Trio — Kri spawns a Toxic Vapors cloud creature (15933) on death.

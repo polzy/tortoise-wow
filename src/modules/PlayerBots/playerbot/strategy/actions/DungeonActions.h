@@ -84,6 +84,26 @@ namespace ai
         bool IsHazardNearby(const WorldPosition& point, const std::list<HazardPosition>& hazards) const;
     };
 
+    // Variant: same as MoveAwayFromCreature but, once the bot reaches the safe
+    // point, clears Chase/Follow movement state so the bot doesn't oscillate
+    // back into the AOE. Use for sustained-AOE mechanics (Anub'Rekhan Locust
+    // Swarm 20s, Sartura Whirlwind 8s, future similar). The trigger should
+    // fire every tick for the duration of the AOE so the clear-state happens
+    // continuously; once the AOE ends and the trigger stops firing, the bot's
+    // normal threat-driven Chase resumes naturally.
+    class MoveAwayAndStayFromCreature : public MovementAction
+    {
+    public:
+        MoveAwayAndStayFromCreature(PlayerbotAI* ai, std::string name, uint32 creatureID, float range)
+            : MovementAction(ai, name), creatureID(creatureID), range(range) {}
+        bool Execute(Event& event) override;
+        bool isPossible() override;
+
+    private:
+        uint32 creatureID;
+        float range;
+    };
+
     class MoveAwayFromCreature : public MovementAction
     {
     public:
