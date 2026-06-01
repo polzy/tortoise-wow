@@ -74,26 +74,31 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
-    // Viscidus (15299) frost phase — needs 200 frost hits to freeze. Caster
-    // bots: spam frost spells (Mage frostbolt, Shaman frost shock). Melee
-    // bots: normal attack (class fallback no-ops the frost action). Action
-    // chain order: frostbolt → frost shock → moonfire (druid). Priority 95.
+    // Viscidus (15299) frost phase — needs 200 frost-school hits to freeze.
+    // Only mage (frostbolt) and shaman (frost shock) actually deal frost
+    // damage in vanilla. Druid moonfire is Arcane school and would NOT
+    // count toward the freeze counter — removed per code-review 2026-06-01
+    // round 3 finding #4. Non-mage/shaman bots fall through to normal
+    // attack (correct — they'll prep DPS for the post-freeze shatter phase).
+    // README note: composition lacking 5+ casters between mage + shaman will
+    // struggle to freeze Viscidus inside the soft enrage window.
     triggers.push_back(new TriggerNode(
         "viscidus frost phase",
         NextAction::array(0,
             new NextAction("frostbolt", 95.0f),
             new NextAction("frost shock", 95.0f),
-            new NextAction("moonfire", 90.0f),
             NULL)));
 
-    // Bug Trio — Kri Toxic Vapors cloud: NOT wired. The SD2 script casts
-    // SPELL_SUMMON_CLOUD (25786) which is actually the *Toxic Vapors* aura,
-    // NOT a summon spell — per boss_bug_trio.cpp:24 comment "should be 26590
-    // -> summons 15933 -> casts 25786 in EventAI". Creature 15933 never
-    // spawns in current Turtle DB; KriToxicCloudNearbyTrigger and
-    // MoveAwayFromKriToxicCloudAction are kept (registered + base classes
-    // intact) so if Turtle adds the EventAI/script fix, just re-add the
-    // trigger node here.
+    // Bug Trio — Kri Toxic Vapors cloud (NPC 15933 "Poison Cloud") spawns on
+    // Kri's death via EventAI in Turtle WoW (verified in
+    // tw_world_creature_template — entry 15933 is EventAI-driven, not the
+    // broken SD2 script path). Bots within 12y trigger 15y move-out at
+    // priority 95. (Wire restored after re-verification — earlier removal
+    // in commit 3c4332e assumed creature never spawns, which is true for
+    // stock cmangos SD2 but NOT for Turtle's EventAI port.)
+    triggers.push_back(new TriggerNode(
+        "kri toxic cloud nearby",
+        NextAction::array(0, new NextAction("move away from kri toxic cloud", 95.0f), NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========

@@ -7,6 +7,43 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — code review round 3 on the 7 frameworks (5 real bugs)
+1. **Thaddius centroid landed on Thaddius** (critical wipe risk): with peers
+   spread on both sides of the boss, the X/Y average lands at the platform
+   center = on the boss = mixed-polarity stack = amped charge tick wipes
+   raid. Replaced centroid with a **deterministic anchor** (lowest
+   ObjectGuid among same-polarity peers). All same-polarity bots compute
+   the same anchor → stack converges to one side. Also adds 5y "already
+   close" short-circuit.
+2. **MoveAwayAndStayFromCreature blocked all downstream actions** for the
+   AOE duration: returning `true` from the "already safe" branch meant
+   healers stopped healing for the full 20s Anub Locust Swarm. Now
+   returns `false` after clearing chase state so lower-priority heals /
+   dispels still run.
+3. **Viscidus moonfire is Arcane school, not Frost**: druid moonfire would
+   not count toward the 200 frost-hit freeze counter. Removed from the
+   action chain. Only mage `frostbolt` + shaman `frost shock` are real
+   frost sources in vanilla.
+4. **UseNearbyGameObjectAction threshold 4y → 5y**: vanilla
+   `INTERACTION_DISTANCE` is 5.0f. The 4y threshold could oscillate the
+   bot between "too far" and "moved to position" at 4-5y range without
+   ever sending CMSG_GAMEOBJ_USE.
+5. **BossHasAuraValue silent-failed on malformed qualifier**: added
+   `sLog.outError` warnings for missing `:` separator and zero entry/spell
+   parse so the wiring author catches issues on first test.
+
+Re-wired the **Kri Toxic Vapors cloud** (NPC 15933) after re-verifying
+Turtle DB: entry 15933 ("Poison Cloud") IS in `tw_world_creature_template`
+as EventAI-driven — earlier removal (commit 3c4332e) was based on the
+broken stock SD2 script path, but Turtle has its own EventAI port. Bug
+Trio Kri now properly dodges the cloud.
+
+Heigan Framework #6 documented as ~50% effective: the Plague Fissure
+creature (533001) despawns in 50ms (TEMPSUMMON_TIMED_DESPAWN, 50) which
+is faster than the bot tick rate (~100-300ms). Bots will eat some ticks;
+predictive zone-cycle prediction would require reading Heigan's
+script-side event schedule.
+
 ### Added — Razorgore Possess Orb subclass (Framework #1 demo)
 - New `UseRazorgorePossessOrbAction` in BlackwingLairDungeonActions.h
   subclasses `UseNearbyGameObjectAction` with GO entry 177808

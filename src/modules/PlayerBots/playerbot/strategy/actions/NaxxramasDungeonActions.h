@@ -38,10 +38,13 @@ namespace ai
     // Framework #5 demo: Thaddius polarity. Each raid member carries either
     // Positive Charge (28059) or Negative Charge (28084). Same-polarity bots
     // must stack within ~10y; different-polarity bots must be >10y apart.
-    // Action: scan group for members with the same polarity as self, compute
-    // their centroid, and move there. The cross-bot read is the multi-player
-    // coordination primitive — each bot reads OTHER bots' aura state via the
-    // shared world, no message bus needed.
+    // Action: find the same-polarity peer with the lowest GUID (deterministic
+    // anchor across bots — they all pick the same one) and move within 5y of
+    // it. Anchor approach avoids the centroid-on-Thaddius failure mode: if
+    // peers are spread on both sides of the boss, the average X/Y lands on
+    // the boss = melee = mixed-polarity stack = wipe. Anchoring to a single
+    // peer guarantees the stack converges to one side. Code-review 2026-06-01
+    // round 3 finding #2.
     class ThaddiusMoveToSamePolarityAction : public MovementAction
     {
     public:
@@ -61,8 +64,9 @@ namespace ai
             Group* group = bot->GetGroup();
             if (!group) return false;
 
-            float sumX = 0.0f, sumY = 0.0f;
-            int count = 0;
+            // Deterministic anchor: lowest ObjectGuid among same-polarity peers
+            // (excluding self). All same-polarity bots compute the same anchor.
+            Player* anchor = nullptr;
             for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
             {
                 Player* member = ref->getSource();
@@ -70,15 +74,16 @@ namespace ai
                 if (member->GetMapId() != bot->GetMapId()) continue;
                 if (!member->IsAlive()) continue;
                 if (!ai->HasAura(myAura, member)) continue;
-                sumX += member->GetPositionX();
-                sumY += member->GetPositionY();
-                count++;
+                if (!anchor || member->GetObjectGuid() < anchor->GetObjectGuid())
+                    anchor = member;
             }
-            if (count == 0) return false;  // No same-polarity peers
+            if (!anchor) return false;  // No same-polarity peers (rare)
 
-            float targetX = sumX / count;
-            float targetY = sumY / count;
-            return MoveTo(bot->GetMapId(), targetX, targetY, bot->GetPositionZ());
+            // Already within stack range — keep position.
+            if (bot->GetDistance(anchor) < 5.0f) return false;
+
+            return MoveTo(anchor->GetMapId(), anchor->GetPositionX(),
+                          anchor->GetPositionY(), anchor->GetPositionZ());
         }
     };
 

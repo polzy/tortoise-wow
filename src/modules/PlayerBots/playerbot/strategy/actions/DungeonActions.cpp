@@ -237,13 +237,16 @@ bool MoveAwayAndStayFromCreature::Execute(Event& event)
     // If we're already outside `range` of every match, the trigger is still
     // active (e.g. AOE aura still on boss) but we're physically safe.
     // Suppress chase so the bot's normal attack loop doesn't pull us back in.
+    // Return FALSE so that lower-priority actions in the chain (heal,
+    // dispel, ranged dps) still run — otherwise healers stop healing for
+    // the entire AOE duration. Code-review 2026-06-01 round 3 finding #3.
     if (units.empty())
     {
         ai->StopMoving();
         bot->clearUnitState(UNIT_STAT_CHASE);
         bot->clearUnitState(UNIT_STAT_FOLLOW);
         AI_VALUE(LastMovement&, "last movement").Set(NULL);
-        return true;
+        return false;
     }
 
     // Otherwise delegate to the standard move-away logic by constructing a

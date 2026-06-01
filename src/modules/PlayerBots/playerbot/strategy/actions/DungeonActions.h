@@ -45,8 +45,11 @@ namespace ai
             }
             if (!closest) return false;
 
-            // ~4y is the vanilla interact range. If we're outside, walk in.
-            if (bestDist > 4.0f)
+            // INTERACTION_DISTANCE = 5.0f (Object.h). Walk closer if outside.
+            // Use 5.0f to match the engine constant — using 4.0f could loop
+            // MoveTo at exactly 4-5y where the bot oscillates between "too
+            // far" and "moved to position" without ever sending the use.
+            if (bestDist > 5.0f)
                 return MoveTo(closest->GetMapId(), closest->GetPositionX(), closest->GetPositionY(), closest->GetPositionZ());
 
             // Bot is in range — send the use opcode. Same path as right-click.
