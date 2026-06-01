@@ -7,6 +7,21 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Changed — pro-engage scoping (code-review #5 follow-up)
+- `NearbyHostileCreaturesTrigger` now accepts an optional `bossEntry`
+  parameter. When set, the trigger first does one cell scan for the boss
+  creature within 100y; if not found, skips the entry-list scan entirely.
+  Resolves the "Gluth zombies scanned everywhere in Naxx" concern from
+  the background reviewer.
+- Applied to the 5 Naxx dungeon-level triggers that were the worst
+  offenders: AnubrekhanCryptGuard (gated on 15956), FaerlinaWorshipper
+  (gated on 15953), GluthZombieChow (gated on 15932), MaexxnaSpiderling
+  (gated on 15952), NothPlaguedAdds (gated on 15954), GothikAdds (gated
+  on 16060 at 150y due to large room).
+- Existing per-FightStrategy wirings (Garr / Sulfuron / Ragnaros / Razorgore /
+  Onyxia / Sartura / Huhuran / Hakkar / etc.) didn't need the gate — they
+  only activate when their fight strategy is enabled.
+
 ### Added — Skeram True Fulfillment (785) dispel
 - AQ40 The Prophet Skeram MC mechanic. SPELL_TRUE_FULFILLMENT = 785
   (per boss_skeram.cpp:21) mind-controls the closest raid member each

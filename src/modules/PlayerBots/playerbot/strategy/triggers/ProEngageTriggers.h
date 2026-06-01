@@ -19,21 +19,49 @@ namespace ai
     class NearbyHostileCreaturesTrigger : public Trigger
     {
     public:
-        NearbyHostileCreaturesTrigger(PlayerbotAI* ai, std::string name, std::vector<uint32> entries, float rangeY)
+        // bossEntry: optional gate — if non-zero, the trigger first scans for
+        // a live boss creature within `bossGateRange` yards. If the boss is
+        // not present, the trigger returns false WITHOUT scanning the entry
+        // list. This resolves code-review #5 (2026-05-29): dungeon-level
+        // pro-engage triggers were scanning every tick anywhere in the
+        // dungeon, including bosses' rooms we weren't engaged with. With the
+        // gate, the scan only fires when the matching boss is nearby.
+        NearbyHostileCreaturesTrigger(PlayerbotAI* ai, std::string name,
+                                       std::vector<uint32> entries, float rangeY,
+                                       uint32 bossEntry = 0, float bossGateRange = 100.0f)
             : Trigger(ai, name)
             , m_entries(std::move(entries))
-            , m_range(rangeY) {}
+            , m_range(rangeY)
+            , m_bossEntry(bossEntry)
+            , m_bossGateRange(bossGateRange) {}
 
         bool IsActive() override
         {
             if (!bot || !bot->IsInWorld())
                 return false;
 
+            // Boss-presence gate (if set). One extra cell visit but it
+            // collapses the common "wrong room" case to a single miss,
+            // avoiding `entries × cell_visit` work on every tick everywhere
+            // in the dungeon.
+            if (m_bossEntry != 0)
+            {
+                std::list<Unit*> bossList;
+                MaNGOS::AllCreaturesOfEntryInRangeCheck bossCheck(bot, m_bossEntry, m_bossGateRange);
+                MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> bossSearcher(bossList, bossCheck);
+                Cell::VisitAllObjects(bot, bossSearcher, m_bossGateRange);
+                bool bossFound = false;
+                for (Unit* u : bossList)
+                {
+                    if (u && u->IsAlive()) { bossFound = true; break; }
+                }
+                if (!bossFound)
+                    return false;
+            }
+
             // One scan per entry. The cost is O(entries × cell_visit) but the
             // entries list is short (typically 1-3) and the range cap on
-            // VisitAllObjects keeps the cell window tight. Caching across
-            // entries would need a single-pass anyEntry searcher we don't
-            // have in the existing GridNotifiers API.
+            // VisitAllObjects keeps the cell window tight.
             for (uint32 entry : m_entries)
             {
                 std::list<Unit*> units;
@@ -55,6 +83,8 @@ namespace ai
     protected:
         std::vector<uint32> m_entries;
         float m_range;
+        uint32 m_bossEntry;
+        float m_bossGateRange;
     };
 
     // --- Per-encounter instantiations ---
@@ -133,36 +163,31 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "sartura royal guard nearby", { 15984 }, 50.0f) {}
     };
 
-    // Anub'Rekhan Crypt Guards (16573) spawn during the Locust Swarm phase —
-    // 3 of them, summoned 1 per ~50% HP transition. Each has Cleave + Web +
-    // Acid Spit. OTs grab on spawn so they don't reach the healers.
-    // ScriptDev2 boss_anubrekhan.cpp MOB_CRYPT_GUARD.
+    // Anub'Rekhan Crypt Guards (16573) — gated on Anub'Rekhan (15956) presence.
     class AnubrekhanCryptGuardNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         AnubrekhanCryptGuardNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "anubrekhan crypt guard nearby", { 16573 }, 60.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "anubrekhan crypt guard nearby",
+                { 16573 }, 60.0f, 15956 /* NPC_ANUB_REKHAN */) {}
     };
 
-    // Grand Widow Faerlina Worshippers (16506) + Followers (16505) — 4 are
-    // chained in the room before pull. They self-detonate at 50%HP Faerlina
-    // to lift her enrage. Pro-engage helps the off-tank/DPS focus them on
-    // proc; ScriptDev2 boss_faerlina.cpp NPC_NaxxramasFollower/Worshipper.
+    // Grand Widow Faerlina Worshippers/Followers — gated on Faerlina (15953).
     class FaerlinaWorshipperNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         FaerlinaWorshipperNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "faerlina worshipper nearby", { 16505, 16506 }, 50.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "faerlina worshipper nearby",
+                { 16505, 16506 }, 50.0f, 15953 /* NPC_FAERLINA */) {}
     };
 
-    // Gluth Zombie Chows (16360) spawn continuously during the encounter.
-    // The boss EATS any within 10y of him to heal — pro-engage to OT kites
-    // them away. ScriptDev2 boss_gluth.cpp NPC_ZOMBIE_CHOW.
+    // Gluth Zombie Chows (16360) — gated on Gluth (15932).
     class GluthZombieChowNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         GluthZombieChowNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "gluth zombie chow nearby", { 16360 }, 50.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "gluth zombie chow nearby",
+                { 16360 }, 50.0f, 15932 /* NPC_GLUTH */) {}
     };
 
     // Fankriss summons. Spawn of Fankriss (15630) — large add with Enrage at
@@ -234,25 +259,22 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "mandokir ohgan nearby", { 14988 }, 40.0f) {}
     };
 
-    // Naxx Maexxna Spiderlings (17055) — 12 spawn at 75%/50%/25% HP per
-    // ScriptDev2 boss_maexxna.cpp NPC_SPIDERLING. AOE focus required to
-    // prevent web wraps stacking on cocooned players.
+    // Maexxna Spiderlings (17055) — gated on Maexxna (15952).
     class MaexxnaSpiderlingNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         MaexxnaSpiderlingNearbyTrigger(PlayerbotAI* ai)
-            : NearbyHostileCreaturesTrigger(ai, "maexxna spiderling nearby", { 17055 }, 60.0f) {}
+            : NearbyHostileCreaturesTrigger(ai, "maexxna spiderling nearby",
+                { 17055 }, 60.0f, 15952 /* NPC_MAEXXNA */) {}
     };
 
-    // Naxx Noth's Plagued adds. Plagued Warrior (16984), Guardian (16981),
-    // Champion (16983), Construct (16982). Adds spawn during the
-    // teleport-to-balcony phase. ScriptDev2 boss_noth.cpp NPC_PLAGUED_*.
+    // Noth's Plagued adds — gated on Noth (15954).
     class NothPlaguedAddsNearbyTrigger : public NearbyHostileCreaturesTrigger
     {
     public:
         NothPlaguedAddsNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "noth plagued adds nearby",
-                { 16981, 16982, 16983, 16984 }, 80.0f) {}
+                { 16981, 16982, 16983, 16984 }, 80.0f, 15954 /* NPC_NOTH */) {}
     };
 
     // ZG High Priestess Marli summons Spawn of Marli (15041) from eggs around
@@ -325,7 +347,8 @@ namespace ai
     public:
         GothikAddsNearbyTrigger(PlayerbotAI* ai)
             : NearbyHostileCreaturesTrigger(ai, "gothik adds nearby",
-                { 16124, 16125, 16126, 16127, 16148, 16149, 16150 }, 80.0f) {}
+                { 16124, 16125, 16126, 16127, 16148, 16149, 16150 }, 80.0f,
+                16060 /* NPC_GOTHIK */, 150.0f /* big room */) {}
     };
 
     // AQ40 Princess Yauj Brood (15621) summoned during the Bug Trio fight.
