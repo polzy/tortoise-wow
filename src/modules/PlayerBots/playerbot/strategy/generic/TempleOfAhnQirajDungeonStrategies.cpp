@@ -61,6 +61,17 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("dispel magic", 90.0f),
             new NextAction("cleanse magic", 90.0f),
             NULL)));
+
+    // Twin Emperors — Mutate Bug (802) transforms the affected player into
+    // a Qiraji bug that detonates after 8s. Magic dispel via priest/paladin.
+    // Group-scan: polymorphed bot can't act on it. Priority 95 (untreated,
+    // it's fatal AOE on the entire raid stack).
+    triggers.push_back(new TriggerNode(
+        "twin emperors mutate bug",
+        NextAction::array(0,
+            new NextAction("dispel magic", 95.0f),
+            new NextAction("cleanse magic", 95.0f),
+            NULL)));
 }
 
 // ========== Battleguard Sartura (15516) ==========

@@ -379,6 +379,7 @@ namespace ai
             creators["skeram true fulfillment"] = [](PlayerbotAI* ai) { return new SkeramTrueFulfillmentTrigger(ai); };
             creators["kri toxic volley"] = [](PlayerbotAI* ai) { return new KriToxicVolleyTrigger(ai); };
             creators["yauj fear"] = [](PlayerbotAI* ai) { return new YaujFearTrigger(ai); };
+            creators["twin emperors mutate bug"] = [](PlayerbotAI* ai) { return new TwinEmperorsMutateBugTrigger(ai); };
 
             // Zul'Gurub (ZG, map 309)
             creators["enter zulgurub"] = [](PlayerbotAI* ai) { return new ZulGurubEnterDungeonTrigger(ai); };

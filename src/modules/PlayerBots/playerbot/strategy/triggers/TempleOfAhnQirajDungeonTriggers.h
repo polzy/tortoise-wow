@@ -128,4 +128,17 @@ namespace ai
         YaujFearTrigger(PlayerbotAI* ai)
             : PartyHasAuraBySpellIdTrigger(ai, "yauj fear", 19408, 1) {}
     };
+
+    // Twin Emperors — Veklor's Mutate Bug (802) turns the affected player
+    // into a Qiraji bug for ~8s, then they detonate (Explodebug 804) for AOE
+    // damage. Mutate Bug is Magic-school, dispelable. The transformed bot is
+    // polymorphed and CAN'T act on it → group-scan obligatoire so a healer
+    // or paladin elsewhere strips the form before the explosion lands on the
+    // raid. ScriptDev2 boss_twinemperors.cpp:47 SPELL_MUTATE_BUG.
+    class TwinEmperorsMutateBugTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        TwinEmperorsMutateBugTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "twin emperors mutate bug", 802, 1) {}
+    };
 }

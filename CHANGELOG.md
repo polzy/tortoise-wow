@@ -7,6 +7,13 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — AQ40 Twin Emperors Mutate Bug dispel
+- Mutate Bug (802) turns the affected raid member into a Qiraji bug for ~8s,
+  then detonates (Explodebug 804) for AOE. Magic dispel chain (priest
+  'dispel magic' / paladin 'cleanse magic'). Group-scan trigger since the
+  polymorphed bot can't act — a non-mutated healer fires the chain. Priority
+  95 (untreated → fatal raid AOE on the stacked group).
+
 ### Added — AQ40 Bug Trio dispels
 - Kri Toxic Volley (25812) — poison-school AOE on raid every cycle. Cure-
   poison chain (druid/shaman + paladin) at priority 85. Self-aura trigger
