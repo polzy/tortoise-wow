@@ -136,6 +136,35 @@ namespace ai
     };
 
     // ====================================================================
+    // Framework #9: MC charm pet-command primitive.
+    // ====================================================================
+    //
+    // CharmPetAttackTargetAction: when the bot is currently charming a
+    // unit (Player::GetCharm() != null), direct that charmed unit to
+    // attack a specific target picked by NPC entry. Mirrors the existing
+    // pet-attack flow in GenericActions.cpp:491 but works on charmed
+    // units (Razuvious DK Understudy etc) instead of summoned pets.
+    //
+    // CMSG_PET_ACTION packet routes through HandlePetAction which checks
+    // the GUID for both pets AND charms — so the same packet works for
+    // both target types.
+    //
+    // Use as a base class; subclass with a fixed target entry for each
+    // specific encounter (e.g. CommandUnderstudyAttackRazuviousAction
+    // hard-codes target = NPC_INSTRUCTOR_RAZUVIOUS 16061).
+    class CharmPetAttackTargetAction : public Action
+    {
+    public:
+        CharmPetAttackTargetAction(PlayerbotAI* ai, std::string name, uint32 targetEntry)
+            : Action(ai, name), m_targetEntry(targetEntry) {}
+        bool Execute(Event& event) override;
+        bool isUseful() override;
+
+    private:
+        uint32 m_targetEntry;
+    };
+
+    // ====================================================================
     // Framework #9 scaffold: MC charm orchestration (Razuvious).
     // ====================================================================
     //

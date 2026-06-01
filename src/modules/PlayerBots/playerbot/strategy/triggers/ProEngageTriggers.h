@@ -222,6 +222,20 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "buru hatchling nearby", { 15521 }, 50.0f) {}
     };
 
+    // Ouro Dirt Mound (15712) — spawned when Ouro burrows (SUBMERGE_VISUAL
+    // aura 26063 on the boss). The raid kills mounds to make Ouro
+    // re-emerge. Without pro-engage, bots stand idle while Ouro is
+    // underground and the mounds free-tick raid AOE.
+    // ScriptDev2 boss_ouro.cpp NPC_DIRT_MOUND = 15712, NPC_OURO = 15517.
+    // Gated on Ouro alive — mounds only spawn during the encounter.
+    class OuroDirtMoundNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        OuroDirtMoundNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "ouro dirt mound nearby",
+                { 15712 }, 80.0f, 15517 /* NPC_OURO */) {}
+    };
+
     // Buru Eggs (15514) — destroyable creatures placed around the room.
     // P1 strategy: Buru the Gorger (15370) chains a raid member and is
     // kited near eggs; killing an egg explodes for ~1500 damage in 8y

@@ -105,24 +105,25 @@ namespace ai
     // Framework #8 wire — Twin Emperors teleport swap.
     //
     // Vek'lor (15276) and Vek'nilash (15275) teleport-swap every ~30s.
-    // Teleport spell ID in this build's DB: looking up by name failed
-    // (no exact "Teleport" entry in 26500-26900 range that maps to the
-    // twins). The mechanic is detected via cast: ScriptDev2's
-    // boss_twin_emperors.cpp uses SPELL_TELEPORT = 26638 — present in
-    // standard cmangos but missing in Turtle. Fallback: detect via
-    // position-change in a future revision. For now this trigger
-    // reads BossIsCasting on both twins for the placeholder spell.
-    // EVEN IF the spell ID is wrong on this server, the trigger no-ops
-    // safely; the existing Unbalancing Strike tank-swap (Framework #4)
-    // remains the primary swap mechanism.
+    // SD2 cross-ref (boss_twinemperors.cpp:37-39):
+    //   SPELL_TWIN_TELEPORT_SCRIPT  = 799  (script effect, no-op)
+    //   SPELL_TWIN_TELEPORT_MSG     = 800  (CTRA watches for this)
+    //   SPELL_TWIN_TELEPORT_VISUAL  = 26638
+    // The MSG (800) fires ~5s before the actual swap, giving tanks the
+    // best heads-up. The VISUAL (26638) is concurrent with the swap.
+    // We check BOTH so we still catch the swap if 800 isn't in the
+    // Turtle DB. EITHER trigger fires → pair-swap action.
     class TwinEmperorsTeleportCastTrigger : public Trigger
     {
     public:
         TwinEmperorsTeleportCastTrigger(PlayerbotAI* ai) : Trigger(ai, "twin emperors teleport cast", 1) {}
         bool IsActive() override
         {
-            return AI_VALUE2(bool, "boss is casting", "15275:26638") ||
-                   AI_VALUE2(bool, "boss is casting", "15276:26638");
+            // Try the early-warning MSG first; fall back to visual on either twin.
+            return AI_VALUE2(bool, "boss is casting", "15275:800")
+                || AI_VALUE2(bool, "boss is casting", "15276:800")
+                || AI_VALUE2(bool, "boss is casting", "15275:26638")
+                || AI_VALUE2(bool, "boss is casting", "15276:26638");
         }
     };
 

@@ -176,6 +176,16 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage buru egg", { 15514 }, 60.0f) {}
     };
 
+    // Ouro Dirt Mound (15712) — burrow-phase add. Killing the mound
+    // forces Ouro to re-emerge. 80y scan covers the whole pit (mounds
+    // can spawn anywhere on the boss arena floor).
+    class EngageOuroDirtMoundAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageOuroDirtMoundAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage ouro dirt mound", { 15712 }, 80.0f) {}
+    };
+
     // Skeram split-phase retarget — clones and real boss share entry
     // 15263. When 2+ are alive AND one is at low HP, the bot's current
     // target may be a clone the raid already burned through. This action

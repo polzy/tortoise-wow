@@ -331,6 +331,56 @@ bool MoveAwayFromGameObject::isPossible()
     return MovementAction::isPossible() && ai->CanMove();
 }
 
+// Framework #9: command a charmed unit to attack a specific NPC entry.
+// Same CMSG_PET_ACTION payload as the hunter/warlock pet-attack chain in
+// GenericActions.cpp, but operates on Player::GetCharm() instead of
+// Player::GetPet(). HandlePetAction on the server side resolves the GUID
+// regardless of whether the source is a summoned pet or a charmed NPC.
+bool CharmPetAttackTargetAction::Execute(Event& event)
+{
+    Unit* charm = bot->GetCharm();
+    if (!charm || !charm->IsAlive())
+        return false;
+
+    // Find the target NPC by entry within 100y. Closest live match wins.
+    std::list<Unit*> matches;
+    MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, m_targetEntry, 100.0f);
+    MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(matches, check);
+    Cell::VisitAllObjects(bot, searcher, 100.0f);
+
+    Unit* target = nullptr;
+    float bestDistSq = 1e9f;
+    for (Unit* u : matches)
+    {
+        if (!u || !u->IsAlive()) continue;
+        float d = charm->GetDistance(u);
+        float dsq = d * d;
+        if (dsq < bestDistSq) { bestDistSq = dsq; target = u; }
+    }
+    if (!target) return false;
+
+    // Already attacking the right target — no-op so we don't spam packets.
+    if (charm->GetVictim() == target)
+        return true;
+
+    const uint8 flag = ACT_COMMAND;
+    const uint32 spellId = COMMAND_ATTACK;
+    const uint32 command = (flag << 24) | spellId;
+
+    WorldPacket data(CMSG_PET_ACTION);
+    data << charm->GetObjectGuid();
+    data << command;
+    data << target->GetObjectGuid();
+    bot->GetSession()->HandlePetAction(data);
+    return true;
+}
+
+bool CharmPetAttackTargetAction::isUseful()
+{
+    // Cheap gate: only useful when the bot is currently charming something.
+    return bot && bot->GetCharm() != nullptr;
+}
+
 bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const std::list<Creature*>& creatures, const std::list<HazardPosition>& hazards)
 {
     // Check if the point is not near other game objects

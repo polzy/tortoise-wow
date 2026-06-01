@@ -428,6 +428,9 @@ namespace ai
             creators["kurinnaxx sand trap nearby"] = [](PlayerbotAI* ai) { return new KurinnaxxSandTrapNearbyTrigger(ai); };
             creators["ossirian sand vortex nearby"] = [](PlayerbotAI* ai) { return new OssirianSandVortexNearbyTrigger(ai); };
             creators["twin emperors teleport cast"] = [](PlayerbotAI* ai) { return new TwinEmperorsTeleportCastTrigger(ai); };
+            creators["kt frost blast self"] = [](PlayerbotAI* ai) { return new KTFrostBlastSelfTrigger(ai); };
+            creators["kt frost blast party"] = [](PlayerbotAI* ai) { return new KTFrostBlastPartyTrigger(ai); };
+            creators["ouro dirt mound nearby"] = [](PlayerbotAI* ai) { return new OuroDirtMoundNearbyTrigger(ai); };
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };

@@ -140,6 +140,39 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
             new NextAction("use bandage", 90.0f),
             NULL)));
 
+    // Ouro Dirt Mound (15712) pro-engage. Spawns during Ouro burrow
+    // phase; killing it forces Ouro to re-emerge. Without this, bots
+    // stand idle while underground. Gated on Ouro alive (NPC 15517).
+    // ScriptDev2 boss_ouro.cpp NPC_DIRT_MOUND.
+    triggers.push_back(new TriggerNode(
+        "ouro dirt mound nearby",
+        NextAction::array(0, new NextAction("engage ouro dirt mound", 95.0f), NULL)));
+
+    // KT Frost Blast (27808) — SELF: flee from raid so the 10y AOE
+    // explosion on expiry only hits the carrier. Priority 100 because
+    // not fleeing wipes the cluster. SD2 boss_kelthuzad.cpp:60.
+    triggers.push_back(new TriggerNode(
+        "kt frost blast self",
+        NextAction::array(0, new NextAction("flee", 100.0f), NULL)));
+
+    // KT Frost Blast PARTY-scan — other bots also flee (away from the
+    // carrier, who is moving away from raid → net effect: cluster
+    // disperses). Priority 95 (carrier's SELF=100 wins for them).
+    triggers.push_back(new TriggerNode(
+        "kt frost blast party",
+        NextAction::array(0, new NextAction("flee", 95.0f), NULL)));
+
+    // Razuvious — Framework #9 pet-command wire. When the bot has charmed
+    // an Understudy (via priest orb-MC, manual today since the orb-use
+    // priest-side chain isn't wired), direct the Understudy to attack
+    // Razuvious. CharmPetAttackTargetAction::isUseful gates on
+    // bot->GetCharm() != null, so non-charming bots no-op cheaply.
+    // Wired against the "timer" trigger (every-second tick) — fight-
+    // defining: without Understudy tanking Razuvious, the raid wipes.
+    triggers.push_back(new TriggerNode(
+        "timer",
+        NextAction::array(0, new NextAction("command understudy attack razuvious", 100.0f), NULL)));
+
     // Thaddius polarity (28059 Positive / 28084 Negative) — Polarity Shift
     // (28089) every ~30s re-rolls everyone. Same-polarity bots stack;
     // different-polarity bots eat amped damage from each other's tick.

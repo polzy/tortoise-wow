@@ -209,4 +209,19 @@ namespace ai
     public:
         SapphironDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable sapphiron fight strategy", "-sapphiron") {}
     };
+
+    // Framework #9 wire — Razuvious: command charmed DK Understudy (16803)
+    // to attack Instructor Razuvious (16061). Only fires when the bot is
+    // already charming something (CharmPetAttackTargetAction::isUseful).
+    // The charm itself still needs to be established manually (priest uses
+    // orb → MC cast); this primitive handles step 4 of the pipeline
+    // documented in DungeonActions.h "Framework #9 scaffold".
+    // ScriptDev2 boss_razuvious.cpp NPC_RAZUVIOUS = 16061 (implicit, the
+    // boss creature_template entry); NPC_DK_UNDERSTUDY = 16803.
+    class CommandUnderstudyAttackRazuviousAction : public CharmPetAttackTargetAction
+    {
+    public:
+        CommandUnderstudyAttackRazuviousAction(PlayerbotAI* ai)
+            : CharmPetAttackTargetAction(ai, "command understudy attack razuvious", 16061) {}
+    };
 }

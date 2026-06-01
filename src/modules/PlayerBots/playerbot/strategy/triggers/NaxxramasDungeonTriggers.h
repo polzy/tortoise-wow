@@ -277,6 +277,30 @@ namespace ai
         }
     };
 
+    // --- KT Frost Blast (27808) — SELF: flee from raid (AOE explodes 10y).
+    // School=Frost, dispel=Magic per DB. Affected raider runs OUT of raid
+    // to isolate the explosion. The cast time is ~2s so we can fire flee
+    // even before the aura lands (detection via SELF aura is also OK since
+    // the explosion only hits at expiry — fleeing during the duration is
+    // the win). ScriptDev2 boss_kelthuzad.cpp SPELL_FROST_BLAST = 27808.
+    class KTFrostBlastSelfTrigger : public Trigger
+    {
+    public:
+        KTFrostBlastSelfTrigger(PlayerbotAI* ai) : Trigger(ai, "kt frost blast self", 1) {}
+        bool IsActive() override { return ai->HasAura(27808, bot); }
+    };
+
+    // KT Frost Blast PARTY-scan — non-affected bots stay AWAY from the
+    // affected member. Group-scan finds the carrier; the bot's response
+    // is to flee from the raid (which contains the carrier) so the
+    // expiry explosion doesn't catch them.
+    class KTFrostBlastPartyTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        KTFrostBlastPartyTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "kt frost blast party", 27808, 1) {}
+    };
+
     // --- Heigan Eruption cast (29371) — PREDICTIVE dance start ---
     // Framework #11 demo. The reactive HeiganFissureNearby trigger fires
     // only when a fissure has ALREADY spawned + lives long enough for the

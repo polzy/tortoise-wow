@@ -167,7 +167,7 @@ to the WotLK-only `wind shear` chain.
 | Skeram (AQ40)                          | ⚠️    | True Fulfillment (785) MC dispel on-party — priority 95. Split-clone targeting still requires phase awareness (Framework #3 primitive available, not wired) |
 | Twin Emperors (AQ40)                   | ⚠️    | Mutate Bug (802) magic dispel on-party + Heal Brother (7393) auto-interrupted via enemy-healer chain + Unbalancing Strike (26613) tank-swap via Framework #4. Multi-tank teleport swap still TODO |
 | Viscidus (AQ40)                        | ✅     | Frost-phase trigger forces caster bots onto frostbolt/frost shock/moonfire (Framework #7) until 200 hits freeze. Shatter phase handled by normal melee attack. |
-| Ouro (AQ40)                            | ❌     | Burrow & emerge mechanic — needs positional awareness of burrow GO + emerge cast detection; bots stay in place and eat Sweep |
+| Ouro (AQ40)                            | ⚠️    | Dirt Mound (15712) pro-engage at 80y prio 95 during burrow phase — killing the mound forces re-emerge. Sweep cone detection on re-emerge still TODO |
 | Moam (AQ20)                            | ✅     | Pro-engage Mana Fiends (15527) on summon — OTs grab + DPS focus before they reach the boss |
 | Buru (AQ20)                            | ✅     | Pro-engage Hivezara Hatchlings (15521) + **Buru Eggs (15514) at priority 95** — egg explosions are the primary boss damage source in P1, raid focuses eggs proactively |
 | Ayamiss (AQ20)                         | ✅     | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
@@ -185,7 +185,7 @@ to the WotLK-only `wind shear` chain.
 | Other ZG bosses                        | ❌     | Jeklik (Bat form / Charge / Screech fear-break covered by class strats) |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank + Hateful Strike (28308) flee for non-tank bots with maxHP<5000 within 8y (cloth/leather DPS retreat to ranged) |
 | Loatheb (Naxx)                         | ✅     | Corrupted Mind (29185/29194/29196/29198 per class) no-heal lockout detection on healers → healing potion + bandage defensive (dispel=0, must survive 12s window) |
-| Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel — group-scan + caster spread |
+| Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel + Frost Blast (27808) flee chain — SELF and PARTY scan both route to `flee` so cluster disperses before 10y AOE expiry. Chains of KT (28410) is dispel=0, broken by damage |
 | Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
 | Anub'Rekhan (Naxx)                     | ✅     | Pro-engage Crypt Guards (16573) + Locust Swarm (28785) — bots move 30y out and STAY (Framework #2, no chase oscillation) |
 | Grand Widow Faerlina (Naxx)            | ✅     | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage (28798) is dispel=0 — broken by Widow's Embrace (28732) when a worshipper dies (already pro-engaged) |
@@ -197,7 +197,7 @@ to the WotLK-only `wind shear` chain.
 | Gothik (Naxx)                          | ✅     | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |
 | Heigan (Naxx)                          | ⚠️    | Plague Fissure (533001) reactive dodge — bots flee within 20y of any spawned fissure (Framework #6). Empirically ~50% effective because fissures despawn in 50ms (faster than bot tick rate). Predictive zone-cycle would require reading boss script's internal timer |
 | Thaddius (Naxx)                        | ✅     | Polarity Shift (28089) → Positive (28059) / Negative (28084) charges, same-polarity deterministic anchor grouping via Framework #5 (lowest-ObjectGuid anchor — same side convergence). |
-| Razuvious (Naxx)                       | ❌     | DK Understudy (16803) mind-control mechanic — requires priest MC-targeting framework that doesn't yet exist (Framework #1 GameObject primitive only handles GO use, not MC charm orchestration). Currently Razuvious cannot be done bot-only — needs a human MC operator |
+| Razuvious (Naxx)                       | ⚠️    | Framework #9 pet-command primitive landed: `CharmPetAttackTargetAction` directs the charmed DK Understudy (16803) to attack Razuvious (16061) via CMSG_PET_ACTION. Wired via `timer` trigger so any bot that IS already charming routes the Understudy to the boss. Full priest-side orb-use + MC-cast chain still manual — needs orb GO entry confirmation in Turtle DB + auto-charm action |
 
 ### Server / infra
 | Feature                                | Status | Notes |
