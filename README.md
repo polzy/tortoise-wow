@@ -216,37 +216,57 @@ to the WotLK-only `wind shear` chain.
 | Eluna source vendored                  | ❌     | Clone https://github.com/ElunaLuaEngine/Eluna into `src/game/LuaEngine/` before building with `-DBUILD_ELUNA=ON` |
 | `#ifdef BUILD_ELUNA` host hooks        | ⚠️    | Partial — to validate once Eluna is cloned and a sample script is wired |
 
-## Todo
+## Todo (as of 2026-06-01)
 
-### Raid priority
-1. Tank face-away boss positioning — boss reste face au raid
-2. OT add-pickup logic — whelps Onyxia P2, Geddon, Lucifron summons
-3. Onyxia Deep Breath detection (spell 17086 / 23461) + perpendicular kite
-4. Onyxia Scale Cloak (item 15138) into BiS BACK slot for full Deep Breath immunity
+The Tank face-away / OT add-pickup / Deep Breath / Scale Cloak items previously
+listed here are all delivered (see encounter table). Outstanding work below is
+grouped by required effort, not by raid.
 
-### Boss strategies to complete
-- Lucifron AoE Silence handling
-- Garr / Geddon add explosion dodge
-- Shazzrah Magic Grounding + Arcane Explosion
-- Sulfuron Healers add pickup
-- Golemagg explosion + add removal
-- Majordomo CC management
-- Ragnaros submerge → Sons of Flame add waves
-- BWL: Razorgore mind control, Vael fire breath, Broodlord knockback, Chromaggus dispel
-- AQ40: Twin Emp positioning, Princess Yauj resurrection prevent, Huhuran nature resist
-- Naxx: 4 Horsemen mark swap, KT mind control, Sapphiron ice block
+### Boss strats still ⚠️ or ❌ (real work remaining)
 
-### Polish
-- Smart Roles context-aware per raid map (Onyxia 1 MT 1 OT vs MC 2 MT vs Naxx 3 MT)
-- Auto-resist on map enter (`.bot fr *` when master enters MC/Onyxia)
-- Pre-raid buffs auto-dispense (Mark of the Wild, PW: Fortitude, blessings, totems)
-- Bot inventory cleanup command (`.bot cleanup` to clear non-BiS bag clutter)
-- Inspect UI (addon click-handler on portrait → `.bot inspect`)
+| Boss | Gap | Reason it's hard |
+|------|-----|------------------|
+| Ebonroc (BWL)         | Shadow of Ebonroc self-heal (23340/23394) `dispel=0` | Aura is passive proc — not interruptable, not dispelable. Only path is burning faster (cooldown sync) |
+| Nefarian (BWL)        | Class Calls 23397-23436 per-class plumbing | Each call needs a class-aware response (warrior call → no taunt; mage call → no polymorph; etc). Big switch |
+| Skeram (AQ40)         | Split-clone target swap at 33%/15% HP | Needs `BossHpPctValue` wiring + closest-clone retarget action. Framework #3 primitive exists, ~half-day work |
+| Twin Emperors (AQ40)  | Teleport swap mid-fight (~30s cycle) | Each tank needs to re-position to the OTHER twin when boss teleports. Needs teleport-cast detection + paired tank coord. ~half-day work |
+| Ouro (AQ40)           | Burrow & emerge cycle | Bot needs to detect emerge GO + reposition off Sweep cone. Needs script-side timer access OR delay-based dead-reckoning |
+| Ossirian (AQ20)       | Tornado-kite shield-break | Tornado GO awareness + kite to break shield. Needs GO entry list + path planning |
+| Kurinnaxx (AQ20)      | Sand trap dodge | GO entry list + close-range move-out. Same primitive as Ossirian tornadoes |
+| Four Horsemen (Naxx)  | Mark swap zone change | Marks aren't magic-dispelable; raid swaps sides. Needs multi-tank zone coord + counter-rotation across 4 zones |
+| Heigan (Naxx)         | Predictive zone-cycle (current is 50% reactive) | Read Heigan's internal `Events::EVENT_SAFETY_DANCE` timer to anticipate fissures instead of reacting to spawn |
+| Razuvious (Naxx)      | DK Understudy MC orb operation | Priest takes Understudy via GO orb, tanks Raz with it. Needs MC charm orchestration (Framework #1 only handles GO use) |
+| Kel'Thuzad (Naxx)     | Frost Blast (28478) move-out + Chains of KT (28410) sequence | Currently only Mana Detonation dispel wired |
 
-### Infra / dev
+### Frameworks needed to unblock the above
+
+- **Framework #8 — Multi-tank teleport / zone coord**: paired tank target swap on cast event. Unblocks Twin Emperors + Four Horsemen mark swap.
+- **Framework #9 — MC charm orchestration**: priest takes orb GO → charm-control NPC → tank with it. Unblocks Razuvious + (long-term) C'Thun stomach phase tentacle eating.
+- **Framework #10 — GO-region kiting**: hazard GO list + safe-path planner. Unblocks Ossirian tornadoes + Kurinnaxx sand traps + Ouro burrows.
+- **Framework #11 — Script-side timer read**: hook into boss `Events` timer. Unblocks Heigan predictive dance, Loatheb pre-stack heals before Corrupted Mind.
+
+### Polish (no fight impact)
+
+- Smart Roles context-aware per raid map (Onyxia 1 MT 1 OT vs MC 2 MT vs Naxx 3 MT) — currently caps adapt by raid SIZE not by CONTENT
+- Auto-resist on map enter (`.bot fr *` when master enters MC/Onyxia) — manual button works, no auto trigger
+- Pre-raid buffs auto-dispense (Mark of the Wild, PW: Fortitude, blessings, totems) — bots have spells, no orchestrator
+- Bot inventory cleanup command (`.bot cleanup` to clear non-BiS bag clutter) — bags fill over time
+- Inspect UI (addon click-handler on portrait → `.bot inspect`) — currently chat-dump only
+
+### Stability / infra
+
+- **Faerlina Enrage detection trigger** — when she enrages (28798 on boss), boost worshipper kill priority to 100 (currently 80). Quick win.
+- **Skeram split phase trigger** — `BossHpPctValue` < 33 → fire "retarget closest skeram". Framework #3 ready.
+- **`AttackAnythingAction` 🚫 → fix or document** — disabled due to dangling Unit*; needed for free-world bots not in a raid
+- **Eluna vendoring + host hooks** (#44, #63 in task list) — clone Eluna into `src/game/LuaEngine/`, validate sample script
+- **MariaDB `character_aura` deadlock** ⚠️ — rare but happens; investigate transaction scope
+
+### Operational
+
+- Crash dump Discord webhook (parsed top frame → async monitoring)
 - Auto-test harness `.testbots` (init/bis/inspect per class, JSON-ish report)
-- Crash dump Discord webhook (parsed top frame → asynchronous monitoring)
-- Performance benchmark for `LearnPenqleClassSpells` (~5-10 ms per bot expected)
+- Benchmark `LearnPenqleClassSpells` (~5-10 ms per bot expected)
+- Cross-reference ike3/mangosbot upstream raid strats (#43 in task list)
 
 ## Companion repos / external references
 
