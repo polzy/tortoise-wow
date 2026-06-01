@@ -43,13 +43,23 @@ void ZulGurubDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
         "arlokk prowler nearby",
         NextAction::array(0, new NextAction("engage arlokk prowler", 80.0f), NULL)));
 
-    // Hazzarah Sleep (24664) dispel — magic. *on party* variants so the
-    // non-slept healer strips the slept bot.
+    // Hazzarah Sleep (24664) — DB-verified school=Shadow, dispel=0
+    // (NOT magic-dispelable, mechanic=10 sleep). Earlier wiring fired
+    // `dispel magic on party` which silently no-oped on the engine side.
+    // Real bot-side breaks in vanilla:
+    //   - Forsaken racial Will of the Forsaken clears sleep/fear/charm
+    //   - Warrior Berserker Rage breaks fear AND sleep (per ScriptDev2)
+    //   - PvP trinket (Insignia of the Horde/Alliance) — class-strat
+    //     decides if equipped
+    // Slept bot self-uses the racial/CD; can't be cured by others.
+    // Kept dispel call as last-priority defense in case engine treats
+    // some mechanic=10 spells differently (no harm, just no-op).
     triggers.push_back(new TriggerNode(
         "hazzarah sleep",
         NextAction::array(0,
-            new NextAction("dispel magic on party", 90.0f),
-            new NextAction("cleanse magic on party", 90.0f),
+            new NextAction("will of the forsaken", 95.0f),
+            new NextAction("berserker rage fear", 90.0f),
+            new NextAction("dispel magic on party", 50.0f),
             NULL)));
 
     // Venoxis Razzashi Cobras (11373) — persistent room adds.

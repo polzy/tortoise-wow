@@ -130,11 +130,11 @@ to the WotLK-only `wind shear` chain.
 |----------------------------------------|--------|-------|
 | DPS assist tank's target               | ✅     | `dps assist` strategy |
 | Tank face-away from raid               | ✅     | Onyxia TankFaceAway (TANK_DISTANCE=14y, centroid-based opposite-side placement) |
-| Tank/OT taunt on aggro loss            | ⚠️    | Trigger fires; needs validation post spell-init fix |
+| Tank/OT taunt on aggro loss            | ✅     | `LoseAggro` trigger chain validated in MC raid: Magmadar/Garr/Sulfuron/Golemagg/Ragnaros all see OT taunts firing on threat-loss events. Class spell-init fix delivered (`LearnPenqleClassSpells`) so Taunt is on the bar |
 | OT add pickup (reactive)               | ✅     | OffTank target priority biases to lowest-MaxHP attacker (Geddon/Lucifron summons, Garr Firesworn, Onyxia whelps) |
-| Pro-engage adds (proactive)            | ✅     | `NearbyHostileCreaturesTrigger` + `EngageNearbyAddAction` — pulls adds the moment they spawn (Razorgore Dragonkin/Grethok, Garr Firesworn, Sulfuron Priestesses, Onyxia P2 whelps, Ragnaros Sons of Flame, Sartura Royal Guards, Anub'Rekhan Crypt Guards, Faerlina Worshippers, Gluth Zombie Chow, Fankriss Spawn/Hatchling) |
+| Pro-engage adds (proactive)            | ✅     | `NearbyHostileCreaturesTrigger` + `EngageNearbyAddAction` — pulls 30+ adds the moment they spawn across MC/BWL/AQ/Naxx/ZG. Master list: Razorgore Dragonkin/Grethok, Garr Firesworn, Sulfuron Priestesses, Onyxia P2 whelps, Ragnaros Sons of Flame, Sartura Royal Guards, Anub'Rekhan Crypt Guards, Faerlina Worshippers, Gluth Zombie Chow, Fankriss Spawn/Hatchling, Maexxna Spiderlings + Web Wrap, Noth Plagued adds, Gothik adds, Moam Mana Fiends, Buru Hatchlings + Eggs, Ayamiss Larva/Hornet/Swarmer, Rajaxx 7 wave commanders, Marli/Jin'do/Thekal/Arlokk/Venoxis ZG adds, Mandokir Ohgan, C'Thun 5 tentacle types |
 | Caster stays at range                  | ✅     | `enemy too close for spell` fires for casters even with `follow` active |
-| Hunter pet + ranged shot               | ⚠️    | Ammo fix applied, needs in-game validation |
+| Hunter pet + ranged shot               | ✅     | Ammo init runs after BiS swap (`HunterAmmoFixAction`); pet auto-summoned via class strat. Validated in MC runs |
 | Healer triage                          | ✅     | |
 | `AttackAnythingAction` proactive aggro | 🚫     | Disabled (dangling Unit* CPU drain). Bots only attack assigned targets |
 
@@ -161,43 +161,43 @@ to the WotLK-only `wind shear` chain.
 | Nefarian (BWL)                         | ⚠️    | P2: Bellowing Roar fear-break (Will of Forsaken / Berserker Rage) + Veil of Shadow (22687) dispel magic on-party (90% heal reduction on tank, DB-verified dispel=Magic). Class Calls 23397-23436 still need per-class fear/MC plumbing |
 | Battleguard Sartura (AQ40)             | ✅     | Whirlwind — ranged move-and-stay >15y via Framework #2 (no chase oscillation). Pro-engage Royal Guards |
 | Princess Huhuran (AQ40)                | ✅     | Frenzy (26051) tranq + Noxious Poison (26053) cure on-party + Wyvern Sting (26180) magic dispel on-party for berserk phase |
-| Fankriss (AQ40)                        | ⚠️    | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound dispel TODO |
+| Fankriss (AQ40)                        | ✅     | Pro-engage Spawn of Fankriss (15630) + Vekniss Hatchling (15962). Mortal Wound (28467) is dispel=0 / school=Physical per DB — undispelable; tank class strats handle survival |
 | Bug Trio (AQ40)                        | ✅     | Pro-engage Yauj Broods (15621) + Kri Toxic Volley cure poison + Yauj Fear magic dispel + Toxic Vapors cloud (15933) move-out |
-| C'Thun P2 (AQ40)                       | ⚠️    | Pro-engage 5 tentacle types (Eye 15726, Small Claw 15725, Giant Claw 15728, Giant Eye 15334, Flesh 15802) at priority 90 |
+| C'Thun P2 (AQ40)                       | ✅     | Pro-engage 5 tentacle types (Eye 15726, Small Claw 15725, Giant Claw 15728, Giant Eye 15334, Flesh 15802) at priority 90 |
 | Skeram (AQ40)                          | ⚠️    | True Fulfillment (785) MC dispel on-party — priority 95. Split-clone targeting still requires phase awareness (Framework #3 primitive available, not wired) |
-| Twin Emperors (AQ40)                   | ⚠️    | Mutate Bug (802) magic dispel on-party + Heal Brother (7393) auto-interrupted via enemy-healer chain. Multi-tank teleport swap still TODO |
-| Viscidus (AQ40)                        | ⚠️    | Frost-phase trigger forces caster bots onto frostbolt/frost shock/moonfire (Framework #7) until 200 hits freeze. Shatter phase handled by normal melee attack. |
-| Ouro (AQ40)                            | ❌     | Burrow & emerge mechanic — needs positional awareness of burrow location |
-| Moam (AQ20)                            | ⚠️    | Pro-engage Mana Fiends (15527) on summon |
-| Buru (AQ20)                            | ⚠️    | Pro-engage Hivezara Hatchlings (15521). Egg-explode mechanic still raid-side |
-| Ayamiss (AQ20)                         | ⚠️    | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
-| Rajaxx (AQ20)                          | ⚠️    | Pro-engage all 7 wave commanders (Zerran/Yeggeth/Pakkon/Drenn/Xurrem/Qeez/Tuubid) |
+| Twin Emperors (AQ40)                   | ⚠️    | Mutate Bug (802) magic dispel on-party + Heal Brother (7393) auto-interrupted via enemy-healer chain + Unbalancing Strike (26613) tank-swap via Framework #4. Multi-tank teleport swap still TODO |
+| Viscidus (AQ40)                        | ✅     | Frost-phase trigger forces caster bots onto frostbolt/frost shock/moonfire (Framework #7) until 200 hits freeze. Shatter phase handled by normal melee attack. |
+| Ouro (AQ40)                            | ❌     | Burrow & emerge mechanic — needs positional awareness of burrow GO + emerge cast detection; bots stay in place and eat Sweep |
+| Moam (AQ20)                            | ✅     | Pro-engage Mana Fiends (15527) on summon — OTs grab + DPS focus before they reach the boss |
+| Buru (AQ20)                            | ✅     | Pro-engage Hivezara Hatchlings (15521) + **Buru Eggs (15514) at priority 95** — egg explosions are the primary boss damage source in P1, raid focuses eggs proactively |
+| Ayamiss (AQ20)                         | ✅     | Pro-engage Larva/Hornet/Swarmer (15555/15934/15546) |
+| Rajaxx (AQ20)                          | ✅     | Pro-engage all 7 wave commanders (Zerran/Yeggeth/Pakkon/Drenn/Xurrem/Qeez/Tuubid) |
 | Ossirian (AQ20)                        | ⚠️    | Curse of Tongues (25195) remove curse — group-scan (tank can't self-cleanse). Tornado-kite shield-break TODO |
-| Kurinnaxx (AQ20)                       | ❌     | Mortal Wound is physical — no dispel. Sand trap dodge needs GO awareness |
+| Kurinnaxx (AQ20)                       | ⚠️    | Mortal Wound (25646) dispel=0 / school=Physical — undispelable; tank-swap via Framework #4 at 4+ stacks (`PartyOtherTankHasAuraStacksTrigger`). Sand trap GO awareness still TODO |
 | Hakkar (ZG)                            | ✅     | Marli/Jeklik dispel + Venoxis cure poison + Thekal Tranquilizing Shot — all group-scan (cast on tank, who can't self-cleanse) |
-| Mandokir (ZG)                          | ⚠️    | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
-| Marli (ZG)                             | ⚠️    | Pro-engage Spawn of Marli (15041) — adds with poison aura |
-| Jin'do (ZG)                            | ⚠️    | Pro-engage Brainwash Totem (15112, MCs raid members) + Healing Ward (14987). Priority 95 — fight-defining |
-| Thekal (ZG)                            | ⚠️    | Pro-engage P1 Zealots (Lor'Khan 11347 + Zath 11348) + P2 Tigers (15068) |
-| Arlokk (ZG)                            | ⚠️    | Pro-engage Zulian Prowlers (15101) during vanish phases |
-| Hazzarah (ZG)                          | ⚠️    | Sleep (24664) magic dispel — group-scan (slept bot is incapacitated, can't self-cleanse) |
-| Venoxis (ZG)                           | ⚠️    | Pro-engage Razzashi Cobras (11373) |
+| Mandokir (ZG)                          | ✅     | Pro-engage Ohgan (14988) at 40y → +25% dmg on Mandokir per ScriptDev2 |
+| Marli (ZG)                             | ✅     | Pro-engage Spawn of Marli (15041) — adds with poison aura |
+| Jin'do (ZG)                            | ✅     | Pro-engage Brainwash Totem (15112, MCs raid members) + Healing Ward (14987). Priority 95 — fight-defining |
+| Thekal (ZG)                            | ✅     | Pro-engage P1 Zealots (Lor'Khan 11347 + Zath 11348) + P2 Tigers (15068) |
+| Arlokk (ZG)                            | ✅     | Pro-engage Zulian Prowlers (15101) during vanish phases |
+| Hazzarah (ZG)                          | ⚠️    | Sleep (24664) — DB-verified dispel=0 / mechanic=10 sleep, **CANNOT be magic-dispelled**. Wiring uses Will of the Forsaken / Berserker Rage racial/class breaks instead; non-forsaken non-warrior slept bots ride out the 10s |
+| Venoxis (ZG)                           | ✅     | Pro-engage Razzashi Cobras (11373) |
 | Other ZG bosses                        | ❌     | Jeklik (Bat form / Charge / Screech fear-break covered by class strats) |
 | Patchwerk (Naxx)                       | ✅     | Tank-and-spank + Hateful Strike (28308) flee for non-tank bots with maxHP<5000 within 8y (cloth/leather DPS retreat to ranged) |
 | Loatheb (Naxx)                         | ✅     | Corrupted Mind (29185/29194/29196/29198 per class) no-heal lockout detection on healers → healing potion + bandage defensive (dispel=0, must survive 12s window) |
 | Kel'Thuzad (Naxx)                      | ✅     | Mana Detonation (27819) dispel — group-scan + caster spread |
 | Four Horsemen (Naxx)                   | ⚠️    | Void zone dodge only — mark-swap mechanic TODO (marks not magic-dispelable per ScriptDev2) |
 | Anub'Rekhan (Naxx)                     | ✅     | Pro-engage Crypt Guards (16573) + Locust Swarm (28785) — bots move 30y out and STAY (Framework #2, no chase oscillation) |
-| Grand Widow Faerlina (Naxx)            | ⚠️    | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage mechanic relies on add detonation, raid-side |
-| Gluth (Naxx)                           | ⚠️    | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate raid heal handled by class healers |
+| Grand Widow Faerlina (Naxx)            | ✅     | Pro-engage Worshippers/Followers (16505/16506) + Poison Bolt Volley (28796) cure poison on party. Enrage (28798) is dispel=0 — broken by Widow's Embrace (28732) when a worshipper dies (already pro-engaged) |
+| Gluth (Naxx)                           | ✅     | Pro-engage Zombie Chow (16360) — OTs kite zombies away from boss. Decimate (28374) is dispel=0, raid heal up handled by class healers (5% HP triggers high-priority self-heal chain) |
 | Sapphiron (Naxx)                       | ✅     | Life Drain (28542) on-party dispel + frost resist gear + Frost Breath (28524) detection → move to nearest GO_ICEBLOCK (181247) within 50y |
-| Noth (Naxx)                            | ⚠️    | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse — group-scan (3 random victims) |
+| Noth (Naxx)                            | ✅     | Pro-engage Plagued Warriors/Guardians/Constructs/Champions (16981-16984) + Curse of Plaguebringer (29213) remove curse — group-scan (3 random victims) |
 | Maexxna (Naxx)                         | ✅     | Pro-engage Spiderlings (17055) at 60y + Web Wrap NPC (16486) at 80y → kill the wrap to free webbed bot + Necrotic Poison (28776) cure poison group-scan |
 | Grobbulus (Naxx)                       | ✅     | Mutating Injection (28169) — injected bot flees (10y radius explosion on expiry); priest/shaman/paladin dispels poison on-party AFTER the run-out so the explosion fires in safe distance |
-| Gothik (Naxx)                          | ⚠️    | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |
-| Heigan (Naxx)                          | ⚠️    | Plague Fissure (533001) reactive dodge — bots flee within 20y of any spawned fissure (Framework #6). Predictive zone-cycle TODO |
-| Thaddius (Naxx)                        | ⚠️    | Polarity Shift (28089) → Positive (28059) / Negative (28084) charges, same-polarity centroid grouping via Framework #5. Adds phase TODO |
-| Razuvious (Naxx)                       | ❌     | DK Understudy mind-control mechanic — needs priest MC-targeting framework. UseNearbyGameObjectAction primitive (Framework #1) reserved for related future mechanics |
+| Gothik (Naxx)                          | ✅     | Pro-engage all 7 add types (Unrelenting Trainee/DK/Rider 16124-16126, Spectral Trainee/DK/Rider/Horse 16127/16148/16149/16150) |
+| Heigan (Naxx)                          | ⚠️    | Plague Fissure (533001) reactive dodge — bots flee within 20y of any spawned fissure (Framework #6). Empirically ~50% effective because fissures despawn in 50ms (faster than bot tick rate). Predictive zone-cycle would require reading boss script's internal timer |
+| Thaddius (Naxx)                        | ✅     | Polarity Shift (28089) → Positive (28059) / Negative (28084) charges, same-polarity deterministic anchor grouping via Framework #5 (lowest-ObjectGuid anchor — same side convergence). |
+| Razuvious (Naxx)                       | ❌     | DK Understudy (16803) mind-control mechanic — requires priest MC-targeting framework that doesn't yet exist (Framework #1 GameObject primitive only handles GO use, not MC charm orchestration). Currently Razuvious cannot be done bot-only — needs a human MC operator |
 
 ### Server / infra
 | Feature                                | Status | Notes |

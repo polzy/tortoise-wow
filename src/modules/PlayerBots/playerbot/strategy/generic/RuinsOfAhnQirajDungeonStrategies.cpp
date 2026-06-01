@@ -15,6 +15,16 @@ void RuinsOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>&
     triggers.push_back(new TriggerNode(
         "buru hatchling nearby",
         NextAction::array(0, new NextAction("engage buru hatchling", 85.0f), NULL)));
+
+    // Buru Eggs (15514) — destroyable creatures around the arena. Each
+    // egg killed explodes (~1500 dmg in 8y) AND damages Buru. Eggs left
+    // alone hatch into Hivezara Hatchlings (15521). High priority (95)
+    // because Buru is otherwise unkillable: she takes minimal direct
+    // damage; nearly all the boss HP needs to come from egg explosions
+    // landing near her.
+    triggers.push_back(new TriggerNode(
+        "buru egg nearby",
+        NextAction::array(0, new NextAction("engage buru egg", 95.0f), NULL)));
     triggers.push_back(new TriggerNode(
         "ayamiss adds nearby",
         NextAction::array(0, new NextAction("engage ayamiss add", 85.0f), NULL)));

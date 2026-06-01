@@ -167,6 +167,15 @@ namespace ai
             : EngageNearbyAddAction(ai, "engage buru hatchling", { 15521 }, 50.0f) {}
     };
 
+    // Buru Eggs (15514) — kill before they hatch. Wider scan range (60y)
+    // covers the whole arena because eggs are scattered.
+    class EngageBuruEggAction : public EngageNearbyAddAction
+    {
+    public:
+        EngageBuruEggAction(PlayerbotAI* ai)
+            : EngageNearbyAddAction(ai, "engage buru egg", { 15514 }, 60.0f) {}
+    };
+
     class EngageAyamissAddAction : public EngageNearbyAddAction
     {
     public:

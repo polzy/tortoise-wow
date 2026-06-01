@@ -222,6 +222,22 @@ namespace ai
             : NearbyHostileCreaturesTrigger(ai, "buru hatchling nearby", { 15521 }, 50.0f) {}
     };
 
+    // Buru Eggs (15514) — destroyable creatures placed around the room.
+    // P1 strategy: Buru the Gorger (15370) chains a raid member and is
+    // kited near eggs; killing an egg explodes for ~1500 damage in 8y
+    // AND damages Buru. Each egg also hatches into a Hivezara Hatchling
+    // (15521) if not killed first. Pro-engage so the raid focuses eggs
+    // proactively. Gated on Buru the Gorger (15370) — only fires during
+    // the encounter. Range 60y covers the whole arena (eggs scattered).
+    // ScriptDev2 boss_buru.cpp NPC_BURU_EGG = 15514, NPC_BURU = 15370.
+    class BuruEggNearbyTrigger : public NearbyHostileCreaturesTrigger
+    {
+    public:
+        BuruEggNearbyTrigger(PlayerbotAI* ai)
+            : NearbyHostileCreaturesTrigger(ai, "buru egg nearby",
+                { 15514 }, 60.0f, 15370 /* NPC_BURU */) {}
+    };
+
     // Ayamiss summons during P1 (boss in air, raid kills adds + larvae on
     // altar). Hivezara Larva (15555) crawl to altar to be sacrificed; Hornet
     // (15934) attacks raid; Swarmer (15546) drops from Ayamiss.

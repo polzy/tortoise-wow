@@ -459,6 +459,7 @@ namespace ai
             creators["engage mandokir ohgan"] = [](PlayerbotAI* ai) { return new EngageMandokirOhganAction(ai); };
             creators["engage maexxna spiderling"] = [](PlayerbotAI* ai) { return new EngageMaexxnaSpiderlingAction(ai); };
             creators["engage maexxna web wrap"] = [](PlayerbotAI* ai) { return new EngageMaexxnaWebWrapAction(ai); };
+            creators["engage buru egg"] = [](PlayerbotAI* ai) { return new EngageBuruEggAction(ai); };
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
             creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };
             creators["engage jindo totem"] = [](PlayerbotAI* ai) { return new EngageJindoTotemAction(ai); };
