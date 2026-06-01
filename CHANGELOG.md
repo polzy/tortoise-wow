@@ -23,6 +23,15 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
   - Hazzarah Sleep (24664) — single-target; slept bot can't self-cleanse.
 - Faerlina Poison Bolt Volley (28796) verified raid-wide AOE — self-aura
   trigger is correct (dispellers will tick alongside).
+- Hakkar Aspects (Marli 24686 stun + Jeklik 24687 silence) and Venoxis
+  Aspect (24688 poison) all cast on Hakkar's current victim (tank). The
+  tank is stunned/silenced/poisoned and can't self-cleanse — group-scan
+  refactor so a priest/paladin elsewhere fires the chain.
+- Audited self-aura triggers that are NOT dispels and confirmed they stay
+  on self: Vael Burning Adrenaline (move-away action), Nefarian Bellowing
+  Roar (fear-break per-bot), Chromaggus Affliction (raid-wide breaths stack
+  on everyone), Karazhan Nether Portal (move-out per-bot), Baron Geddon
+  Living Bomb (flee-self).
 
 ### Added — Faerlina Poison Bolt + Ossirian Curse of Tongues dispels
 - Naxx Grand Widow Faerlina Poison Bolt Volley (28796) — poison-school,
