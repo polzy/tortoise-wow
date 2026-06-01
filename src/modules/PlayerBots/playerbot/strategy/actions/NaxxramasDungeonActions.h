@@ -25,6 +25,16 @@ namespace ai
             : MoveAwayAndStayFromCreature(ai, "move away from anubrekhan locust swarm", 15956, 30.0f) {}
     };
 
+    // Heigan dance: move 20y from the nearest Plague Fissure creature
+    // (533001). Reactive, not predictive. *AndStay* variant so the bot
+    // doesn't immediately re-engage chase after dodging.
+    class MoveAwayFromHeiganFissureAction : public MoveAwayAndStayFromCreature
+    {
+    public:
+        MoveAwayFromHeiganFissureAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from heigan fissure", 533001, 20.0f) {}
+    };
+
     // Framework #5 demo: Thaddius polarity. Each raid member carries either
     // Positive Charge (28059) or Negative Charge (28084). Same-polarity bots
     // must stack within ~10y; different-polarity bots must be >10y apart.

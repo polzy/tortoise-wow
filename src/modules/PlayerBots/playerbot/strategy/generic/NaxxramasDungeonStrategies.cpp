@@ -89,6 +89,14 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "anubrekhan locust swarm",
         NextAction::array(0, new NextAction("move away from anubrekhan locust swarm", 100.0f), NULL)));
 
+    // Heigan dance — Plague Fissures (NPC 533001) erupt instantly. Reactive
+    // dodge: any fissure within 15y → move 20y out. Won't perfectly dodge
+    // the predictable cycle but significantly improves survivability vs
+    // doing nothing. Priority 100 (fight-defining).
+    triggers.push_back(new TriggerNode(
+        "heigan fissure nearby",
+        NextAction::array(0, new NextAction("move away from heigan fissure", 100.0f), NULL)));
+
     // Thaddius polarity (28059 Positive / 28084 Negative) — Polarity Shift
     // (28089) every ~30s re-rolls everyone. Same-polarity bots stack;
     // different-polarity bots eat amped damage from each other's tick.

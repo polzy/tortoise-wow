@@ -7,6 +7,18 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #6: Positional rotation (reactive — Heigan dance)
+- New `HeiganFissureNearbyTrigger` (CloseToCreatureTrigger 15y on NPC
+  533001 Plague Fissure) + `MoveAwayFromHeiganFissureAction`
+  (MoveAwayAndStayFromCreature 20y).
+- Reactive (not predictive) — predictive cycle timing requires script-side
+  state we can't read from bot side. Bots dodge each fissure as it spawns;
+  some ticks are unavoidable because the spawn→eruption window is short
+  (~50ms despawn). Still significantly improves survivability vs zero
+  avoidance.
+- Wired in NaxxramasDungeonStrategy at priority 100 (fight-defining).
+- Pattern reusable for any "spawned instant-damage zone creature" → flee.
+
 ### Added — Framework #5: Multi-player coordination (Thaddius polarity)
 - New `ThaddiusHasPolarityTrigger` fires when self carries Positive Charge
   (28059) or Negative Charge (28084).

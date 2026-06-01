@@ -420,6 +420,7 @@ namespace ai
             creators["disable sapphiron fight strategy"] = [](PlayerbotAI* ai) { return new SapphironDisableFightStrategyAction(ai); };
             creators["hide behind sapphiron ice block"] = [](PlayerbotAI* ai) { return new HideBehindSapphironIceBlockAction(ai); };
             creators["thaddius same polarity"] = [](PlayerbotAI* ai) { return new ThaddiusMoveToSamePolarityAction(ai); };
+            creators["move away from heigan fissure"] = [](PlayerbotAI* ai) { return new MoveAwayFromHeiganFissureAction(ai); };
             creators["move away from anubrekhan locust swarm"] = [](PlayerbotAI* ai) { return new MoveAwayFromAnubRekhanLocustSwarmAction(ai); };
 
             // Temple of Ahn'Qiraj (AQ40)

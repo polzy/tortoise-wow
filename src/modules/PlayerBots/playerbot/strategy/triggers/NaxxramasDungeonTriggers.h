@@ -119,6 +119,19 @@ namespace ai
         }
     };
 
+    // Heigan Plague Fissure (533001) — eruption fissure creatures spawn in
+    // a zone pattern every ~3s. Each fissure casts SPELL_ERUPTION (29371)
+    // on itself dealing AOE damage in its zone, then despawns ~50ms later.
+    // Reactive bot logic: any fissure within 15y → move out. Won't perfectly
+    // dodge the dance (predictive timing requires script-side info) but
+    // significantly improves survivability vs no avoidance.
+    class HeiganFissureNearbyTrigger : public CloseToCreatureTrigger
+    {
+    public:
+        HeiganFissureNearbyTrigger(PlayerbotAI* ai)
+            : CloseToCreatureTrigger(ai, "heigan fissure nearby", 533001, 15.0f) {}
+    };
+
     // Thaddius polarity charges (Positive 28059 / Negative 28084) applied
     // to the whole raid every ~30s via Polarity Shift (28089). Bots with the
     // same polarity must stack to absorb each other's charge tick; bots with
