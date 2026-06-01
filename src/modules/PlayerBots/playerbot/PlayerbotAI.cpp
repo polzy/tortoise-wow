@@ -5632,6 +5632,14 @@ bool PlayerbotAI::IsInterruptableSpellCasting(Unit* target, std::string spell, u
 
         if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA) && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SILENCE)
             return true;
+
+        // Stuns interrupt casts at engine level (Spell::InterruptNonMeleeSpells
+        // fires on stun aura apply). Without this branch, the validator
+        // rejected: warrior Intercept (20252), druid Bash (5211), paladin
+        // Hammer of Justice (853) — all useful interrupts that would never
+        // be queued by the "X on enemy healer" chains. See audit 2026-06-01.
+        if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA) && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STUN)
+            return true;
 	}
 
 	return false;

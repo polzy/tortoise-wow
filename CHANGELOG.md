@@ -7,6 +7,34 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — `IsInterruptableSpellCasting` rejected stun-based interrupts
+Comprehensive audit of every class's `X on enemy healer` chain revealed
+**4 more classes** had dead-code interrupt validators in addition to the
+shaman wind shear bug:
+
+- Druid `bash on enemy healer` (Bash 5211 — stun aura 12, not silence)
+- Paladin `hammer of justice on enemy healer` (HoJ 853 — stun aura 12)
+- Warrior `intercept on enemy healer` (Intercept 20252 — charge-stun)
+- Paladin `repentance on enemy healer` (effect 17 area-aura, not interrupt)
+
+Root cause: `PlayerbotAI::IsInterruptableSpellCasting` validated only
+`SPELL_AURA_MOD_SILENCE` (27), missing `SPELL_AURA_MOD_STUN` (12) — yet
+stuns interrupt casts at the engine level (`Spell::InterruptNonMeleeSpells`
+fires on stun aura apply).
+
+Fix: one-line extension in `PlayerbotAI.cpp:5635` to also accept stun
+auras. Unlocks all four chains simultaneously.
+
+Remaining dead chains (intentional, no vanilla equivalent):
+- Hunter `silencing shot on enemy healer` — spell 34490 is TBC-only,
+  absent from Turtle 1.18 spell template. Chain fails silently because
+  bot has no spell id → validator short-circuits. Left in place in case
+  Turtle backports it.
+- Warlock `death coil on enemy healer` — Death Coil 6789 is fear (aura
+  7), not interrupt. Validator rejects. The fear DOES break casts
+  in-game but the bot won't queue it. Spell Lock (felhunter pet) chain
+  already covers warlock interrupts.
+
 ### Fixed — Shaman heal-interrupt was dead code on vanilla
 - `WindShearInterruptEnemyHealerSpellTrigger` checks if the bot knows the
   "wind shear" spell — but Wind Shear is a WotLK (lvl-80) shaman spell.
