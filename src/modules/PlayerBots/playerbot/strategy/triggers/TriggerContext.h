@@ -421,6 +421,10 @@ namespace ai
             creators["noth plagued adds nearby"] = [](PlayerbotAI* ai) { return new NothPlaguedAddsNearbyTrigger(ai); };
             creators["maexxna necrotic poison"] = [](PlayerbotAI* ai) { return new MaexxnaNecroticPoisonTrigger(ai); };
             creators["noth curse plaguebringer"] = [](PlayerbotAI* ai) { return new NothCursePlaguebringerTrigger(ai); };
+            creators["grobbulus mutating injection"] = [](PlayerbotAI* ai) { return new GrobbulusMutatingInjectionTrigger(ai); };
+            creators["party grobbulus injection"] = [](PlayerbotAI* ai) { return new PartyHasGrobbulusInjectionTrigger(ai); };
+            creators["loatheb corrupted mind healer"] = [](PlayerbotAI* ai) { return new LoathebCorruptedMindHealerTrigger(ai); };
+            creators["patchwerk hateful nontank"] = [](PlayerbotAI* ai) { return new PatchwerkHatefulNonTankTrigger(ai); };
             creators["faerlina poison bolt"] = [](PlayerbotAI* ai) { return new FaerlinaPoisonBoltTrigger(ai); };
             creators["ossirian curse of tongues"] = [](PlayerbotAI* ai) { return new OssirianCurseOfTonguesTrigger(ai); };
             creators["marli spawn nearby"] = [](PlayerbotAI* ai) { return new MarliSpawnNearbyTrigger(ai); };

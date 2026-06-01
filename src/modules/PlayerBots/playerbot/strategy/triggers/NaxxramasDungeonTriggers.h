@@ -202,6 +202,88 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "noth curse plaguebringer", 29213, 1) {}
     };
 
+    // --- Grobbulus Mutating Injection (28169) — Poison-school 12s debuff
+    // that EXPLODES on expiry (or on dispel) in a 10y radius and spawns a
+    // poison cloud. Best practice: affected raider runs >10y from group,
+    // THEN gets dispelled (instant explosion in a safe spot) OR lets it
+    // tick the full duration in isolation. We trigger on SELF — the
+    // injected bot needs to move itself away; nobody else moves for them.
+    // ScriptDev2 boss_grobbulus.cpp SPELL_MUTATING_INJECTION = 28169.
+    class GrobbulusMutatingInjectionTrigger : public Trigger
+    {
+    public:
+        GrobbulusMutatingInjectionTrigger(PlayerbotAI* ai) : Trigger(ai, "grobbulus mutating injection", 1) {}
+        bool IsActive() override { return ai->HasAura(28169, bot); }
+    };
+
+    // Group-scan variant: AFTER the injected bot has moved out (>10y from
+    // raid), a priest/shaman/paladin dispels (poison). The dispel triggers
+    // an immediate explosion which is now safe because the affected member
+    // is solo. Without the group-scan, the affected bot can't self-cleanse
+    // (poison comes from himself, his own dispel would explode him).
+    class PartyHasGrobbulusInjectionTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        PartyHasGrobbulusInjectionTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "party grobbulus injection", 28169, 1) {}
+    };
+
+    // --- Loatheb Corrupted Mind (29201) main effect spawns class-specific
+    // sub-debuffs that ZERO healing for 12s: priest 29185, paladin 29194,
+    // druid 29196, shaman 29198. These cannot be dispelled (dispel=0).
+    // Strategy: detect the no-heal window on SELF and during it use
+    // defensive CDs / drink potions / use bandage (BoTM in TBC, vanilla:
+    // healing potions / bandage). Tank takes burst — tank-side trigger
+    // routes to shield wall / last stand / divine protection. ScriptDev2
+    // boss_loatheb.cpp SPELL_INFECTED_*.
+    class LoathebCorruptedMindHealerTrigger : public Trigger
+    {
+    public:
+        LoathebCorruptedMindHealerTrigger(PlayerbotAI* ai) : Trigger(ai, "loatheb corrupted mind healer", 1) {}
+        bool IsActive() override
+        {
+            // Healer is silenced from heal-school casts — true when SELF
+            // has the class-specific infected aura.
+            return ai->HasAura(29185, bot) || ai->HasAura(29194, bot)
+                || ai->HasAura(29196, bot) || ai->HasAura(29198, bot);
+        }
+    };
+
+    // --- Patchwerk Hateful Strike (28308) ---
+    // Hateful Strike picks the highest-HP NON-TANK target within melee
+    // range (5y) of Patchwerk every ~1.2s for ~25,000 damage. Plate /
+    // high-HP melee DPS can soak; cloth/leather get one-shot. Bot-side
+    // strategy: non-tank melee with <5k HP backs off to ranged while a
+    // plate off-tank or melee with >5k HP stays in to soak.
+    // The trigger fires on a non-tank bot that is in melee range of
+    // Patchwerk (16028) AND has below-soak HP threshold.
+    class PatchwerkHatefulNonTankTrigger : public Trigger
+    {
+    public:
+        PatchwerkHatefulNonTankTrigger(PlayerbotAI* ai) : Trigger(ai, "patchwerk hateful nontank", 2) {}
+        bool IsActive() override
+        {
+            if (ai->IsTank(bot)) return false;
+
+            // Soak threshold tuned for vanilla T2/T2.5 gear levels: a
+            // raider with 5000+ max HP can survive 2 consecutive Hateful
+            // Strikes if heals land within the window. Cloth/leather are
+            // typically 3500-4500 — below the line.
+            if (bot->GetMaxHealth() >= 5000) return false;
+
+            // Patchwerk creature ID 16028. Scan 8y (melee + small margin).
+            std::list<Unit*> patchworks;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 16028, 8.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(patchworks, check);
+            Cell::VisitAllObjects(bot, searcher, 8.0f);
+            for (Unit* p : patchworks)
+            {
+                if (p && p->IsAlive()) return true;
+            }
+            return false;
+        }
+    };
+
     // --- Four Horsemen mark stacks ---
     // Marks (28832 Korth'azz fire / 28833 Blaumeux shadow / 28834 Mograine
     // unholy / 28835 Zeliek holy) stack on every Horseman cast (~12s). At 4

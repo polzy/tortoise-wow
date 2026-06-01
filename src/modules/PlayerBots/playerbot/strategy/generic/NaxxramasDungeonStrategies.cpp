@@ -105,6 +105,44 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "thaddius has polarity",
         NextAction::array(0, new NextAction("thaddius same polarity", 95.0f), NULL)));
+
+    // Grobbulus Mutating Injection (28169) — 12s Poison debuff that AOE-
+    // explodes on expiry (10y radius) and spawns a poison cloud. The injected
+    // bot needs to MOVE AWAY from the raid before expiry/dispel.
+    // Priority 95 because failing to run out wipes the raid via the cloud.
+    triggers.push_back(new TriggerNode(
+        "grobbulus mutating injection",
+        NextAction::array(0, new NextAction("flee", 95.0f), NULL)));
+
+    // After the injected bot has fled, a priest/shaman/paladin in the group
+    // can dispel (poison) for an instant explosion in the safe zone. Note:
+    // the affected bot can't self-cleanse — dispelling himself explodes him.
+    // Lower prio than the flee so the run-out happens first.
+    triggers.push_back(new TriggerNode(
+        "party grobbulus injection",
+        NextAction::array(0,
+            new NextAction("cure poison on party", 75.0f),
+            new NextAction("cleanse poison on party", 75.0f),
+            NULL)));
+
+    // Loatheb Corrupted Mind (29185/29194/29196/29198 per class) — silences
+    // healer school for 12s. Cannot be dispelled. Healer-side response is
+    // to use non-class instant CDs (priest fade, shaman nature swiftness +
+    // chain heal, paladin lay on hands) or just survive — there is no
+    // "force" we can apply via direct action chain in vanilla. We DO route
+    // to a defensive: healer self-pots to weather the gap. Priority 90.
+    triggers.push_back(new TriggerNode(
+        "loatheb corrupted mind healer",
+        NextAction::array(0, new NextAction("healthstone", 90.0f), NULL)));
+
+    // Patchwerk Hateful Strike (28308) — non-tank bots within 8y of Patchwerk
+    // with low max HP get one-shot. Action: flee melee back to ranged
+    // position. Priority 100 (fight-defining for cloth/leather DPS).
+    // Plate melee with high HP can ignore this — the trigger gates on
+    // max-HP threshold inside IsActive().
+    triggers.push_back(new TriggerNode(
+        "patchwerk hateful nontank",
+        NextAction::array(0, new NextAction("flee", 100.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
