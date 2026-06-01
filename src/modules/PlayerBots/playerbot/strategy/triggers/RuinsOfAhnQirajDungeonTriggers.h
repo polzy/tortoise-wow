@@ -23,4 +23,14 @@ namespace ai
         RuinsOfAhnQirajLeaveDungeonTrigger(PlayerbotAI* ai)
             : LeaveDungeonTrigger(ai, "leave ruins of ahnqiraj", "ruins of ahnqiraj", 509) {}
     };
+
+    // Ossirian Curse of Tongues (25195) — curse, -50% casting speed on raid
+    // casters. Dispelable with 'remove curse' (druid/mage). ScriptDev2
+    // boss_ossirian.cpp:36 SPELL_CURSE_OF_TONGUES.
+    class OssirianCurseOfTonguesTrigger : public Trigger
+    {
+    public:
+        OssirianCurseOfTonguesTrigger(PlayerbotAI* ai) : Trigger(ai, "ossirian curse of tongues", 1) {}
+        bool IsActive() override { return ai->HasAura(25195, bot); }
+    };
 }

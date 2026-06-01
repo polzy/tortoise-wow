@@ -23,4 +23,10 @@ void RuinsOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>&
     triggers.push_back(new TriggerNode(
         "rajaxx wave commander nearby",
         NextAction::array(0, new NextAction("engage rajaxx wave commander", 85.0f), NULL)));
+
+    // Ossirian Curse of Tongues (25195) — -50% casting speed on casters.
+    // Druid/mage 'remove curse'.
+    triggers.push_back(new TriggerNode(
+        "ossirian curse of tongues",
+        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
 }

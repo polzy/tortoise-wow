@@ -102,6 +102,14 @@ namespace ai
         bool IsActive() override { return ai->HasAura(28776, bot); }
     };
 
+    // --- Faerlina Poison Bolt Volley (28796) — poison, dispelable. ---
+    class FaerlinaPoisonBoltTrigger : public Trigger
+    {
+    public:
+        FaerlinaPoisonBoltTrigger(PlayerbotAI* ai) : Trigger(ai, "faerlina poison bolt", 1) {}
+        bool IsActive() override { return ai->HasAura(28796, bot); }
+    };
+
     // --- Noth Curse of Plaguebringer (29213) — curse, lethal damage tick. ---
     class NothCursePlaguebringerTrigger : public Trigger
     {

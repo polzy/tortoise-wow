@@ -7,6 +7,13 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Faerlina Poison Bolt + Ossirian Curse of Tongues dispels
+- Naxx Grand Widow Faerlina Poison Bolt Volley (28796) — poison-school,
+  raid-wide. Cure-poison chain (druid/shaman + paladin) at priority 85.
+- AQ20 Ossirian Curse of Tongues (25195) — curse, -50% casting speed.
+  Remove-curse (druid/mage) at priority 80 via the RuinsOfAhnQiraj
+  dungeon strategy.
+
 ### Changed — pro-engage scoping (code-review #5 follow-up)
 - `NearbyHostileCreaturesTrigger` now accepts an optional `bossEntry`
   parameter. When set, the trigger first does one cell scan for the boss

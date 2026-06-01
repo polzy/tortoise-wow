@@ -71,6 +71,15 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "gothik adds nearby",
         NextAction::array(0, new NextAction("engage gothik add", 85.0f), NULL)));
+
+    // Faerlina Poison Bolt Volley (28796) — poison, raid-wide. Druid/shaman/
+    // paladin cure-poison chain. Priority 85.
+    triggers.push_back(new TriggerNode(
+        "faerlina poison bolt",
+        NextAction::array(0,
+            new NextAction("cure poison", 85.0f),
+            new NextAction("cleanse poison", 85.0f),
+            NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
