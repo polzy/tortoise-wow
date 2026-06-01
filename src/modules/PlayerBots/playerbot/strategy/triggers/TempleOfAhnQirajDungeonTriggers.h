@@ -95,10 +95,14 @@ namespace ai
     // from any priest 'dispel magic' / paladin 'cleanse magic' returns the
     // MC'd player to the raid before they hit anyone.
     // ScriptDev2 boss_skeram.cpp:21 SPELL_TRUE_FULFILLMENT = 785.
-    class SkeramTrueFulfillmentTrigger : public Trigger
+    //
+    // Note: scans the WHOLE raid for the aura — the MC'd bot is charmed and
+    // can't run its own dispel logic, so the trigger must fire for OTHER
+    // (un-MC'd) bots in the group so a healer/paladin can react.
+    class SkeramTrueFulfillmentTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        SkeramTrueFulfillmentTrigger(PlayerbotAI* ai) : Trigger(ai, "skeram true fulfillment", 1) {}
-        bool IsActive() override { return ai->HasAura(785, bot); }
+        SkeramTrueFulfillmentTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "skeram true fulfillment", 785, 1) {}
     };
 }

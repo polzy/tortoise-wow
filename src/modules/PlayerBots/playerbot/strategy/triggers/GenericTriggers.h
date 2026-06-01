@@ -667,12 +667,50 @@ namespace ai
         int auraTypeId;
 	};
 
-    class HasNoAuraTrigger : public Trigger 
+    class HasNoAuraTrigger : public Trigger
     {
     public:
         HasNoAuraTrigger(PlayerbotAI* ai, std::string spell) : Trigger(ai, spell) {}
         virtual std::string GetTargetName() override { return "self target"; }
         virtual bool IsActive() override;
+    };
+
+    // Fires when ANY same-map party member has the given aura (by spell id).
+    // Subclass and set m_spellId. Use when the dispelable debuff is
+    // single-target and may land on a bot that can't self-dispel (e.g. Skeram
+    // True Fulfillment MCs a victim that's then charmed; Ossirian Curse of
+    // Tongues lands on the tank only). The trigger ticks across the raid so
+    // any dispel-capable bot fires its chain.
+    class PartyHasAuraBySpellIdTrigger : public Trigger
+    {
+    public:
+        PartyHasAuraBySpellIdTrigger(PlayerbotAI* ai, std::string name, uint32 spellId, int interval = 1)
+            : Trigger(ai, name, interval), m_spellId(spellId) {}
+
+        virtual std::string GetTargetName() override { return "self target"; }
+
+        virtual bool IsActive() override
+        {
+            Player* bot = ai->GetBot();
+            if (!bot) return false;
+            if (ai->HasAura(m_spellId, bot)) return true;
+
+            Group* group = bot->GetGroup();
+            if (!group) return false;
+
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+            {
+                Player* member = ref->getSource();
+                if (!member || member == bot) continue;
+                if (member->GetMapId() != bot->GetMapId()) continue;
+                if (!member->IsAlive()) continue;
+                if (ai->HasAura(m_spellId, member)) return true;
+            }
+            return false;
+        }
+
+    protected:
+        uint32 m_spellId;
     };
 
     class TimerTrigger : public Trigger

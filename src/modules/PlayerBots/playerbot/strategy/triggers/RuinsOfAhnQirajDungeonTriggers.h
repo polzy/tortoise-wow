@@ -27,10 +27,15 @@ namespace ai
     // Ossirian Curse of Tongues (25195) — curse, -50% casting speed on raid
     // casters. Dispelable with 'remove curse' (druid/mage). ScriptDev2
     // boss_ossirian.cpp:36 SPELL_CURSE_OF_TONGUES.
-    class OssirianCurseOfTonguesTrigger : public Trigger
+    //
+    // Note: scans the whole raid for the aura. Ossirian's curse lands on the
+    // current victim (typically the tank, warrior/paladin — no 'remove
+    // curse'). The trigger must fire for the druid/mage bots in the group so
+    // they cleanse the tank.
+    class OssirianCurseOfTonguesTrigger : public PartyHasAuraBySpellIdTrigger
     {
     public:
-        OssirianCurseOfTonguesTrigger(PlayerbotAI* ai) : Trigger(ai, "ossirian curse of tongues", 1) {}
-        bool IsActive() override { return ai->HasAura(25195, bot); }
+        OssirianCurseOfTonguesTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "ossirian curse of tongues", 25195, 1) {}
     };
 }

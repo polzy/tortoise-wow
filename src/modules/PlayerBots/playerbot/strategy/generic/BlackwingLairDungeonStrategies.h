@@ -31,7 +31,7 @@ namespace ai
     // --- Razorgore the Untamed (12435) ---
     // Two-phase fight. P1: Razorgore is mind-controlled (aura 23014) by a player
     // standing on the Possess orb; the boss attacks his own eggs. Adds spawn
-    // (Death Talon Dragonspawn 12422 / 14036, Grethok mages 12420) and assault
+    // (Death Talon Dragonspawn 12422, Grethok mages 12420) and assault
     // the orb-bound player. Raid kills adds, ignores boss. P2 (after all 30 eggs
     // smashed): Razorgore reverts and is tank-and-spanked with Fireball Volley
     // (22425), Conflagration (23023), War Stomp (24375).

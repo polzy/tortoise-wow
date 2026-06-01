@@ -7,6 +7,18 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — single-target dispel trigger scope (code-review 2026-06-01)
+- New base `PartyHasAuraBySpellIdTrigger` in GenericTriggers.h scans the bot's
+  whole group for the named aura before firing.
+- Skeram True Fulfillment (785) was wired with a self-aura check — the MC'd
+  bot is charmed and can't run dispel logic, so the chain never executed.
+  Fixed to fire on any group member's aura.
+- Ossirian Curse of Tongues (25195) lands on the current victim (typically
+  the warrior tank — no `remove curse`). Same self-aura bug; fixed to fire on
+  any group member's aura so the druid/mage cleanses the tank.
+- Stale BWL doc comment still listed phantom NPC 14036; removed (was cargo-
+  culted, removed from code in commit ff51266).
+
 ### Added — Faerlina Poison Bolt + Ossirian Curse of Tongues dispels
 - Naxx Grand Widow Faerlina Poison Bolt Volley (28796) — poison-school,
   raid-wide. Cure-poison chain (druid/shaman + paladin) at priority 85.
