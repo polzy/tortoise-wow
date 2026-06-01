@@ -13,6 +13,7 @@ INSTANTIATE_SINGLETON_1(PlayerbotLLMInterface);
 #include <sstream>
 #include <regex>
 #include <chrono>
+#include <atomic>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <thread>
@@ -376,6 +377,25 @@ std::string GetSSLError() {
 std::string PlayerbotLLMInterface::Generate(const std::string& prompt, int timeOutSeconds, int maxGenerations, std::vector<std::string> & debugLines) {
     bool debug = !debugLines.empty();
 
+    // Circuit breaker: once we've had 5 consecutive failed connects (no LLM
+    // server reachable), suppress all further attempts for 5 minutes. Without
+    // this, every .bot command on a 40-bot raid fan-outs 40 blocking
+    // connect() syscalls (each ~5-10s OS timeout) and stalls the world
+    // thread. Per live MC test 2026-06-01: a single `.bot c * attack`
+    // caused 20s server lag.
+    //
+    // The proper fix is `AiPlayerbot.LLMEnabled = 0` in aiplayerbot.conf,
+    // but that requires reboot. Circuit breaker degrades gracefully when
+    // no LLM server is configured or running.
+    static std::atomic<uint32> s_consecutiveFailures{0};
+    static std::atomic<time_t> s_suppressUntil{0};
+    time_t now = time(0);
+    if (now < s_suppressUntil.load())
+    {
+        // Silent skip: not an error, expected behavior when LLM is down.
+        return {};
+    }
+
     if (sPlayerbotLLMInterface.generationCount > maxGenerations)
     {
         if (debug)
@@ -461,18 +481,43 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, int timeO
         if (debug)
             debugLines.push_back("Connection to server failed");
 
+        // Circuit breaker: after 5 consecutive failures, suppress for 5min.
+        // Use local variables to avoid TOCTOU on the atomics.
+        uint32 failures = s_consecutiveFailures.fetch_add(1) + 1;
+        if (failures >= 5)
+        {
+            s_suppressUntil.store(time(0) + 300);  // 5 minutes
+            // Log only when we ARM the breaker, not every connect attempt.
+            sLog.outError("BotLLM: %u consecutive connect failures, suppressing for 5 minutes (set AiPlayerbot.LLMEnabled=0 in config + restart to disable permanently).", failures);
+        }
+        else if (failures <= 3)
+        {
 #ifdef _WIN32
-        sLog.outError("BotLLM: Connection to server failed. Error: %d", WSAGetLastError());
+            sLog.outError("BotLLM: Connection to server failed. Error: %d", WSAGetLastError());
+            closesocket(sock);
+            WSACleanup();
+#else
+            sLog.outError("BotLLM: Connection to server failed. Error: %s", strerror(errno));
+#endif
+            freeaddrinfo(res);
+            sPlayerbotLLMInterface.generationCount--;
+            return "error";
+        }
+
+        // failures == 4 or 5+ silenced (between log threshold and breaker arm)
+#ifdef _WIN32
         closesocket(sock);
         WSACleanup();
 #else
-        sLog.outError("BotLLM: Connection to server failed. Error: %s", strerror(errno));
         close(sock);
 #endif
         freeaddrinfo(res);
         sPlayerbotLLMInterface.generationCount--;
         return "error";
     }
+
+    // Reset circuit breaker on successful connect.
+    s_consecutiveFailures.store(0);
 
     freeaddrinfo(res);
 
