@@ -433,14 +433,51 @@ PlayerbotHolder::~PlayerbotHolder()
     PlayerbotHolder_OnDestroy(this);
 }
 
+// SEH-safe invocation of the per-bot callback. Must be a separate function:
+// MSVC rejects __try inside ForEachPlayerbot itself because the std::function
+// callback and Player* parameter have destructors (C2712). With this helper
+// we isolate the SEH frame, so an AV inside one bot's iteration (dangling
+// Player* from a failed login / rolled-back transaction / orphaned holder
+// entry) doesn't kill the entire UpdateSessions loop.
+//
+// Live trigger 2026-06-01 17:26:40+: SQL Deadlock on character_pet INSERT
+// left the session/player in an inconsistent state. The orphaned playerBots[]
+// entry pointed at freed memory, producing 12,000+ "UpdateAI crash #N at
+// phase 1" log lines in a tight loop — the whole RandomPlayerbotMgr::UpdateAI
+// was wedged. With this per-iter guard the bad entry's exception is
+// contained; the caller continues with the next bot, and at least the
+// crash-count log spam stops being a permanent state.
+static bool SafeCall_BotCallback(const std::function<void(Player*)>& cb, Player* bot)
+{
+    __try { cb(bot); return true; }
+    __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+}
+
 void PlayerbotHolder::ForEachPlayerbot(std::function<void(Player*)> callback) const
 {
+    // Snapshot pointers first so the callback can mutate playerBots (e.g.
+    // LogoutPlayerBot) without invalidating our iterator. Belt + suspenders
+    // alongside the SEH guard below.
+    std::vector<std::pair<uint32, Player*>> snapshot;
+    snapshot.reserve(playerBots.size());
     for (auto& itr : playerBots)
     {
-        Player* bot = itr.second;
-        if (bot)
+        if (itr.second)
+            snapshot.emplace_back(itr.first, itr.second);
+    }
+
+    for (auto& kv : snapshot)
+    {
+        Player* bot = kv.second;
+        if (!bot) continue;
+        if (!SafeCall_BotCallback(callback, bot))
         {
-            callback(bot);
+            // Defensive: clear the orphan entry so we don't AV again next
+            // tick on the same dangling pointer. Cast away const because
+            // this is recovery code; the map mutation is intentional and
+            // confined to a known-bad entry.
+            const_cast<PlayerBotMap&>(playerBots)[kv.first] = nullptr;
+            sLog.outError("[PLAYERBOTS] ForEachPlayerbot AV on bot guid=%u — cleared orphan playerBots entry", kv.first);
         }
     }
 }

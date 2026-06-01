@@ -698,7 +698,12 @@ Strategy* Engine::GetStrategy(const std::string& name) const
 // catches a crash with phase=9331 we can also dump the trigger name from the
 // log even though we can't SEH-wrap individual Check() calls here (Event has
 // a destructor → MSVC rejects __try inside this function).
-static const char* s_lastTriggerName = "<none>";
+//
+// IMPORTANT: Trigger::getName() returns std::string BY VALUE — a temporary.
+// We MUST copy the bytes into a fixed buffer; a const char* would dangle
+// after the temp dies. Static char[] keeps the crash handler safe even if
+// the originating Trigger object is destroyed mid-tick.
+static char s_lastTriggerName[128] = "<none>";
 // Plain C++ linkage; HostHooks.cpp forward-declares the same signature
 // (both are C++ TUs so mangling matches).
 const char* PlayerbotAI_GetLastTriggerName() { return s_lastTriggerName; }
@@ -728,7 +733,15 @@ void Engine::ProcessTriggers(bool minimal)
             // Update the last-trigger marker BEFORE calling Check(). If
             // Check() throws an AV, the outer SafeCall_BotAI catches it and
             // the host hook logger reads s_lastTriggerName via the extern.
-            s_lastTriggerName = trigger->getName().c_str();
+            // Copy bytes (not pointer) — getName() returns std::string by
+            // value; a const char* would dangle after the temp is destroyed.
+            {
+                std::string triggerName = trigger->getName();
+                size_t n = triggerName.size();
+                if (n >= sizeof(s_lastTriggerName)) n = sizeof(s_lastTriggerName) - 1;
+                memcpy(s_lastTriggerName, triggerName.c_str(), n);
+                s_lastTriggerName[n] = '\0';
+            }
             Event event = trigger->Check();
 
 #ifdef PLAYERBOT_ELUNA

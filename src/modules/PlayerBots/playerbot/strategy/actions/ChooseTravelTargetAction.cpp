@@ -676,7 +676,14 @@ bool RefreshTravelTargetAction::isUseful()
 
 bool ResetTargetAction::Execute(Event& event)
 {
+    // Defense in depth: isUseful already guards, but if some path calls
+    // Execute directly we still need to bail out cleanly.
+    if (!sTravelMgr.IsQuestTravelDataLoaded())
+        return false;
+
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
+    if (!oldTarget)
+        return false;
 
     context->ClearValues("no active travel destinations");
 
@@ -697,10 +704,21 @@ bool ResetTargetAction::isUseful()
     if (bot->InBattleGround())
         return false;
 
+    // Guard against LoadQuestTravelTable crash at boot: without quest travel
+    // data the action AVs on null destinationMap iteration (live crash logs
+    // 2026-06-01: Lenlienne phase=9331 trigger='reset travel target').
+    // RequestTravelTargetAction::Execute already has this guard — mirror it.
+    if (!sTravelMgr.IsQuestTravelDataLoaded())
+        return false;
+
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
-    if (AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    if (!travelTarget)
+        return false;
+
+    if (travelTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     return true;
