@@ -386,6 +386,7 @@ namespace ai
             creators["kri toxic volley"] = [](PlayerbotAI* ai) { return new KriToxicVolleyTrigger(ai); };
             creators["yauj fear"] = [](PlayerbotAI* ai) { return new YaujFearTrigger(ai); };
             creators["twin emperors mutate bug"] = [](PlayerbotAI* ai) { return new TwinEmperorsMutateBugTrigger(ai); };
+            creators["viscidus frost phase"] = [](PlayerbotAI* ai) { return new ViscidusFrostPhaseTrigger(ai); };
             creators["kri toxic cloud nearby"] = [](PlayerbotAI* ai) { return new KriToxicCloudNearbyTrigger(ai); };
 
             // Zul'Gurub (ZG, map 309)

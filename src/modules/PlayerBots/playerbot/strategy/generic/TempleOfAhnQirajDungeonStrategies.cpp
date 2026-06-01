@@ -74,6 +74,18 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
+    // Viscidus (15299) frost phase — needs 200 frost hits to freeze. Caster
+    // bots: spam frost spells (Mage frostbolt, Shaman frost shock). Melee
+    // bots: normal attack (class fallback no-ops the frost action). Action
+    // chain order: frostbolt → frost shock → moonfire (druid). Priority 95.
+    triggers.push_back(new TriggerNode(
+        "viscidus frost phase",
+        NextAction::array(0,
+            new NextAction("frostbolt", 95.0f),
+            new NextAction("frost shock", 95.0f),
+            new NextAction("moonfire", 90.0f),
+            NULL)));
+
     // Bug Trio — Kri Toxic Vapors cloud: NOT wired. The SD2 script casts
     // SPELL_SUMMON_CLOUD (25786) which is actually the *Toxic Vapors* aura,
     // NOT a summon spell — per boss_bug_trio.cpp:24 comment "should be 26590

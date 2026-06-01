@@ -7,6 +7,18 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #7: Frost barrage (Viscidus)
+- Viscidus (15299) needs 200 frost hits to freeze (then ~100 melee to
+  shatter; repeat until dead). Re-interpreted "frost CD coordination" as
+  "force all caster bots onto frost spells during the freeze phase" since
+  the raw mechanic is many-fires not tight-sync.
+- New `ViscidusFrostPhaseTrigger` fires when a live Viscidus is within 60y
+  AND he doesn't yet carry the freeze/shrink auras (25937/25893). When
+  frozen, the trigger releases and bots resume normal attack for shatter.
+- Wired at AQ40 dungeon level: action chain frostbolt → frost shock →
+  moonfire at priority 95. Class-routed; non-caster bots silently no-op.
+- 5-10 caster bots × 200 cast budget = doable freeze in ~30-40s.
+
 ### Added — Framework #6: Positional rotation (reactive — Heigan dance)
 - New `HeiganFissureNearbyTrigger` (CloseToCreatureTrigger 15y on NPC
   533001 Plague Fissure) + `MoveAwayFromHeiganFissureAction`

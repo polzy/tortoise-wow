@@ -140,6 +140,32 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "yauj fear", 19408, 1) {}
     };
 
+    // Viscidus (15299) — needs 200 frost hits to freeze, then ~100 physical
+    // hits to shatter. Trigger fires when bot's current target is Viscidus
+    // and he's NOT frozen yet (SPELL_VISCIDUS_FREEZE 25937 absent). Caster
+    // bots route to frost spam; melee bots route to normal attack.
+    class ViscidusFrostPhaseTrigger : public Trigger
+    {
+    public:
+        ViscidusFrostPhaseTrigger(PlayerbotAI* ai) : Trigger(ai, "viscidus frost phase", 1) {}
+        bool IsActive() override
+        {
+            std::list<Unit*> units;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15299, 60.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, check);
+            Cell::VisitAllObjects(bot, searcher, 60.0f);
+            for (Unit* u : units)
+            {
+                if (!u || !u->IsAlive()) continue;
+                // Frozen / shrunk / membrane states — past the freeze threshold,
+                // melee shatter phase, no more frost needed.
+                if (u->HasAura(25937) || u->HasAura(25893)) return false;
+                return true;  // Viscidus alive and not frozen → frost phase.
+            }
+            return false;
+        }
+    };
+
     // Twin Emperors — Veklor's Mutate Bug (802) turns the affected player
     // into a Qiraji bug for ~8s, then they detonate (Explodebug 804) for AOE
     // damage. Mutate Bug is Magic-school, dispelable. The transformed bot is
