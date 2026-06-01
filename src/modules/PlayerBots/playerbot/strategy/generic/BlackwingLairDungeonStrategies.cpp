@@ -229,9 +229,9 @@ void ChromaggusFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "chromaggus affliction danger",
         NextAction::array(0,
-            new NextAction("remove curse", 100.0f),
-            new NextAction("dispel magic", 100.0f),
-            new NextAction("cleanse", 100.0f),
+            new NextAction("remove curse on party", 100.0f),
+            new NextAction("dispel magic on party", 100.0f),
+            new NextAction("cleanse magic on party", 100.0f),
             NULL)));
 }
 

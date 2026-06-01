@@ -378,6 +378,7 @@ namespace ai
             creators["end huhuran fight"] = [](PlayerbotAI* ai) { return new HuhuranEndFightTrigger(ai); };
             creators["huhuran frenzy"] = [](PlayerbotAI* ai) { return new HuhuranFrenzyTrigger(ai); };
             creators["huhuran noxious poison"] = [](PlayerbotAI* ai) { return new HuhuranNoxiousPoisonTrigger(ai); };
+            creators["huhuran wyvern sting"] = [](PlayerbotAI* ai) { return new HuhuranWyvernStingTrigger(ai); };
             creators["skeram true fulfillment"] = [](PlayerbotAI* ai) { return new SkeramTrueFulfillmentTrigger(ai); };
             creators["kri toxic volley"] = [](PlayerbotAI* ai) { return new KriToxicVolleyTrigger(ai); };
             creators["yauj fear"] = [](PlayerbotAI* ai) { return new YaujFearTrigger(ai); };

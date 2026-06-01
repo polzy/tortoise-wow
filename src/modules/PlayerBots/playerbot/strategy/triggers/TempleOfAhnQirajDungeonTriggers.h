@@ -91,6 +91,17 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "huhuran noxious poison", 26053, 1) {}
     };
 
+    // Wyvern Sting (26180) — cast on tank during Huhuran berserk phase
+    // (<30% HP). Sleep, magic-school dispelable. Slept tank can't act and
+    // can't self-cleanse → group-scan so a priest/paladin strips it before
+    // the tank dies. ScriptDev2 boss_huhuran.cpp:39 SPELL_WYVERNSTING.
+    class HuhuranWyvernStingTrigger : public PartyHasAuraBySpellIdTrigger
+    {
+    public:
+        HuhuranWyvernStingTrigger(PlayerbotAI* ai)
+            : PartyHasAuraBySpellIdTrigger(ai, "huhuran wyvern sting", 26180, 1) {}
+    };
+
     // The Prophet Skeram True Fulfillment (785) — MIND-CONTROLS the closest
     // raid member every cycle. Spell is Magic-school, dispelable. Quick kick
     // from any priest 'dispel magic' / paladin 'cleanse magic' returns the

@@ -140,15 +140,14 @@ void LucifronFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     // no harm. Same priority Magmadar uses for its fear cure pots.
     triggers.push_back(new TriggerNode(
         "lucifron curse",
-        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
+        NextAction::array(0, new NextAction("remove curse on party", 80.0f), NULL)));
 
     // Impending Doom (19702) is a magic debuff that ticks heavy shadow damage; if a
-    // priest is present they can dispel it off party members. The "dispel magic"
-    // action node is defined in PriestActions; non-priests no-op. Priority slightly
-    // higher than the curse since the DoT actively kills heals.
+    // priest is present they can dispel it off party members. *on party* so the
+    // dispeller actually targets affected raid members instead of self.
     triggers.push_back(new TriggerNode(
         "lucifron impending doom",
-        NextAction::array(0, new NextAction("dispel magic", 90.0f), NULL)));
+        NextAction::array(0, new NextAction("dispel magic on party", 90.0f), NULL)));
 }
 
 void LucifronFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -178,7 +177,7 @@ void GehennasFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     // action node is class-routed.
     triggers.push_back(new TriggerNode(
         "gehennas curse",
-        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
+        NextAction::array(0, new NextAction("remove curse on party", 80.0f), NULL)));
 }
 
 void GehennasFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -283,7 +282,7 @@ void ShazzrahFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     // Same class-routed chain as the Lucifron / Gehennas curses.
     triggers.push_back(new TriggerNode(
         "shazzrah curse",
-        NextAction::array(0, new NextAction("remove curse", 80.0f), NULL)));
+        NextAction::array(0, new NextAction("remove curse on party", 80.0f), NULL)));
 }
 
 void ShazzrahFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -314,8 +313,8 @@ void SulfuronFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "sulfuron demoralizing shout",
         NextAction::array(0,
-            new NextAction("dispel magic", 80.0f),
-            new NextAction("cleanse magic", 80.0f),
+            new NextAction("dispel magic on party", 80.0f),
+            new NextAction("cleanse magic on party", 80.0f),
             NULL)));
 
     // Pro-engage: OTs grab Priestesses of Shahram (NPC 12099 — same entry

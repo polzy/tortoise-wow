@@ -7,6 +7,23 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Huhuran Wyvern Sting dispel + missed self→party chains (round 3)
+- Huhuran Wyvern Sting (26180) — magic-school sleep cast on tank during
+  berserk phase (<30% HP). Group-scan + on-party dispel at priority 95.
+  Slept tank = wipe; needed for the bot raid to clear Huhuran berserk.
+- Caught 6 more self-targeting dispel chains that the previous self→party
+  sweep (5ab5705) missed because they live in *fight* strategy files
+  rather than dungeon-wide ones:
+  - MC: Lucifron Curse + Impending Doom, Gehennas Curse, Shazzrah Curse,
+    Sulfuron Demoralizing Shout — all converted to *on party* variants.
+  - BWL: Chromaggus Brood Affliction (4+ stacks) — converted (and also
+    fixes the action name "cleanse" → "cleanse magic on party").
+  - AQ40: Huhuran Noxious Poison — converted.
+- All these were the same dead-code pattern: trigger fires on the affected
+  bot, but the bot's class-routed action targets self with nothing to
+  dispel → no-op. *on party* variants extend CurePartyMemberAction which
+  scans the group for the dispel type.
+
 ### Fixed — code review 2026-06-01 (round 2) — 2 real bugs
 - **HideBehindSapphironIceBlockAction was positional theater**: bot moved
   TO the ice block, but Sapphiron is AIRBORNE and the block is ground-level

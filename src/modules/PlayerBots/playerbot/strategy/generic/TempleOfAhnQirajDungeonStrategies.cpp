@@ -141,12 +141,25 @@ void HuhuranFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         "huhuran frenzy",
         NextAction::array(0, new NextAction("tranquilizing shot", 90.0f), NULL)));
 
-    // Noxious Poison (26053) — nature debuff curable by druid 'cure poison'.
-    // Class-routed: druid handles it, others no-op. Priority 80 matches the
-    // Lucifron Curse cadence.
+    // Noxious Poison (26053) — poison debuff on the current victim (tank).
+    // *on party* so druid/shaman/paladin strips the tank — tank typically has
+    // no self-cleanse. Priority 80 matches the Lucifron Curse cadence.
     triggers.push_back(new TriggerNode(
         "huhuran noxious poison",
-        NextAction::array(0, new NextAction("cure poison", 80.0f), NULL)));
+        NextAction::array(0,
+            new NextAction("cure poison on party", 80.0f),
+            new NextAction("cleanse poison on party", 80.0f),
+            NULL)));
+
+    // Wyvern Sting (26180) — sleep on current victim (tank) during berserk
+    // phase (<30% HP). Magic-school. Tank sleep = wipe. Group-scan + on-party
+    // dispel. Priority 95 — fight-critical.
+    triggers.push_back(new TriggerNode(
+        "huhuran wyvern sting",
+        NextAction::array(0,
+            new NextAction("dispel magic on party", 95.0f),
+            new NextAction("cleanse magic on party", 95.0f),
+            NULL)));
 }
 
 void HuhuranFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
