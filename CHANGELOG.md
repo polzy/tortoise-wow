@@ -7,6 +7,17 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #1: GameObject interaction primitive
+- New `UseNearbyGameObjectAction` base class in DungeonActions.h. Scans for
+  the nearest GO of a given entry within `scanRange` yards, moves to ~4y
+  interact range if needed, then sends `CMSG_GAMEOBJ_USE` via the same path
+  as a player right-click. Same pattern as BattleGroundTactics flag/relic
+  capture.
+- Infrastructure-only commit — no current encounter immediately needs the
+  primitive (Razuvious uses priest Mind Control on creatures, Buru eggs
+  are NPCs not GOs). Reserved for future use: Razorgore Possess Orbs in a
+  full-bot raid scenario, future custom mechanics.
+
 ### Added — Huhuran Wyvern Sting dispel + missed self→party chains (round 3)
 - Huhuran Wyvern Sting (26180) — magic-school sleep cast on tank during
   berserk phase (<30% HP). Group-scan + on-party dispel at priority 95.
