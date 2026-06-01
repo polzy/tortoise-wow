@@ -92,6 +92,84 @@ namespace ai { namespace botdiag {
 // just let the process die. Per-thread so concurrent crashes are handled.
 static thread_local int g_inCrashHandler = 0;
 
+// Discord webhook POST helper. Separate function because __try is illegal
+// in functions with C++ destructors (std::string, httplib::SSLClient). All
+// arguments are POD; the actual destructor-bearing locals are scoped INSIDE
+// the helper but NOT under __try — the SEH wrap is around the OUTER call
+// to this helper from the crash handler.
+//
+// Config: `MCWoW.DiscordCrashWebhook` = full URL like
+// https://discord.com/api/webhooks/<id>/<token>. Empty disables.
+//
+// Best-effort: 3s timeout, no response check. Process is dying anyway —
+// we just want the alert to land before the OS reaps us.
+static void PostCrashToDiscord(const char* tag, const char* phaseTag,
+                                 const char* phaseBot, const char* dumpFile,
+                                 const char* txtFile, unsigned long exCode)
+{
+    std::string webhookUrl;
+    try { webhookUrl = sConfig.GetStringDefault("MCWoW.DiscordCrashWebhook", ""); }
+    catch (...) { return; }
+    if (webhookUrl.empty() || webhookUrl.find("discord.com") == std::string::npos)
+        return;
+
+    // Extract path from URL; SSLClient takes host and path separately.
+    size_t hostPos = webhookUrl.find("discord.com");
+    size_t pathPos = webhookUrl.find('/', hostPos);
+    std::string path = (pathPos != std::string::npos) ? webhookUrl.substr(pathPos) : "/";
+
+    // Read top frames from the .txt for the embed body.
+    std::string topFrames;
+    if (FILE* rf = fopen(txtFile, "r"))
+    {
+        char line[512];
+        int linesRead = 0;
+        bool inStack = false;
+        while (linesRead < 12 && fgets(line, sizeof(line), rf))
+        {
+            if (strstr(line, "STACK TRACE")) { inStack = true; continue; }
+            if (inStack) { topFrames += line; ++linesRead; }
+        }
+        fclose(rf);
+    }
+    if (topFrames.empty()) topFrames = "(no stack captured)";
+
+    auto jsonEsc = [](const std::string& s) {
+        std::string out; out.reserve(s.size() + 16);
+        for (char c : s) {
+            if      (c == '"')  out += "\\\"";
+            else if (c == '\\') out += "\\\\";
+            else if (c == '\n') out += "\\n";
+            else if (c == '\r') {}
+            else if (c == '\t') out += "    ";
+            else out += c;
+        }
+        return out;
+    };
+
+    char payload[8192];
+    snprintf(payload, sizeof(payload),
+        "{\"content\":\"\",\"embeds\":[{"
+        "\"title\":\"mangosd CRASH (%s) — code 0x%08lx\","
+        "\"description\":\"**bot:** %s\\n**phase:** %s\\n**dump:** `%s`\\n```\\n%s\\n```\","
+        "\"color\":15158332}]}",
+        jsonEsc(tag ? tag : "(unknown)").c_str(),
+        exCode,
+        jsonEsc(phaseBot ? phaseBot : "(?)").c_str(),
+        jsonEsc(phaseTag ? phaseTag : "(?)").c_str(),
+        jsonEsc(dumpFile ? dumpFile : "(?)").c_str(),
+        jsonEsc(topFrames.substr(0, 2000)).c_str());
+
+    try
+    {
+        httplib::SSLClient cli("discord.com", 443);
+        cli.set_connection_timeout(3, 0);
+        cli.set_read_timeout(3, 0);
+        cli.Post(path.c_str(), payload, "application/json");
+    }
+    catch (...) {} // best-effort
+}
+
 // Shared minidump-write helper. Called from every crash entry-point we
 // install (vectored, SEH-unhandled, terminate, signal, invalid-param,
 // purecall). Always returns; caller decides whether to continue or die.
@@ -343,6 +421,11 @@ static void Mangosd_WriteCrashDump(EXCEPTION_POINTERS* ep, DWORD synthCode, cons
                    tag ? tag : "Unhandled exception",
                    ep->ExceptionRecord->ExceptionCode, filename);
     sLog.outError("[CRASH] Last SC_PHASE: %s (bot=%s)", phaseTag, phaseBot);
+
+    // Discord webhook notification — extracted to a separate function
+    // since __try is illegal in functions with C++ destructors (C2712).
+    PostCrashToDiscord(tag, phaseTag, phaseBot, filename, txtFilename,
+                       ep->ExceptionRecord->ExceptionCode);
 
     g_inCrashHandler = 0;
 }
