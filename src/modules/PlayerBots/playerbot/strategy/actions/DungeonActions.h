@@ -135,6 +135,18 @@ namespace ai
         float range;
     };
 
+    // Bot maintenance — auto-destroy gray quality loot (ITEM_QUALITY_POOR)
+    // when bags are full. Pairs with BotBagFullTrigger; runs in non-combat
+    // strategy so it never destroys mid-fight. Conservative: only ITEM_
+    // QUALITY_POOR (gray = vendor trash); whites/greens/blues left alone
+    // because they may be class upgrades or quest items.
+    class AutoDestroyGrayLootAction : public Action
+    {
+    public:
+        AutoDestroyGrayLootAction(PlayerbotAI* ai) : Action(ai, "auto destroy gray loot") {}
+        bool Execute(Event& event) override;
+    };
+
     // ====================================================================
     // Framework #9: MC charm pet-command primitive.
     // ====================================================================

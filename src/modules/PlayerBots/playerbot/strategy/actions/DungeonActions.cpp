@@ -381,6 +381,53 @@ bool CharmPetAttackTargetAction::isUseful()
     return bot && bot->GetCharm() != nullptr;
 }
 
+// Auto-destroy gray quality loot when bags are full. Conservative pass —
+// only ITEM_QUALITY_POOR (gray = vendor trash); whites/greens/blues left
+// alone because they may be class upgrades, quest items, or recipes the
+// bot could equip. Iterates backpack + equipped bags; destroys up to 5
+// items per call so we don't stall the AI tick. BotBagFullTrigger fires
+// every 10s so 5/call clears typical overflow within a minute.
+bool AutoDestroyGrayLootAction::Execute(Event& event)
+{
+    if (!bot) return false;
+    int destroyed = 0;
+    const int kMaxPerCall = 5;
+
+    auto tryDestroy = [&](Item* item) -> bool {
+        if (!item) return false;
+        ItemPrototype const* proto = item->GetProto();
+        if (!proto) return false;
+        if (proto->Quality != ITEM_QUALITY_POOR) return false;
+        // Bind-on-pickup grays are still safe to destroy — they're not
+        // BiS gear by definition (quality=poor).
+        bot->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+        ++destroyed;
+        return destroyed >= kMaxPerCall;
+    };
+
+    // Backpack.
+    for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (destroyed >= kMaxPerCall) break;
+        if (Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            tryDestroy(item);
+    }
+    // Equipped bags.
+    for (uint8 b = INVENTORY_SLOT_BAG_START; b < INVENTORY_SLOT_BAG_END; ++b)
+    {
+        if (destroyed >= kMaxPerCall) break;
+        Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, b);
+        if (!bag) continue;
+        for (uint32 s = 0; s < bag->GetBagSize(); ++s)
+        {
+            if (destroyed >= kMaxPerCall) break;
+            if (Item* item = bag->GetItemByPos(s))
+                tryDestroy(item);
+        }
+    }
+    return destroyed > 0;
+}
+
 bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const std::list<Creature*>& creatures, const std::list<HazardPosition>& hazards)
 {
     // Check if the point is not near other game objects

@@ -429,6 +429,8 @@ namespace ai
             creators["ossirian sand vortex nearby"] = [](PlayerbotAI* ai) { return new OssirianSandVortexNearbyTrigger(ai); };
             creators["ossirian alive"] = [](PlayerbotAI* ai) { return new OssirianAliveTrigger(ai); };
             creators["twin emperors teleport cast"] = [](PlayerbotAI* ai) { return new TwinEmperorsTeleportCastTrigger(ai); };
+            creators["ouro sweep cone non tank"] = [](PlayerbotAI* ai) { return new OuroSweepConeNonTankTrigger(ai); };
+            creators["bot bag full"] = [](PlayerbotAI* ai) { return new BotBagFullTrigger(ai); };
             creators["kt frost blast self"] = [](PlayerbotAI* ai) { return new KTFrostBlastSelfTrigger(ai); };
             creators["kt frost blast party"] = [](PlayerbotAI* ai) { return new KTFrostBlastPartyTrigger(ai); };
             creators["ouro dirt mound nearby"] = [](PlayerbotAI* ai) { return new OuroDirtMoundNearbyTrigger(ai); };

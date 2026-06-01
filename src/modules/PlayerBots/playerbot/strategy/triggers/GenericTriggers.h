@@ -774,6 +774,48 @@ namespace ai
         uint32 m_minStacks;
     };
 
+    // Bag-full auto-cleanup trigger. Fires when the bot's main 16-slot
+    // backpack + equipped bags have <20% free space. Pair with
+    // AutoDestroyGrayLootAction in the non-combat strategy so cleanup
+    // runs in the background — no player command required. Interval=10s
+    // (avoid hot-path cost; bag fills slowly).
+    //
+    // Without this, bot inventory fills with quest greys / leveling
+    // greens / random vendor trash and the bot stops looting (logged
+    // as "There is some loot but I do not have free bag space"). The
+    // user pointed out 2026-06-01 that they don't want to issue manual
+    // .bot cleanup commands — make it automatic.
+    class BotBagFullTrigger : public Trigger
+    {
+    public:
+        BotBagFullTrigger(PlayerbotAI* ai) : Trigger(ai, "bot bag full", 10) {}
+        bool IsActive() override
+        {
+            if (!bot) return false;
+            int totalSlots = 16;  // Default backpack.
+            int usedSlots  = 0;
+
+            // Backpack.
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+            {
+                if (bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                    ++usedSlots;
+            }
+            // Equipped bags.
+            for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            {
+                if (Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                {
+                    totalSlots += bag->GetBagSize();
+                    for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+                        if (bag->GetItemByPos(j)) ++usedSlots;
+                }
+            }
+            // Fire at 80%+ full.
+            return totalSlots > 0 && (usedSlots * 100 / totalSlots) >= 80;
+        }
+    };
+
     // Framework #10 primitive: hazard-GO proximity trigger. Fires when a
     // GameObject of `goEntry` is within `range` yards of the bot. Pair
     // with MoveAwayFromGameObject in the action chain so the bot kites

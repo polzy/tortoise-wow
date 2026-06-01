@@ -161,6 +161,16 @@ void RpgMaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trig
     triggers.push_back(new TriggerNode(
         "rpg train",
         NextAction::array(0, new NextAction("rpg train", 1.080f), NULL)));
+
+    // Auto-cleanup: when bot bags ≥80% full, destroy ITEM_QUALITY_POOR
+    // (gray vendor trash). Fires in NonCombat only — never mid-fight.
+    // Conservative: greys only; greens/blues/quest items left alone.
+    // Replaces the never-shipped manual `.bot cleanup` command.
+    // Priority 1.099 (just above repair) — clear space before vendoring
+    // so we don't sell items we'd destroy anyway.
+    triggers.push_back(new TriggerNode(
+        "bot bag full",
+        NextAction::array(0, new NextAction("auto destroy gray loot", 1.099f), NULL)));
 }
 
 void RpgGuildStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

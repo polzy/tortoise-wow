@@ -468,6 +468,7 @@ namespace ai
             creators["engage ouro dirt mound"] = [](PlayerbotAI* ai) { return new EngageOuroDirtMoundAction(ai); };
             creators["engage nefarian adds"] = [](PlayerbotAI* ai) { return new EngageNefarianAddsAction(ai); };
             creators["engage opposite horseman"] = [](PlayerbotAI* ai) { return new EngageOppositeHorsemanAction(ai); };
+            creators["auto destroy gray loot"] = [](PlayerbotAI* ai) { return new AutoDestroyGrayLootAction(ai); };
             creators["command understudy attack razuvious"] = [](PlayerbotAI* ai) { return new CommandUnderstudyAttackRazuviousAction(ai); };
             creators["engage noth plagued add"] = [](PlayerbotAI* ai) { return new EngageNothPlaguedAddAction(ai); };
             creators["engage marli spawn"] = [](PlayerbotAI* ai) { return new EngageMarliSpawnAction(ai); };

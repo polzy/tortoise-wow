@@ -66,6 +66,14 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
         "twin emperors teleport cast",
         NextAction::array(0, new NextAction("engage other twin emperor", 95.0f), NULL)));
 
+    // Ouro Sweep cone — when Ouro re-emerges (no longer submerged), the
+    // frontal cone Sweep hits melee directly in front. Non-tank melee
+    // bots flee to break LOS / position behind. Prio 95.
+    // Tanks excluded by trigger gate (ai->IsTank).
+    triggers.push_back(new TriggerNode(
+        "ouro sweep cone non tank",
+        NextAction::array(0, new NextAction("flee", 95.0f), NULL)));
+
     // Bug Trio — Kri Toxic Volley (25812) poison AOE every cycle. Cure-poison
     // chain. Raid-wide AOE so the dispel target is anyone in party — use
     // the *on party* variants for the cure to dispel a party member.

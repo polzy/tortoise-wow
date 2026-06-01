@@ -102,6 +102,40 @@ namespace ai
             : PartyHasAuraBySpellIdTrigger(ai, "huhuran wyvern sting", 26180, 1) {}
     };
 
+    // Ouro Sweep cone — when Ouro (15517) is alive AND above ground
+    // (NOT carrying SUBMERGE_VISUAL aura 26063), Sweep is a frontal
+    // melee cone. Non-tank melee bots within 8y need to stay BEHIND
+    // him. We detect "above ground" by inverting the boss-aura check;
+    // when the trigger fires, the bot is in danger zone.
+    //   Boss alive ✓
+    //   Bot is melee (current target is Ouro, in melee range)
+    //   Bot is NOT a tank (tanks hold position to keep boss facing)
+    //   Ouro does NOT have aura 26063 (= above ground = Sweep active)
+    // Action: flee from boss for a tick to get out of frontal cone.
+    // SD2 boss_ouro.cpp:45 SPELL_SUBMERGE_VISUAL = 26063.
+    class OuroSweepConeNonTankTrigger : public Trigger
+    {
+    public:
+        OuroSweepConeNonTankTrigger(PlayerbotAI* ai) : Trigger(ai, "ouro sweep cone non tank", 2) {}
+        bool IsActive() override
+        {
+            if (!bot || ai->IsTank(bot)) return false;
+            std::list<Unit*> bosses;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, 15517 /* NPC_OURO */, 10.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(bosses, check);
+            Cell::VisitAllObjects(bot, searcher, 10.0f);
+            for (Unit* b : bosses)
+            {
+                if (!b || !b->IsAlive()) continue;
+                // Submerged → no Sweep, safe.
+                if (b->HasAura(26063)) return false;
+                // Above ground AND we're in melee range → at risk of Sweep.
+                return true;
+            }
+            return false;
+        }
+    };
+
     // Framework #8 wire — Twin Emperors teleport swap.
     //
     // Vek'lor (15276) and Vek'nilash (15275) teleport-swap every ~30s.
