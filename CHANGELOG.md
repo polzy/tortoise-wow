@@ -7,6 +7,27 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Fixed — code review 2026-06-01 (round 2) — 2 real bugs
+- **HideBehindSapphironIceBlockAction was positional theater**: bot moved
+  TO the ice block, but Sapphiron is AIRBORNE and the block is ground-level
+  — standing AT the block leaves vertical LOS clear. Now computes
+  `block + (block - sapphiron).normalized * 4y` so the bot ends up 4y past
+  the block from Sapphiron's POV → block horizontally between bot and boss
+  → LOS broken for the 7s breath.
+- **Kri Toxic Cloud trigger was dead code**: removed the wire in
+  TempleOfAhnQirajDungeonStrategies.cpp. SD2 boss_bug_trio.cpp:24 explicitly
+  says spell 25786 (`SPELL_SUMMON_CLOUD`) is actually the Toxic Vapors aura
+  not a summon — "should be 26590 -> summons 15933 -> casts 25786 in
+  EventAI". Creature 15933 never spawns in current Turtle DB. Trigger and
+  action classes kept registered for future re-wire if Turtle backports the
+  EventAI fix.
+- Anub'Rekhan Locust Swarm oscillation (Chase movement re-pulls bot into
+  AOE after MoveAwayFromCreature completes) — accepted as framework
+  limitation. Priority 100 + every-tick trigger fires so bot's net AOE
+  exposure ~30-50% rather than full duration. Proper fix needs
+  `ai->Stay()` integration into MoveAwayFromCreature base, scoped for a
+  later session.
+
 ### Added — Kri Toxic Cloud dodge + Anub'Rekhan Locust Swarm dodge
 - Bug Trio Kri Toxic Vapors cloud creature (15933) spawns on Kri's death.
   Bots within 12y trigger move-out to 15y via `MoveAwayFromCreature` at

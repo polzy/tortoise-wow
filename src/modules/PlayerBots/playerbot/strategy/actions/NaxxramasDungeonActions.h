@@ -24,6 +24,9 @@ namespace ai
             : MoveAwayFromCreature(ai, "move away from anubrekhan locust swarm", 15956, 30.0f) {}
     };
 
+    // Hide on the FAR SIDE of the nearest ice block from Sapphiron — standing
+    // AT the block leaves LOS clear to the airborne boss. ScriptDev2
+    // boss_sapphiron.cpp:56 GO_ICEBLOCK = 181247, boss entry 15989.
     class HideBehindSapphironIceBlockAction : public MovementAction
     {
     public:
@@ -34,6 +37,15 @@ namespace ai
         {
             Player* bot = ai->GetBot();
             if (!bot) return false;
+
+            // Locate Sapphiron — needed to compute the "far side" of each block.
+            std::list<Unit*> bosses;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck bossCheck(bot, 15989, 100.0f);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> bossSearcher(bosses, bossCheck);
+            Cell::VisitAllObjects(bot, bossSearcher, 100.0f);
+            Unit* sapphiron = nullptr;
+            for (Unit* u : bosses) { if (u && u->IsAlive()) { sapphiron = u; break; } }
+            if (!sapphiron) return false;
 
             std::list<GameObject*> blocks;
             GameObjectsInObjectRangeCheck check(bot, 50.0f, 181247);
@@ -48,9 +60,23 @@ namespace ai
                 float d = bot->GetDistance(go);
                 if (d < bestDist) { bestDist = d; closest = go; }
             }
-
             if (!closest) return false;
-            return MoveTo(closest->GetMapId(), closest->GetPositionX(), closest->GetPositionY(), closest->GetPositionZ());
+
+            // Hide point = block_position + (block - sapphiron).normalized * 4y
+            // → bot 4y past the block from Sapphiron's perspective → block sits
+            // between bot and boss → horizontal LOS broken for the 7s breath.
+            float dx = closest->GetPositionX() - sapphiron->GetPositionX();
+            float dy = closest->GetPositionY() - sapphiron->GetPositionY();
+            float len = sqrtf(dx * dx + dy * dy);
+            float targetX, targetY;
+            if (len < 0.001f) {
+                targetX = closest->GetPositionX();
+                targetY = closest->GetPositionY();
+            } else {
+                targetX = closest->GetPositionX() + (dx / len) * 4.0f;
+                targetY = closest->GetPositionY() + (dy / len) * 4.0f;
+            }
+            return MoveTo(closest->GetMapId(), targetX, targetY, closest->GetPositionZ());
         }
     };
 

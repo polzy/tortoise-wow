@@ -74,11 +74,14 @@ void TempleOfAhnQirajDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>
             new NextAction("cleanse magic on party", 95.0f),
             NULL)));
 
-    // Bug Trio — Kri Toxic Vapors cloud (15933) spawns on Kri's death.
-    // Standing in it ticks heavy poison damage. Move out at priority 95.
-    triggers.push_back(new TriggerNode(
-        "kri toxic cloud nearby",
-        NextAction::array(0, new NextAction("move away from kri toxic cloud", 95.0f), NULL)));
+    // Bug Trio — Kri Toxic Vapors cloud: NOT wired. The SD2 script casts
+    // SPELL_SUMMON_CLOUD (25786) which is actually the *Toxic Vapors* aura,
+    // NOT a summon spell — per boss_bug_trio.cpp:24 comment "should be 26590
+    // -> summons 15933 -> casts 25786 in EventAI". Creature 15933 never
+    // spawns in current Turtle DB; KriToxicCloudNearbyTrigger and
+    // MoveAwayFromKriToxicCloudAction are kept (registered + base classes
+    // intact) so if Turtle adds the EventAI/script fix, just re-add the
+    // trigger node here.
 }
 
 // ========== Battleguard Sartura (15516) ==========
