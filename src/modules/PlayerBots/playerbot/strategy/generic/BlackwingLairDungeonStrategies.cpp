@@ -148,6 +148,13 @@ void FiremawFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",
         NextAction::array(0, new NextAction("fire protection potion", 50.0f), NULL)));
+
+    // Tank-swap on Flame Buffet 23341 (Framework #4). Fires only on
+    // off-tank bots when the other tank carries 3+ stacks. Action: taunt
+    // → become the new MT, let the old MT's stacks decay. Priority 95.
+    triggers.push_back(new TriggerNode(
+        "firemaw flame buffet swap",
+        NextAction::array(0, new NextAction("taunt", 95.0f), NULL)));
 }
 
 void FiremawFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

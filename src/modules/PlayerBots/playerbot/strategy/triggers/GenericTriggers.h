@@ -713,6 +713,58 @@ namespace ai
         uint32 m_spellId;
     };
 
+    // Framework #4 primitive: tank coordination.
+    //
+    // Fires when self is a tank AND any OTHER tank in the group (same map,
+    // alive) carries the given aura with stack count >= minStacks. Used by
+    // boss mechanics with stacking debuffs (Firemaw Flame Buffet 23341,
+    // Kurinnaxx Mortal Wound 25646, Twin Emperors Unbalancing Strike 26613,
+    // etc.) where the MT needs to drop aggro on threshold and the OT takes
+    // over.
+    //
+    // Self-tank gate avoids non-tank bots from firing. The "other tank"
+    // gate avoids the MT from taunting himself. Off-tank bots that share
+    // the boss's target will all fire on the same tick — taunt GCD ensures
+    // only one succeeds.
+    class PartyOtherTankHasAuraStacksTrigger : public Trigger
+    {
+    public:
+        PartyOtherTankHasAuraStacksTrigger(PlayerbotAI* ai, std::string name, uint32 spellId, uint32 minStacks, int interval = 1)
+            : Trigger(ai, name, interval), m_spellId(spellId), m_minStacks(minStacks) {}
+
+        virtual std::string GetTargetName() override { return "self target"; }
+
+        virtual bool IsActive() override
+        {
+            Player* bot = ai->GetBot();
+            if (!bot) return false;
+            if (!ai->IsTank(bot)) return false;
+
+            Group* group = bot->GetGroup();
+            if (!group) return false;
+
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+            {
+                Player* member = ref->getSource();
+                if (!member || member == bot) continue;
+                if (member->GetMapId() != bot->GetMapId()) continue;
+                if (!member->IsAlive()) continue;
+                if (!ai->IsTank(member)) continue;
+
+                if (Aura* aura = ai->GetAura(m_spellId, member))
+                {
+                    if (aura->GetStackAmount() >= m_minStacks)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+    protected:
+        uint32 m_spellId;
+        uint32 m_minStacks;
+    };
+
     class TimerTrigger : public Trigger
     {
     public:

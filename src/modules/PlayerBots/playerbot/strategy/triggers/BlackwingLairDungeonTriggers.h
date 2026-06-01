@@ -200,6 +200,16 @@ namespace ai
         }
     };
 
+    // Flame Buffet (23341) — Firemaw self-buff that becomes a tank-debuff on
+    // the next melee hit. Stacks heavily on the MT; at 3+ stacks the OT
+    // should taunt to let MT's stacks decay. ScriptDev2 boss_firemaw.cpp:31.
+    class FiremawFlameBuffetSwapTrigger : public PartyOtherTankHasAuraStacksTrigger
+    {
+    public:
+        FiremawFlameBuffetSwapTrigger(PlayerbotAI* ai)
+            : PartyOtherTankHasAuraStacksTrigger(ai, "firemaw flame buffet swap", 23341, 3, 1) {}
+    };
+
     // --- Chromaggus ---
     class ChromaggusStartFightTrigger : public StartBossFightTrigger
     {

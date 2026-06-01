@@ -7,6 +7,20 @@ this fork adds on top of `Penqle/tortoise-wow` and `alexisrichard/cmangos-player
 
 ## [Unreleased] — 2026-05-29
 
+### Added — Framework #4: Tank coordination (`PartyOtherTankHasAuraStacksTrigger`)
+- New base in GenericTriggers.h fires when self is a tank AND any OTHER
+  tank in the group (same map, alive) carries a named aura with
+  `stackAmount >= minStacks`. Self-tank gate avoids non-tanks firing;
+  other-tank gate avoids the MT from taunting themselves. Multiple
+  off-tanks fire on the same tick → taunt GCD ensures only one succeeds
+  (race is OK).
+- Wired for **Firemaw Flame Buffet** (23341, swap at 3+ stacks) in
+  `FiremawFightStrategy::InitCombatTriggers`. Action: `taunt` at priority
+  95. Off-tank that taunts becomes the new MT; old MT's stacks decay
+  during the 6-9s lull before they re-aggro.
+- Pattern reusable for Kurinnaxx Mortal Wound (25646), Twin Emperors
+  Unbalancing Strike (26613), or any future stacking-debuff tank-swap.
+
 ### Added — Framework #3: Phase awareness primitives (`BossHpPctValue`, `BossHasAuraValue`)
 - New value `boss hp pct` qualified by NPC entry: scans 100y for that
   creature and returns its `HP / MaxHP * 100`. Returns 100.0 if not in
