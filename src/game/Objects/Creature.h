@@ -554,6 +554,10 @@ class ThreatListProcesser
         virtual bool Process(Unit* unit) = 0;
 };
 
+#ifdef BUILD_ELUNA
+class Eluna;
+#endif
+
 class Creature : public Unit
 {
     CreatureAI *i_AI;
@@ -562,6 +566,13 @@ class Creature : public Unit
 
         explicit Creature(CreatureSubtype subtype = CREATURE_SUBTYPE_GENERIC);
         virtual ~Creature();
+
+#ifdef BUILD_ELUNA
+        // Eluna ElunaCreatureAI calls Creature::GetEluna() to dispatch
+        // hook events. Forward to the bot's Map (same Eluna* lives there
+        // — Map owns the Lua engine for the instance scope).
+        Eluna* GetEluna() const;
+#endif
 
         void AddToWorld() override;
         void RemoveFromWorld() override;

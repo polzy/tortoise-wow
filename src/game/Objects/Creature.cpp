@@ -245,6 +245,18 @@ Creature::~Creature()
     --PerfStats::g_totalCreatures;
 }
 
+#ifdef BUILD_ELUNA
+// Eluna ElunaCreatureAI hooks dispatch through Creature::GetEluna(). The
+// Eluna* lives on the Map; forward there. Safe at any creature lifecycle
+// stage (returns nullptr if creature isn't in a map yet — Eluna hook
+// helpers null-check before invoking).
+Eluna* Creature::GetEluna() const
+{
+    if (Map* m = GetMap()) return m->GetEluna();
+    return nullptr;
+}
+#endif
+
 void Creature::AddToWorld()
 {
     bool bWasInWorld = IsInWorld();

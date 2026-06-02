@@ -53,6 +53,8 @@ public:
     SpellInfo const* GetSpellInfo() const { return nullptr; }
     SpellSchoolMask GetSchoolMask() const { return SPELL_SCHOOL_MASK_NORMAL; }
     void AbsorbHeal(uint32) {}
+    void SetEffectiveHeal(uint32) {} // Eluna ElunaSpellWrapper.cpp:121
+    void SetHeal(uint32) {}
 };
 
 class ProcEventInfo
@@ -70,5 +72,10 @@ public:
     DamageInfo* GetDamageInfo() const { return nullptr; }
     HealInfo* GetHealInfo() const { return nullptr; }
 };
+
+// Eluna upstream uses TBC+ enum names. Map to vanilla equivalents.
+#ifndef TEAM_INDEX_NEUTRAL
+#define TEAM_INDEX_NEUTRAL TEAM_NEUTRAL
+#endif
 
 #endif // MCWOW_ELUNA_PROCEVENTINFO_STUB

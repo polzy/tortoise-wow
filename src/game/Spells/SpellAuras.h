@@ -112,6 +112,9 @@ class SpellAuraHolder
 
         uint32 GetId() const { return m_spellProto->Id; }
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
+#ifdef BUILD_ELUNA
+        SpellEntry const* GetSpellInfo() const { return m_spellProto; }
+#endif
 
         ObjectGuid const& GetCasterGuid() const { return m_casterGuid; }
         void SetCasterGuid(ObjectGuid guid) { m_casterGuid = guid; }
@@ -450,6 +453,11 @@ class Aura
         int32 GetMiscValue() const { return m_spellAuraHolder->GetSpellProto()->EffectMiscValue[m_effIndex]; }
 
         SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
+#ifdef BUILD_ELUNA
+        // Eluna calls Aura::GetSpellInfo() (cmangos modern name); alias to
+        // GetSpellProto. Same SpellEntry* under the typedef.
+        SpellEntry const* GetSpellInfo() const { return GetSpellProto(); }
+#endif
         uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }
         ObjectGuid const& GetCastItemGuid() const { return GetHolder()->GetCastItemGuid(); }
         ObjectGuid const& GetCasterGuid() const { return GetHolder()->GetCasterGuid(); }

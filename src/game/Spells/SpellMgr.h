@@ -722,6 +722,11 @@ class SpellMgr
         void LoadSpells();
         void AssignInternalSpellFlags();
         SpellEntry const* GetSpellEntry(uint32 spellId) const { return spellId < GetMaxSpellId() ? mSpellEntryMap[spellId].get() : nullptr; }
+#ifdef BUILD_ELUNA
+        // Eluna expects SpellMgr::GetSpellInfo() (cmangos modern name);
+        // vanilla calls it GetSpellEntry. Forward to keep both ABIs.
+        SpellEntry const* GetSpellInfo(uint32 spellId) const { return GetSpellEntry(spellId); }
+#endif
         uint32 GetMaxSpellId() const { return mSpellEntryMap.size(); }
         bool IsExistingSpellId(uint32 id) const { return (mExistingSpellsSet.find(id) != mExistingSpellsSet.end()); }
 

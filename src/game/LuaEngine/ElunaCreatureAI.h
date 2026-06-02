@@ -92,11 +92,13 @@ struct ElunaCreatureAI : NativeScriptedAI
 #endif
 
     // Called at any Damage from any attacker (before damage apply)
-#if defined ELUNA_TRINITY || defined ELUNA_CMANGOS 
+#if defined ELUNA_TRINITY || (defined ELUNA_CMANGOS && ELUNA_EXPANSION > 0)
+    // Newer cmangos / Trinity: 4-arg signature with damageType + spellInfo.
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo) override
 #elif defined ELUNA_AZEROTHCORE
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask) override
 #else
+    // Vanilla cmangos + VMANGOS: 2-arg signature.
     void DamageTaken(Unit* attacker, uint32& damage) override
 #endif
     {
@@ -218,11 +220,13 @@ struct ElunaCreatureAI : NativeScriptedAI
     }
 
     // Called when hit by a spell
-#if defined ELUNA_TRINITY
+#if defined ELUNA_TRINITY || (defined ELUNA_CMANGOS && ELUNA_EXPANSION == 0)
+    // Trinity AND vanilla cmangos: WorldObject* first arg.
     void SpellHit(WorldObject* caster, SpellInfo const* spell) override
 #elif defined ELUNA_VMANGOS
     void SpellHit(Unit* caster, SpellInfo const* spell)
 #else
+    // Newer cmangos (TBC+): Unit* first arg.
     void SpellHit(Unit* caster, SpellInfo const* spell) override
 #endif
     {

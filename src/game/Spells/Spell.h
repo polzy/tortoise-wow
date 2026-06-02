@@ -236,6 +236,13 @@ class Spell
         // bot sets spell->m_clientCast = true on spells it queues.
         // Penqle has no equivalent; stub field is never read.
         bool m_clientCast = false;
+
+#ifdef BUILD_ELUNA
+        // Eluna expects Spell::GetSpellInfo() returning SpellInfo const*
+        // (typedef SpellEntry SpellInfo defined in ElunaIncludes.h:234).
+        // Vanilla has m_spellInfo as a member; add the accessor.
+        SpellEntry const* GetSpellInfo() const { return m_spellInfo; }
+#endif
         // SpellStart: cmangos returns SpellCastResult; Penqle uses prepare().
         SpellCastResult SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr) {
             return prepare(targets ? *targets : SpellCastTargets(), triggeredByAura);

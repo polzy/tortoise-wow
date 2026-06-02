@@ -205,6 +205,42 @@ compiled and they're a meaningful head start for the next attempt.
 6. [ ] Audit `HealInfo` stub vs Eluna usage — add missing setters
 7. [ ] Repeat error inventory; expect at least one more layer to surface
 
+## Iter 4 (2026-06-02 morning)
+
+User picked Option D = continue Eluna port. Reduced **229 → 140
+errors (-89, -39%)** by adding 6 broad-impact fixes:
+
+- `Spell::GetSpellInfo()` accessor → `m_spellInfo` (vanilla member);
+  killed ~10 errors across SpellHooks/ElunaSpellWrapper.
+- `SpellMgr::GetSpellInfo(uint32)` → forwards to `GetSpellEntry(id)`;
+  killed ~5 errors.
+- `Aura::GetSpellInfo()` + `SpellAuraHolder::GetSpellInfo()` → alias
+  for `GetSpellProto()`; killed ~30 errors across SpellHooks.
+- `Creature::GetEluna()` → forwards to `Map::GetEluna()`; killed 17
+  errors in ElunaCreatureAI.
+- `HealInfo` stub gained `SetEffectiveHeal(uint32)` + `SetHeal(uint32)`.
+- `ElunaCreatureAI.h` DamageTaken/SpellHit gating split:
+  newer cmangos (TBC+) keeps 4-arg/Unit*; vanilla cmangos
+  (ELUNA_EXPANSION==0) goes to 2-arg/WorldObject* branches.
+- `#define TEAM_INDEX_NEUTRAL TEAM_NEUTRAL` shim in
+  _eluna_compat/Spells/ProcEventInfo.h.
+
+After iter 4 the **remaining 140 errors cluster** in Lua API surface
+code:
+
+| File | Errors | Reason |
+|------|--------|--------|
+| WorldObjectMethods.h | 48 | Lua-exposed methods using vanilla-divergent APIs (per-method porting) |
+| GlobalMethods.h | 43 | Lua-exposed methods (CliCommandHolder ctor, TemporarySpawn vs TemporarySummon, Creature/GameObject::Create signature drift, sTaxiNodesStore, Opcodes cast, ObjectMgr static vs instance) |
+| SpellHooks.cpp | 21 | Deeper proc info accesses + EntryKey<SpellEvents> template paths |
+| UnitMethods.h | 15 | Unit::IsStandState/isAuctioner/isGuildMaster vanilla name diffs |
+| LuaEngine.cpp | 5 | Various |
+| Others | 8 | ElunaCreatureAI.h (3), ElunaSpellWrapper.cpp (2), PacketHooks.cpp (2) |
+
+The remaining work has **no more broad-impact fixes** — each method
+needs case-by-case porting (rename call, adapt args, or stub-out and
+lose the Lua-side functionality). Estimated remaining: **10-15 hours**.
+
 ## Why this is deferred
 
 The user shipped 27+ encounter strategies, 11 frameworks, and a
