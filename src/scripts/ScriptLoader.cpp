@@ -84,8 +84,20 @@ void AddSC_boss_bogpaw_truthsay();
 void AddSC_boss_gowlfang();
 void AddSC_boss_halgan_redbrand();
 void AddSC_boss_searistrasz();
-void AddSC_boss_web_master_torkon();
 void AddSC_boss_zuluhed_the_whacked();
+
+void AddSC_instance_stormwrought_ruins();            //stormwrought_ruins
+void AddSC_boss_chieftain_stormsong();
+void AddSC_boss_dagar_the_glutton();
+void AddSC_boss_deathlord_tidebane();
+void AddSC_boss_duke_balor_iv();
+void AddSC_boss_eldermaw_the_primordial();
+void AddSC_boss_ighalfor();
+void AddSC_boss_lady_drazare();
+void AddSC_boss_librarian_theodorus();
+void AddSC_boss_mycellakos();
+void AddSC_boss_oronok_torn_heart();
+void AddSC_boss_subjugator_halthas_shadecrest();
 
 void AddSC_gnomeregan();                             //gnomeregan
 void AddSC_boss_thermaplugg();
@@ -187,6 +199,7 @@ void AddSC_burning_steppes();
 void AddSC_dun_morogh();
 void AddSC_eastern_plaguelands();
 void AddSC_elwynn_forest();
+void AddSC_grim_reaches();
 void AddSC_hillsbrad_foothills();
 void AddSC_hinterlands();
 void AddSC_ironforge();
@@ -205,6 +218,7 @@ void AddSC_westfall();
 void AddSC_wetlands();
 
 //kalimdor
+void AddSC_boss_velthelaxx_the_defiler();            //blackfathom_deeps
 void AddSC_instance_blackfathom_deeps();             //blackfathom_deeps
 void AddSC_boss_celebras_the_cursed();               //maraudon
 void AddSC_boss_landslide();
@@ -237,6 +251,7 @@ void AddSC_instance_temple_of_ahnqiraj();
 void AddSC_instance_wailing_caverns();               //Wailing caverns
 void AddSC_wailing_caverns();
 void AddSC_zulfarrak();                              //zulfarrak
+void AddSC_farraki_arena();
 void AddSC_instance_zulfarrak();
 
 void AddSC_ashenvale();
@@ -250,6 +265,7 @@ void AddSC_duskwood();
 void AddSC_felwood();
 void AddSC_feralas();
 void AddSC_moonglade();
+void AddSC_moonwhisper_coast();
 void AddSC_mulgore();
 void AddSC_orgrimmar();
 void AddSC_silithus();
@@ -318,6 +334,13 @@ void AddSC_boss_engineer_figgles();
 void AddSC_boss_hargesh_doomcaller();
 void AddSC_boss_hatereaver_annhilator();
 void AddSC_trash_mobs_hateforge_quarry();
+
+// Frostmane Hollow
+void AddSC_boss_hailar_the_frigid();
+
+// Windhorn Canyon
+void AddSC_boss_bonespeaker_narlgom();
+void AddSC_windhorn_canyon();
 
 // Stormwind Vaults
 void AddSC_boss_aszosh_grimflame();
@@ -417,6 +440,24 @@ void AddScripts()
     AddSC_deadmines();                                      //deadmines
     AddSC_instance_deadmines();
     AddSC_boss_mr_smite();
+    AddSC_instance_dragonmaw_retreat();                     //dragonmaw_retreat
+    AddSC_boss_bogpaw_truthsay();
+    AddSC_boss_gowlfang();
+    AddSC_boss_halgan_redbrand();
+    AddSC_boss_searistrasz();
+    AddSC_boss_zuluhed_the_whacked();
+    AddSC_instance_stormwrought_ruins();                    //stormwrought_ruins
+    AddSC_boss_chieftain_stormsong();
+    AddSC_boss_dagar_the_glutton();
+    AddSC_boss_deathlord_tidebane();
+    AddSC_boss_duke_balor_iv();
+    AddSC_boss_eldermaw_the_primordial();
+    AddSC_boss_ighalfor();
+    AddSC_boss_lady_drazare();
+    AddSC_boss_librarian_theodorus();
+    AddSC_boss_mycellakos();
+    AddSC_boss_oronok_torn_heart();
+    AddSC_boss_subjugator_halthas_shadecrest();
     AddSC_gnomeregan();                                     //gnomeregan
     AddSC_boss_thermaplugg();
     AddSC_instance_gnomeregan();
@@ -516,6 +557,7 @@ void AddScripts()
     AddSC_dun_morogh();
     AddSC_eastern_plaguelands();
     AddSC_elwynn_forest();
+    AddSC_grim_reaches();
     AddSC_hillsbrad_foothills();
     AddSC_hinterlands();
     AddSC_ironforge();
@@ -534,6 +576,7 @@ void AddScripts()
     AddSC_wetlands();
 
     //kalimdor
+    AddSC_boss_velthelaxx_the_defiler();                    //blackfathom_deeps
     AddSC_instance_blackfathom_deeps();                     //blackfathom_deeps
     AddSC_boss_celebras_the_cursed();                       //maraudon
     AddSC_boss_landslide();
@@ -566,6 +609,7 @@ void AddScripts()
     AddSC_wailing_caverns();                               //Wailing caverns
     AddSC_instance_wailing_caverns();
     AddSC_zulfarrak();                                      //zulfarrak
+    AddSC_farraki_arena();
     AddSC_instance_zulfarrak();
 
     AddSC_ashenvale();
@@ -579,6 +623,7 @@ void AddScripts()
     AddSC_felwood();
     AddSC_feralas();
     AddSC_moonglade();
+    AddSC_moonwhisper_coast();
     AddSC_mulgore();
     AddSC_orgrimmar();
     AddSC_silithus();
@@ -591,6 +636,13 @@ void AddScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+
+    // Frostmane Hollow
+    AddSC_boss_hailar_the_frigid();
+
+    // Windhorn Canyon
+    AddSC_boss_bonespeaker_narlgom();
+    AddSC_windhorn_canyon();
 
     // Stormwind Vaults
     AddSC_boss_aszosh_grimflame();
