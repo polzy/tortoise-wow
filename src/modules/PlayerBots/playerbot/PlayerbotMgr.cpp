@@ -3639,7 +3639,23 @@ std::string PlayerbotHolder::HandleBotBis(Player* bot, Player* master, const std
         return std::string(bot->GetName()) + " must be lvl 60 to apply BiS.";
 
     uint8 cls = bot->getClass();
+
+    // Detect bot's talent spec via PlayerbotAI::GetTalentSpec(), which counts
+    // talents per tab and picks the highest. The returned enum follows
+    // ((class * 3) - 2) + tab, so we recover the tab index (0/1/2) by taking
+    // (enum_value - 1) % 3 for classes 1-9, and (enum - 31) for druid (11).
+    // SpecKey(cls, tab) is what PlayerbotBiS.h uses to differentiate
+    // tank/heal/dps gear within the same class.
     uint8 spec = 0;
+    if (PlayerbotAI* botAI = bot->GetPlayerbotAI())
+    {
+        PlayerTalentSpec ts = botAI->GetTalentSpec();
+        uint8 raw = static_cast<uint8>(ts);
+        if (raw >= 1 && raw <= 30)
+            spec = (raw - 1) % 3;
+        else if (raw >= 31 && raw <= 33)
+            spec = raw - 31;  // druid tab block starts at 31
+    }
     uint32 equipped = 0;
     uint32 skippedNoItem = 0;
     uint32 skippedNoSlot = 0;

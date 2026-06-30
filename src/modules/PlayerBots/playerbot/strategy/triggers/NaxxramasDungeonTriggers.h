@@ -320,6 +320,18 @@ namespace ai
         }
     };
 
+    // --- Heigan Decrepit Fever (29998) — raid-wide disease, ticks for high
+    // damage every 3s and reduces max HP by 50%. Priest/Paladin/Shaman must
+    // dispel ASAP or the raid dies. Self-aura trigger; the action ("cure
+    // disease on party") then group-scans and dispels all afflicted party
+    // members. ScriptDev2 boss_heigan.cpp SPELL_DECREPIT_FEVER = 29998. ---
+    class HeiganDecrepitFeverTrigger : public Trigger
+    {
+    public:
+        HeiganDecrepitFeverTrigger(PlayerbotAI* ai) : Trigger(ai, "heigan decrepit fever", 1) {}
+        bool IsActive() override { return ai->HasAura(29998, bot); }
+    };
+
     // --- Loatheb Corrupted Mind cast (29201) — PREDICTIVE healer prep ---
     // Framework #11 demo. The reactive trigger only fires after Corrupted
     // Mind has landed and silenced the healer for 12s. By detecting the

@@ -5817,8 +5817,17 @@ void Spell::HandleEffects(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGOT
     if (eff < TOTAL_SPELL_EFFECTS)
         (*this.*SpellEffects[eff])(i);
     else
-        sLog.outError("WORLD: Spell %u has effect %d at index %u > TOTAL_SPELL_EFFECTS",
-            m_spellInfo->Id, eff, i);
+    {
+        // Dedupe per (spell, effect-index) — Turtle custom spells 18744/18771
+        // declare TBC+ effect IDs (134) that vanilla cores don't implement, and
+        // this was emitting ~840 lines/session as the same handful of spells got
+        // cast over and over. First occurrence is enough.
+        static std::set<uint64> s_loggedUnknownEffects;
+        uint64 key = (uint64(m_spellInfo->Id) << 32) | (uint64(uint32(eff)) << 8) | i;
+        if (s_loggedUnknownEffects.insert(key).second)
+            sLog.outError("WORLD: Spell %u has effect %d at index %u > TOTAL_SPELL_EFFECTS",
+                m_spellInfo->Id, eff, i);
+    }
 }
 
 void Spell::AddTriggeredSpell(uint32 spellId)

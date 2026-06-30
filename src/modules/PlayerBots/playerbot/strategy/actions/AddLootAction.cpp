@@ -23,12 +23,24 @@ bool AddLootAction::Execute(Event& event)
     if (!guid)
         return false;
 
-    return AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
+    LootObjectStack* stack = AI_VALUE(LootObjectStack*, "available loot");
+    if (!stack)
+        return false;
+    return stack->Add(guid);
 }
 
 bool AddAllLootAction::Execute(Event& event)
 {
+    // Same guard pattern as AddGatheringLootAction::AddLoot: an AV swallowed by
+    // SEH leaves the heap inconsistent; cheaper to bail out at entry than to
+    // let the call cascade into Map/IsDungeon/GetGroup on a half-valid bot.
+    if (!bot)
+        return false;
+
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    if (!requester)
+        return false;
+
     bool added = false;
 
     std::string text = event.getParam();
@@ -66,6 +78,17 @@ bool AddAllLootAction::isUseful()
 
 bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 {
+    // Same defense as AddGatheringLootAction::AddLoot — null checks here are the
+    // ONLY way to stop the heap-corruption death spiral. SEH catches the AV
+    // (Map* deref while mid-teleport, or requester == null from a bad caller)
+    // but only after the libc allocator's internal state is already broken.
+    if (!bot || !requester)
+        return false;
+
+    Map* botMap = bot->GetMap();
+    if (!botMap)
+        return false;
+
     LootObject loot(bot, guid);
 
     if (ai->HasStrategy("debug loot", BotState::BOT_STATE_NON_COMBAT))
@@ -112,7 +135,10 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
     Group* group = bot->GetGroup();
 
     bool isInGroup = group ? true : false;
-    bool isInDungeon = bot->GetMap()->IsDungeon();
+    // Use the cached botMap (validated non-null at top) — bot->GetMap() can
+    // return null mid-Execute if a teleport ACK lands between the entry check
+    // and this line, and that AV is what was bypassing the entry guard.
+    bool isInDungeon = botMap->IsDungeon();
 
     if (isInGroup)
     {
@@ -163,7 +189,11 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
         if (hostiles.size() > 0)
         {
-            AI_VALUE(LootObjectStack*, "available loot")->Remove(wo->GetObjectGuid());
+            // AI_VALUE can return null if the bot's context is half-built
+            // (mid-teleport, pre-OnBotLogin, etc). Skip the side-effect rather
+            // than crash the AI.
+            if (LootObjectStack* stack = AI_VALUE(LootObjectStack*, "available loot"))
+                stack->Remove(wo->GetObjectGuid());
             RESET_AI_VALUE2(bool, "should loot object", std::to_string(wo->GetObjectGuid().GetRawValue()));
             return false;
         }
@@ -200,7 +230,12 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
         }
     }
 
-    return AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
+    // Defensive: AI_VALUE can return null if the bot context is half-built
+    // (the source of the Naxx loot-cascade quarantine wave).
+    LootObjectStack* stack = AI_VALUE(LootObjectStack*, "available loot");
+    if (!stack)
+        return false;
+    return stack->Add(guid);
 }
 
 bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)

@@ -14,10 +14,20 @@ using namespace ai;
 using namespace MaNGOS;
 
 bool TravelAction::Execute(Event& event)
-{    
+{
+    // The 'travel target' AI value can be null when LoadQuestTravelTable() crashed
+    // at world boot (SEH-caught) leaving the travel map incomplete. Without this
+    // guard CheckStatus() dereferences null → AV → SEH-catch → heap corruption
+    // (~5 quarantines/min from bots like Melian who repeatedly enter the travel
+    // strategy and hit the same null deref).
     TravelTarget * target = AI_VALUE(TravelTarget *, "travel target");
-    
-    target->CheckStatus();     
+    if (!target)
+    {
+        SET_AI_VALUE2(time_t, "manual time", "next travel check", time(0) + 30);
+        return false;
+    }
+
+    target->CheckStatus();
 
     SET_AI_VALUE2(time_t, "manual time", "next travel check", time(0) + 5);
 
@@ -40,9 +50,12 @@ bool TravelAction::isUseful()
         return false;
 
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+    if (!target)
+        return false;
+
     if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
         return true;
-    
+
     if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
         return true;
 

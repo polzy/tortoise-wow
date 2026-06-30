@@ -11,6 +11,9 @@ namespace ai
 
         virtual bool Execute(Event& event) override
         {
+            if (!bot || !ai)
+                return false;
+
             Group* grp = bot->GetGroupInvite();
             if (!grp)
                 return false;
@@ -56,7 +59,7 @@ namespace ai
 
             Player* master = inviter;
 
-            if (master->GetPlayerbotAI()) //Copy formation from bot master.
+            if (master && master->GetPlayerbotAI()) //Copy formation from bot master.
             {
                 if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
                 {
@@ -76,9 +79,16 @@ namespace ai
                         bot->Say(reply, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
                 }
 
+                // Formation copy: MAI_VALUE returns the master's "formation" Value*,
+                // which can be null when the master AI is half-built or has no
+                // formation set. Null-check both the master formation and the
+                // local Value before dereferencing. This is the AV that swallowed
+                // ~4 bots/session on accept-invitation (Iwario, Alairii, Aslo,
+                // Velinah this session).
                 Formation* masterFormation = MAI_VALUE(Formation*, "formation");
                 FormationValue* value = (FormationValue*)context->GetValue<Formation*>("formation");
-                value->Load(masterFormation->getName());
+                if (masterFormation && value)
+                    value->Load(masterFormation->getName());
             }
 
             ai->TellPlayer(inviter, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

@@ -126,6 +126,17 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "heigan eruption cast",
         NextAction::array(0, new NextAction("flee", 99.0f), NULL)));
 
+    // Heigan Decrepit Fever (29998) — raid-wide disease, ticks for 250-400
+    // damage every 3s and reduces max HP by 50%. Must be dispelled fast or
+    // the raid dies during dance phase. Priests/Pala/Shamans group-scan
+    // and dispel. Priority 90 (above pro-engage, below positioning).
+    triggers.push_back(new TriggerNode(
+        "heigan decrepit fever",
+        NextAction::array(0,
+            new NextAction("cure disease on party", 90.0f),
+            new NextAction("cleanse disease on party", 90.0f),
+            NULL)));
+
     // Loatheb Corrupted Mind PREDICTIVE — Framework #11. Boss-cast
     // detection fires while Loatheb (16011) is mid-cast of Corrupted Mind
     // (29201, ~1.5-2.5s cast). Pre-stack defensives BEFORE the silence

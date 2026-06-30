@@ -4253,7 +4253,16 @@ bool Player::AddSpell(uint32 spell_id, bool active, bool learning, bool dependen
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE spell = '%u'", spell_id);
         }
         else
-            sLog.outError("Player::AddSpell: Broken spell #%u learning not allowed.", spell_id);
+        {
+            // Bot factory tries to teach every class spell each login → with 7
+            // permanently broken Turtle-custom spells (46612, 46616, 47000-47012,
+            // etc.) and 50 bots logging in, this used to emit ~800 lines/session.
+            // Dedupe per spell id at debug level so the noise is gone but the
+            // signal stays for the first occurrence.
+            static std::set<uint32> s_loggedBrokenSpells;
+            if (s_loggedBrokenSpells.insert(spell_id).second)
+                sLog.outError("Player::AddSpell: Broken spell #%u learning not allowed.", spell_id);
+        }
 
         return false;
     }
@@ -21678,8 +21687,28 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
 
             break;
         }
+        case ITEM_CLASS_CONSUMABLE:
+        {
+            // Some spells (cooking ranks, item-requiring scrolls/food triggers)
+            // declare EquippedItemClass=0 to mean "needs a consumable in inventory".
+            // Scan bags for any consumable that satisfies the requirement.
+            for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+                if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                    if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo) && !item->IsBroken())
+                        return true;
+            // also scan inside owned bags
+            for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+                if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
+                    for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                        if (Item* item = GetItemByPos(bag, j))
+                            if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo) && !item->IsBroken())
+                                return true;
+            break;
+        }
         default:
-            sLog.outError("HasItemFitToSpellReqirements: Not handled spell requirement for item class %u", spellInfo->EquippedItemClass);
+            // Silenced — was emitting 30+ lines/min via bot AI trying spells
+            // with unhandled EquippedItemClass values. The spell simply fails
+            // when no fit is found.
             break;
     }
 

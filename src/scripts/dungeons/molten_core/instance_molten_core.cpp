@@ -176,12 +176,18 @@ struct instance_molten_core : ScriptedInstance
                     pCreature->AddObjectToRemoveList();
                 break;
             case NPC_DOMO:
-                m_auiEncounter[TYPE_MAJORDOMO] = DONE;
-                pCreature->AddObjectToRemoveList();
+                // Vanilla: Majordomo is not statically spawned. He's summoned by
+                // molten_core.cpp after the 8 sub-bosses are dead, then teleports
+                // to the altar as a friendly NPC for the Ragnaros gossip. Only
+                // remove leftovers if the whole instance is cleared (Ragnaros DONE).
+                if (m_auiEncounter[TYPE_RAGNAROS] == DONE)
+                    pCreature->AddObjectToRemoveList();
                 break;
             case NPC_RAGNAROS:
-                m_auiEncounter[TYPE_RAGNAROS] = DONE;
-                pCreature->AddObjectToRemoveList();
+                // Vanilla: Ragnaros is summoned via Majordomo gossip. Only despawn
+                // if the encounter is already DONE (instance cleared).
+                if (m_auiEncounter[TYPE_RAGNAROS] == DONE)
+                    pCreature->AddObjectToRemoveList();
                 break;
             case NPC_LAVA_ANNIHILATOR:
                 if (urand(0, 1))

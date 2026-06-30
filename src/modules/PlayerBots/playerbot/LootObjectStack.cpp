@@ -58,7 +58,16 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid, bool debug)
     reqItem = 0;
     this->guid = ObjectGuid();
 
+    // Root cause for the 'add all loot' quarantine wave that survived the
+    // AddLootAction null checks: bot->GetPlayerbotAI() can return null while
+    // the bot is mid-disconnect / mid-teleport, even though the Action::ai
+    // that invoked us is still valid. The next line then derefs ai. Same
+    // pattern in GetWorldObject below.
+    if (!bot)
+        return;
     PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return;
     Creature* creature = ai->GetCreature(guid);
     if (creature && sServerFacade.GetDeathState(creature) == CORPSE)
     {
@@ -196,9 +205,13 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid, bool debug)
 
 WorldObject* LootObject::GetWorldObject(Player* bot)
 {
+    if (!bot)
+        return NULL;
     Refresh(bot, guid);
 
     PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return NULL;
 
     Creature *creature = ai->GetCreature(guid);
     if (creature && sServerFacade.GetDeathState(creature) == CORPSE)
@@ -221,10 +234,14 @@ LootObject::LootObject(const LootObject& other)
 
 bool LootObject::IsLootPossible(Player* bot)
 {
+    if (!bot)
+        return false;
     if (IsEmpty() || !GetWorldObject(bot))
         return false;
 
     PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return false;
 
     if (reqItem && !bot->HasItemCount(reqItem, 1))
         return false;

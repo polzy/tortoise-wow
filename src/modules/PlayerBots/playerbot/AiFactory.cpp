@@ -711,6 +711,12 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             combatEngine->addStrategies("behind", "stealth", "poisons", "buff", NULL);
         }
     }
+
+    // Mirror of the non-combat addStrategy("dungeon") — needed because the
+    // EnterDungeonTrigger::IsActive checks HasStrategy(...,BOT_STATE_COMBAT),
+    // so if the bot is already in combat when it crosses the portal the
+    // non-combat-only entry won't trip the enable-strat action.
+    combatEngine->addStrategy("dungeon");
 }
 
 Engine* AiFactory::createCombatEngine(Player* player, PlayerbotAI* const facade, AiObjectContext* AiObjectContext)
@@ -930,6 +936,14 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
 
     nonCombatEngine->addStrategies("wbuff", NULL);
     nonCombatEngine->addStrategy("avoid mobs");
+
+    // Auto-load per-dungeon strategies on map enter. The "dungeon" base strategy
+    // contains "enter naxxramas"/"enter molten core"/etc. triggers that flip
+    // +naxxramas / +molten core / etc. on map match. Without "dungeon" loaded
+    // here, the Noth plagued-adds engage, MC Ragnaros add engage, BWL Razorgore
+    // orb-click, AQ40 dispel chains — none of them fire. This is the root cause
+    // for "bots don't follow the boss strat" reports across all raids.
+    nonCombatEngine->addStrategy("dungeon");
 
     if(sPlayerbotAIConfig.llmEnabled == 2)
         nonCombatEngine->addStrategy("ai chat");

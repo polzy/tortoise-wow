@@ -45,8 +45,15 @@ RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(acc
     availableRaces[CLASS_WARRIOR].push_back(RACE_DRAENEI);
 #endif
 
+    // Turtle WoW: paladin available cross-faction (vanilla Alliance-only).
     availableRaces[CLASS_PALADIN].push_back(RACE_HUMAN);
     availableRaces[CLASS_PALADIN].push_back(RACE_DWARF);
+    availableRaces[CLASS_PALADIN].push_back(RACE_NIGHTELF);
+    availableRaces[CLASS_PALADIN].push_back(RACE_GNOME);
+    availableRaces[CLASS_PALADIN].push_back(RACE_ORC);
+    availableRaces[CLASS_PALADIN].push_back(RACE_UNDEAD);
+    availableRaces[CLASS_PALADIN].push_back(RACE_TAUREN);
+    availableRaces[CLASS_PALADIN].push_back(RACE_TROLL);
 #ifndef MANGOSBOT_ZERO
     availableRaces[CLASS_PALADIN].push_back(RACE_DRAENEI);
     availableRaces[CLASS_PALADIN].push_back(RACE_BLOODELF);
@@ -90,9 +97,16 @@ RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(acc
     availableRaces[CLASS_WARLOCK].push_back(RACE_BLOODELF);
 #endif
 
+    // Turtle WoW: shaman available cross-faction → add all races (vanilla
+    // restricted shaman to Horde, but Turtle DB+client allow Alliance shaman).
     availableRaces[CLASS_SHAMAN].push_back(RACE_ORC);
     availableRaces[CLASS_SHAMAN].push_back(RACE_TAUREN);
     availableRaces[CLASS_SHAMAN].push_back(RACE_TROLL);
+    availableRaces[CLASS_SHAMAN].push_back(RACE_HUMAN);
+    availableRaces[CLASS_SHAMAN].push_back(RACE_DWARF);
+    availableRaces[CLASS_SHAMAN].push_back(RACE_NIGHTELF);
+    availableRaces[CLASS_SHAMAN].push_back(RACE_GNOME);
+    availableRaces[CLASS_SHAMAN].push_back(RACE_UNDEAD);
 #ifndef MANGOSBOT_ZERO
     availableRaces[CLASS_SHAMAN].push_back(RACE_DRAENEI);
 #endif
@@ -107,8 +121,16 @@ RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(acc
     availableRaces[CLASS_HUNTER].push_back(RACE_BLOODELF);
 #endif
 
+    // Turtle WoW: druid available cross-faction → add all races (vanilla
+    // restricted druid to Night Elf / Tauren only).
     availableRaces[CLASS_DRUID].push_back(RACE_NIGHTELF);
     availableRaces[CLASS_DRUID].push_back(RACE_TAUREN);
+    availableRaces[CLASS_DRUID].push_back(RACE_HUMAN);
+    availableRaces[CLASS_DRUID].push_back(RACE_DWARF);
+    availableRaces[CLASS_DRUID].push_back(RACE_GNOME);
+    availableRaces[CLASS_DRUID].push_back(RACE_ORC);
+    availableRaces[CLASS_DRUID].push_back(RACE_UNDEAD);
+    availableRaces[CLASS_DRUID].push_back(RACE_TROLL);
 
 #ifdef MANGOSBOT_TWO
     availableRaces[CLASS_DEATH_KNIGHT].push_back(RACE_NIGHTELF);
