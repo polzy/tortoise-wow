@@ -35,6 +35,39 @@ namespace ai
             : MoveAwayAndStayFromCreature(ai, "move away from heigan fissure", 533001, 20.0f) {}
     };
 
+    // Plague Slime corridor: 4 entries share the kill-on-touch Disease Cloud,
+    // so the trigger ("plague slime nearby") chains all 4 actions — each
+    // Execute returns false when no slime of ITS entry is in range, letting
+    // the next entry's action run. Only the one matching the nearby slime
+    // actually moves the bot.
+    class MoveAwayFromPlagueSlimeAction : public MoveAwayAndStayFromCreature
+    {
+    public:
+        MoveAwayFromPlagueSlimeAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from plague slime", 16243, 15.0f) {}
+    };
+
+    class MoveAwayFromPlagueSlimeBlueAction : public MoveAwayAndStayFromCreature
+    {
+    public:
+        MoveAwayFromPlagueSlimeBlueAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from plague slime blue", 16783, 15.0f) {}
+    };
+
+    class MoveAwayFromPlagueSlimeRedAction : public MoveAwayAndStayFromCreature
+    {
+    public:
+        MoveAwayFromPlagueSlimeRedAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from plague slime red", 16784, 15.0f) {}
+    };
+
+    class MoveAwayFromPlagueSlimeGreenAction : public MoveAwayAndStayFromCreature
+    {
+    public:
+        MoveAwayFromPlagueSlimeGreenAction(PlayerbotAI* ai)
+            : MoveAwayAndStayFromCreature(ai, "move away from plague slime green", 16785, 15.0f) {}
+    };
+
     // Framework #5 demo: Thaddius polarity. Each raid member carries either
     // Positive Charge (28059) or Negative Charge (28084). Same-polarity bots
     // must stack within ~10y; different-polarity bots must be >10y apart.

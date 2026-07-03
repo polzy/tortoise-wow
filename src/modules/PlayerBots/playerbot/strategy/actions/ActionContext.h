@@ -423,6 +423,10 @@ namespace ai
             creators["thaddius same polarity"] = [](PlayerbotAI* ai) { return new ThaddiusMoveToSamePolarityAction(ai); };
             creators["move away from heigan fissure"] = [](PlayerbotAI* ai) { return new MoveAwayFromHeiganFissureAction(ai); };
             creators["move away from anubrekhan locust swarm"] = [](PlayerbotAI* ai) { return new MoveAwayFromAnubRekhanLocustSwarmAction(ai); };
+            creators["move away from plague slime"] = [](PlayerbotAI* ai) { return new MoveAwayFromPlagueSlimeAction(ai); };
+            creators["move away from plague slime blue"] = [](PlayerbotAI* ai) { return new MoveAwayFromPlagueSlimeBlueAction(ai); };
+            creators["move away from plague slime red"] = [](PlayerbotAI* ai) { return new MoveAwayFromPlagueSlimeRedAction(ai); };
+            creators["move away from plague slime green"] = [](PlayerbotAI* ai) { return new MoveAwayFromPlagueSlimeGreenAction(ai); };
 
             // Temple of Ahn'Qiraj (AQ40)
             creators["enable temple of ahnqiraj strategy"] = [](PlayerbotAI* ai) { return new TempleOfAhnQirajEnableDungeonStrategyAction(ai); };

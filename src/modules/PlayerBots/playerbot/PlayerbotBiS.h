@@ -95,13 +95,14 @@ namespace mcwow_bis
                 19364, 0, 0, 0
             } } },
 
-            // HUNTER (T2 Dragonstalker, 8 pieces) + Ashkandi 2H sword + holdable + bow
-            // Was 21797 (Pwnage sword). Hunters use 2H as a melee fallback, so kept 2H
-            // with Ashkandi (19364, str 33, canonical vanilla BiS 2H sword).
+            // HUNTER — all 3 specs are ranged; one entry + spec-0 fallback
+            // covers BM/MM/SV. Ashkandi 2H melee stat-stick + bow. OH must be
+            // 0: a 2H mainhand blocks the offhand slot (the previous 55350
+            // holdable could never equip and just spammed equip failures).
             { SpecKey(3, 0), { {
                 16939, 47323, 16937, 0, 16942, 16936, 16938, 16941,
                 16935, 16940, 55353, 55516, 55124, 55131, 55352,
-                19364, 55350, 55346, 0
+                19364, 0, 55346, 0
             } } },
 
             // ROGUE spec 0 — all specs use daggers — Kingsfall (AQ40) MH +
@@ -135,11 +136,27 @@ namespace mcwow_bis
                 22799, 0, 22821, 0
             } } },
 
-            // SHAMAN (T2 The Ten Storms) + 1H mace + shield + no ranged
+            // SHAMAN spec 0 — ELEMENTAL caster — 1H caster mace (23056,
+            // int+spirit) + shield. Was 55347 (Thunderfall, NEGATIVE stats).
             { SpecKey(7, 0), { {
                 70724, 47185, 70725, 0, 70726, 70729, 70730, 70731,
                 70727, 70728, 55353, 55516, 55124, 55131, 55352,
-                55347, 55349, 0, 0
+                23056, 55349, 0, 0
+            } } },
+
+            // SHAMAN spec 1 — ENHANCEMENT melee — Might of Menethil 2H mace
+            // (22798, sta 46 + str 20; allowable_class includes shaman).
+            { SpecKey(7, 1), { {
+                70724, 47185, 70725, 0, 70726, 70729, 70730, 70731,
+                70727, 70728, 55353, 55516, 55124, 55131, 55352,
+                22798, 0, 0, 0
+            } } },
+
+            // SHAMAN spec 2 — RESTORATION heal — same caster 1H heal + shield.
+            { SpecKey(7, 2), { {
+                70724, 47185, 70725, 0, 70726, 70729, 70730, 70731,
+                70727, 70728, 55353, 55516, 55124, 55131, 55352,
+                23056, 55349, 0, 0
             } } },
 
             // MAGE (T2 Netherwind) + staff + holdable + wand
@@ -156,11 +173,28 @@ namespace mcwow_bis
                 55348, 55350, 22821, 0
             } } },
 
-            // DRUID (T2 Stormrage Raiment) + 1H mace + holdable + no ranged
+            // DRUID spec 0 — BALANCE caster — Kirel'narak staff (int+sta).
+            // Was 55347 (Thunderfall, NEGATIVE stats) + holdable.
             { SpecKey(11, 0), { {
                 70792, 47395, 70793, 0, 70794, 70797, 70798, 70799,
                 70795, 70796, 55353, 55516, 55124, 55131, 55352,
-                55347, 55350, 0, 0
+                55348, 0, 0, 0
+            } } },
+
+            // DRUID spec 1 — FERAL tank/cat — Might of Menethil 2H mace
+            // (sta 46 + str 20). Feral weapon DPS is irrelevant in forms;
+            // only the stats carry through, so a chunky sta/str stick wins.
+            { SpecKey(11, 1), { {
+                70792, 47395, 70793, 0, 70794, 70797, 70798, 70799,
+                70795, 70796, 55353, 55516, 55124, 55131, 55352,
+                22798, 0, 0, 0
+            } } },
+
+            // DRUID spec 2 — RESTORATION heal — 1H heal mace + holdable.
+            { SpecKey(11, 2), { {
+                70792, 47395, 70793, 0, 70794, 70797, 70798, 70799,
+                70795, 70796, 55353, 55516, 55124, 55131, 55352,
+                23056, 55350, 0, 0
             } } },
         };
         return data;

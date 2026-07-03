@@ -332,6 +332,37 @@ namespace ai
         bool IsActive() override { return ai->HasAura(29998, bot); }
     };
 
+    // --- Plague Slime corridor (Plague Quarter, before Noth) ---
+    // Patrolling slimes 16243 / 16783 (Blue) / 16784 (Red) / 16785 (Green)
+    // carry a contact-range Disease/Poison Cloud that near-one-shots anyone
+    // they touch. They are an avoid-entirely mechanic, not a kill target —
+    // EVERY bot (tanks included) must keep distance while the pack navigates
+    // the corridor. Fires when any of the 4 entries is within 12y; the
+    // action chain moves the bot 15y+ out of the patrol path.
+    class PlagueSlimeNearbyTrigger : public Trigger
+    {
+    public:
+        PlagueSlimeNearbyTrigger(PlayerbotAI* ai) : Trigger(ai, "plague slime nearby", 1) {}
+        bool IsActive() override
+        {
+            if (!bot->IsInWorld() || bot->IsBeingTeleported())
+                return false;
+
+            static const uint32 slimeEntries[] = { 16243, 16783, 16784, 16785 };
+            for (uint32 entry : slimeEntries)
+            {
+                std::list<Unit*> slimes;
+                MaNGOS::AllCreaturesOfEntryInRangeCheck check(bot, entry, 12.0f);
+                MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(slimes, check);
+                Cell::VisitAllObjects(bot, searcher, 12.0f);
+                for (Unit* slime : slimes)
+                    if (slime->IsAlive())
+                        return true;
+            }
+            return false;
+        }
+    };
+
     // --- Loatheb Corrupted Mind cast (29201) — PREDICTIVE healer prep ---
     // Framework #11 demo. The reactive trigger only fires after Corrupted
     // Mind has landed and silenced the healer for 12s. By detecting the

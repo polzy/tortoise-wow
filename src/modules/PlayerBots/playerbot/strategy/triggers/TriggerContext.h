@@ -425,6 +425,7 @@ namespace ai
             creators["skeram split phase"] = [](PlayerbotAI* ai) { return new SkeramSplitPhaseTrigger(ai); };
             creators["heigan eruption cast"] = [](PlayerbotAI* ai) { return new HeiganEruptionCastTrigger(ai); };
             creators["heigan decrepit fever"] = [](PlayerbotAI* ai) { return new HeiganDecrepitFeverTrigger(ai); };
+            creators["plague slime nearby"] = [](PlayerbotAI* ai) { return new PlagueSlimeNearbyTrigger(ai); };
             creators["loatheb corrupted mind cast"] = [](PlayerbotAI* ai) { return new LoathebCorruptedMindCastTrigger(ai); };
             creators["kurinnaxx sand trap nearby"] = [](PlayerbotAI* ai) { return new KurinnaxxSandTrapNearbyTrigger(ai); };
             creators["ossirian sand vortex nearby"] = [](PlayerbotAI* ai) { return new OssirianSandVortexNearbyTrigger(ai); };

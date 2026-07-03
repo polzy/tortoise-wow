@@ -233,6 +233,34 @@ void NaxxramasDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "patchwerk hateful nontank",
         NextAction::array(0, new NextAction("flee", 100.0f), NULL)));
+
+    // Plague Slime corridor (16243/16783/16784/16785) — kill-on-touch
+    // Disease Cloud. Chain all 4 color actions; each bails (returns false)
+    // when its entry isn't nearby, so only the matching one moves the bot.
+    // Priority 100: touching a slime is death, nothing else matters.
+    triggers.push_back(new TriggerNode(
+        "plague slime nearby",
+        NextAction::array(0,
+            new NextAction("move away from plague slime", 100.0f),
+            new NextAction("move away from plague slime blue", 100.0f),
+            new NextAction("move away from plague slime red", 100.0f),
+            new NextAction("move away from plague slime green", 100.0f),
+            NULL)));
+}
+
+void NaxxramasDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // Same slime avoidance out of combat — the corridor is walked while
+    // following the master between trash packs, which is exactly when a
+    // patrolling slime clips the formation.
+    triggers.push_back(new TriggerNode(
+        "plague slime nearby",
+        NextAction::array(0,
+            new NextAction("move away from plague slime", 100.0f),
+            new NextAction("move away from plague slime blue", 100.0f),
+            new NextAction("move away from plague slime red", 100.0f),
+            new NextAction("move away from plague slime green", 100.0f),
+            NULL)));
 }
 
 void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

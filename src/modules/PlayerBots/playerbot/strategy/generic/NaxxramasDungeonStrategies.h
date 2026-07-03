@@ -11,6 +11,10 @@ namespace ai
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        // Non-combat too: Plague Slimes patrol the corridor while bots are
+        // out of combat (following through trash) — that's exactly when they
+        // get touched and one-shot.
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
     class FourHorsemanFightStrategy : public Strategy
