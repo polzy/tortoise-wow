@@ -3872,7 +3872,7 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
         if (auras.empty())
             continue;
 
-        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
         {
             Aura* aura = *i;
             if (!aura)
@@ -4001,7 +4001,7 @@ Aura* PlayerbotAI::GetAura(std::string name, Unit* unit, bool checkIsOwner)
             if (auras.empty())
                 continue;
 
-            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+            for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
             {
                 Aura* aura = *i;
                 if (!aura)
@@ -4050,7 +4050,7 @@ std::vector<Aura*> PlayerbotAI::GetAuras(Unit* unit, bool allAuras, bool positiv
         if (auras.empty())
             continue;
 
-        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
         {
             Aura* aura = *i;
             if (aura)
@@ -4355,18 +4355,23 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
 
         if (!damage)
         {
-            for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
+            // Vanilla signature: IsImmuneToSpell(spellInfo, castOnSelf) — no
+            // effectMask/caster params (upstream #306 targets newer cmangos).
+            bool immune = target->IsImmuneToSpell(spellInfo, false);
+            if (!immune)
             {
-                bool immune = target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, false);
-                if (immune)
-                {
-                    if (checkResult)
-                    {
-                        *checkResult = SPELL_FAILED_IMMUNE;
-                    }
+                for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
+                    immune = target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, false);
+            }
 
-                    return false;
+            if (immune)
+            {
+                if (checkResult)
+                {
+                    *checkResult = SPELL_FAILED_IMMUNE;
                 }
+
+                return false;
             }
         }
 
@@ -5626,9 +5631,9 @@ bool PlayerbotAI::IsInterruptableSpellCasting(Unit* target, std::string spell, u
 		if ((spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
 			return true;
 
-		if ((spellInfo->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST) &&
-			!target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, true))
-			return true;
+        if ((spellInfo->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST) &&
+            (!target->IsImmuneToSpell(spellInfo, true) || !target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, true)))
+            return true;
 
         if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA) && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SILENCE)
             return true;

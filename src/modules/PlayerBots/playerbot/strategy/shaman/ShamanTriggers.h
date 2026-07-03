@@ -305,7 +305,9 @@ namespace ai
                     const Aura* aura = *itr;
                     const SpellEntry* entry = aura->GetSpellProto();
                     uint32 spellId = entry->Id;
-                    if (!IsPositiveSpell(spellId))
+                    // Upstream #297 uses IsPositiveAuraEffect (newer cmangos);
+                    // vanilla equivalent is SpellEntry::IsPositiveEffect.
+                    if (!IsPositiveSpell(spellId) || !entry->IsPositiveEffect(aura->GetEffIndex()))
                         continue;
 
                     std::vector<uint32> ignoreSpells;
