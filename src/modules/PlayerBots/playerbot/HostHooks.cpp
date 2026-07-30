@@ -228,3 +228,19 @@ void Player_DispatchBotChatCommand(Player* master, uint32 type, std::string cons
 
     sRandomPlayerbotMgr.HandleCommand(type, msg, *master, "", master->GetTeam(), lang);
 }
+
+void Playerbot_SetForcedRole(Player* bot, uint8 role)
+{
+    if (!bot)
+        return;
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return;
+
+    if (ai->GetForcedRole() == role)
+        return;
+
+    ai->SetForcedRole(role);
+    ai->ResetStrategies();
+}
