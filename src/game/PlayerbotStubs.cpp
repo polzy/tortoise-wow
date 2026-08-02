@@ -27,6 +27,7 @@ bool Player_DispatchBotOutgoingPacket(Player*, WorldPacket const&) { return fals
 void Player_DispatchBotChatCommand(Player*, uint32, std::string const&, uint32) {}
 void Player_OnPlayerbotLogin(Player*) {}
 void Playerbot_SetForcedRole(Player*, uint8) {}
+uint8 Playerbot_GetAllowedRoles(Player*) { return 0; }
 
 void BotActionLog_LogCastStart  (WorldObject*, uint32, uint64, uint32)         {}
 void BotActionLog_LogCastResult (WorldObject*, uint32, uint8, const char*)     {}
