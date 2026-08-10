@@ -1490,7 +1490,8 @@ void World::LoadConfigSettingsFromFile(bool reload)
     setConfig(CONFIG_BOOL_LEECH_ENABLE, "Leech.Enable", false);
     setConfig(CONFIG_BOOL_LFT_BOTFILL_ENABLE, "LFT.BotFill.Enable", false);
     setConfig(CONFIG_UINT32_LFT_BOTFILL_DELAY, "LFT.BotFill.DelaySeconds", 90);
-    setConfig(CONFIG_UINT32_LFT_BOTFILL_LEVEL_RANGE, "LFT.BotFill.LevelRange", 5);
+    setConfig(CONFIG_UINT32_LFT_BOTFILL_LEVEL_BELOW, "LFT.BotFill.LevelRangeBelow", 2);
+    setConfig(CONFIG_UINT32_LFT_BOTFILL_LEVEL_ABOVE, "LFT.BotFill.LevelRangeAbove", 6);
 
     setConfig(CONFIG_UINT32_PERFORMANCE_REPORT_INTERVAL, "Perf.ReportInterval", 600);
     setConfig(CONFIG_UINT32_MAX_GOLD_TRANSFERRED, "Transfer.MaxGold", 300000);
