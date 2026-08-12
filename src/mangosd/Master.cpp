@@ -814,7 +814,7 @@ int Master::Run()
         // go down and shutdown the server
     }
 
-    sWorldSocketMgr->Wait();
+    world_thread.join();
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)
@@ -825,10 +825,6 @@ int Master::Run()
 
     ///- Remove signal handling before leaving
     _UnhookSignals();
-
-    // when the main thread closes the singletons get unloaded
-    // since worldrunnable uses them, it will crash if unloaded after master
-    world_thread.join();
 
     ///- Clean account database before leaving
     sLog.outString("Cleaning character database...");

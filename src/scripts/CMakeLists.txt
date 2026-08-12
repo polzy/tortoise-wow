@@ -137,12 +137,15 @@ dungeons/molten_core/boss_baron_geddon.cpp
 dungeons/molten_core/boss_garr.cpp
 dungeons/molten_core/boss_gehennas.cpp
 dungeons/molten_core/boss_golemagg.cpp
+dungeons/molten_core/boss_incindis.cpp
 dungeons/molten_core/boss_lucifron.cpp
 dungeons/molten_core/boss_magmadar.cpp
 dungeons/molten_core/boss_majordomo_executus.cpp
 dungeons/molten_core/boss_ragnaros.cpp
 dungeons/molten_core/boss_shazzrah.cpp
 dungeons/molten_core/boss_sulfuron_harbinger.cpp
+dungeons/molten_core/boss_thane.cpp
+dungeons/molten_core/boss_twin_golems.cpp
 dungeons/molten_core/instance_molten_core.cpp
 dungeons/molten_core/molten_core.cpp
 dungeons/molten_core/molten_core.h
@@ -330,6 +333,19 @@ miscellaneous/random_scripts_3.cpp
 miscellaneous/custom_exploration_triggers.cpp
 miscellaneous/jewelcrafting.cpp
 
+spells/spell_druid.cpp
+spells/spell_hunter.cpp
+spells/spell_item.cpp
+spells/spell_mage.cpp
+spells/spell_paladin.cpp
+spells/spell_priest.cpp
+spells/spell_rogue.cpp
+spells/spell_shaman.cpp
+spells/spell_special.cpp
+spells/spells_turtle.cpp
+spells/spell_warlock.cpp
+spells/spell_warrior.cpp
+
 world/alterac_mountains.cpp
 world/arathi_highlands.cpp
 world/ashenvale.cpp
@@ -357,6 +373,7 @@ world/loch_modan.cpp
 world/moonglade.cpp
 world/moonwhisper_coast.cpp
 world/mulgore.cpp
+world/northwind.cpp
 world/orgrimmar.cpp
 world/redridge_mountains.cpp
 world/searing_gorge.cpp

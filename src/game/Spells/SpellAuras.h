@@ -75,7 +75,10 @@ struct HeartBeatData
 };
 
 class Unit;
+class Item;
+class WorldObject;
 class SpellEntry;
+struct AuraScript;
 struct SpellModifier;
 struct ProcTriggerSpell;
 
@@ -115,6 +118,7 @@ class SpellAuraHolder
 #ifdef BUILD_ELUNA
         SpellEntry const* GetSpellInfo() const { return m_spellProto; }
 #endif
+        AuraScript* GetAuraScript() const { return m_auraScript; }
 
         ObjectGuid const& GetCasterGuid() const { return m_casterGuid; }
         void SetCasterGuid(ObjectGuid guid) { m_casterGuid = guid; }
@@ -155,6 +159,7 @@ class SpellAuraHolder
         bool IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) const;
         bool IsNeedVisibleSlot(Unit const* caster) const;
         bool IsRemovedOnShapeLost() const { return m_isRemovedOnShapeLost; }
+        void SetRemovedOnShapeLost(bool removed) { m_isRemovedOnShapeLost = removed; }
         bool IsInUse() const { return m_in_use;}
         bool IsDeleted() const { return m_deleted;}
         bool IsEmptyHolder() const;
@@ -254,6 +259,7 @@ class SpellAuraHolder
         time_t m_applyTime;
 
         SpellEntry const* m_spellProto;
+        AuraScript* m_auraScript;
 
         uint8 m_auraSlot;                                   // Aura slot on unit (for show in client)
         uint8 m_auraLevel;                                  // Aura level (store caster level for correct show level dep amount)
@@ -359,6 +365,7 @@ class Aura
         void HandleAuraModRoot(bool Apply, bool Real);
         void HandleAuraModSilence(bool Apply, bool Real);
         void HandleAuraModStat(bool Apply, bool Real);
+        void HandleAuraModPetStatsFromOwner(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseMountedSpeed(bool Apply, bool Real);
         void HandleAuraModDecreaseSpeed(bool Apply, bool Real);
@@ -396,6 +403,7 @@ class Aura
         void HandleChannelDeathItem(bool Apply, bool Real);
         void HandlePeriodicDamagePCT(bool Apply, bool Real);
         void HandleAuraModAttackPower(bool Apply, bool Real);
+        void HandleAuraModAttackPowerArea(bool Apply, bool Real);
         void HandleAuraTransform(bool Apply, bool Real);
         void HandleModSpellCritChance(bool Apply, bool Real);
         void HandleAuraModIncreaseSwimSpeed(bool Apply, bool Real);
@@ -426,6 +434,7 @@ class Aura
         void HandleAuraModPacify(bool Apply, bool Real);
         void HandleAuraGhost(bool Apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
+        void HandleAuraModAttackPowerPercentArea(bool apply, bool Real);
         void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
         void HandleSpiritOfRedemption(bool apply, bool Real);
         void HandleAuraAoeCharm(bool apply, bool real);
@@ -500,6 +509,12 @@ class Aura
             if(uint32 maxticks = GetAuraMaxTicks())
                 m_periodicTick = maxticks - GetAuraDuration() / m_modifier.periodictime;
         }
+        void SetPeriodicTimer(uint32 periodicTimerMs)
+        {
+            m_isPeriodic = true;
+            m_periodicTimer = periodicTimerMs;
+            m_modifier.periodictime = periodicTimerMs;
+        }
 
         bool IsPositive() const { return m_positive; }
         bool IsPersistent() const { return m_isPersistent; }
@@ -557,9 +572,11 @@ class Aura
         bool CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
 
         SpellAuraHolder* GetHolder() const { return m_spellAuraHolder; }
+        AuraScript* GetAuraScript() const { return GetHolder()->GetAuraScript(); }
 
         bool IsLastAuraOnHolder();
         SpellModifier* GetSpellModifier() const { return m_spellmod; }
+        void AddExtraSpellModifier(SpellModifier* mod) { m_extraSpellMods.push_back(mod); }
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 

@@ -31,6 +31,7 @@
 #include "Player.h"
 #include "Creature.h"
 #include "Spell.h"
+#include "ScriptMgr.h"
 #include "Group.h"
 #include "SpellAuras.h"
 #include "SpellEntry.h"
@@ -68,6 +69,7 @@
 #include "Autoscaling/AutoScaler.hpp"
 
 #include <math.h>
+#include <optional>
 #include <stdarg.h>
 #include "SuspiciousStatisticMgr.h"
 #include "PerfStats.h"
@@ -1713,6 +1715,13 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo *da
         {
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->procEx |= PROC_EX_BLOCK;
+            uint32 blockDamageReduction = damageInfo->subDamage[0].damage * uint32(std::abs(damageInfo->target->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_DAMAGE_PERCENT))) / 100;
+            if (blockDamageReduction > damageInfo->subDamage[0].damage)
+                blockDamageReduction = damageInfo->subDamage[0].damage;
+
+            damageInfo->totalDamage -= blockDamageReduction;
+            damageInfo->subDamage[0].damage -= blockDamageReduction;
+
             damageInfo->blocked_amount = damageInfo->target->GetShieldBlockValue();
             if (damageInfo->blocked_amount >= damageInfo->subDamage[0].damage)
             {
@@ -2144,11 +2153,15 @@ void Unit::CalculateDamageAbsorbAndResist(WorldObject *pCaster, SpellSchoolMask 
         if (remainingDamage < currentAbsorb)
             currentAbsorb = remainingDamage;
 
+        bool dropCharge = true;
+        if (aura->GetAuraScript())
+            aura->GetAuraScript()->OnAbsorb(aura, currentAbsorb, remainingDamage, dropCharge, damagetype);
+
         remainingDamage -= currentAbsorb;
 
         // Reduce shield amount
         mod->m_amount -= currentAbsorb;
-        if (aura->GetHolder()->DropAuraCharge())
+        if (dropCharge && aura->GetHolder()->DropAuraCharge())
             mod->m_amount = 0;
         // Need remove it later
         if (mod->m_amount <= 0)
@@ -2222,6 +2235,9 @@ void Unit::CalculateDamageAbsorbAndResist(WorldObject *pCaster, SpellSchoolMask 
             int32 manaReduction = int32(currentAbsorb * manaMultiplier);
             ApplyPowerMod(POWER_MANA, manaReduction, false);
         }
+
+        if ((*i)->GetAuraScript())
+            (*i)->GetAuraScript()->OnManaAbsorb(*i, currentAbsorb, remainingDamage);
 
         (*i)->GetModifier()->m_amount -= currentAbsorb;
         if ((*i)->GetModifier()->m_amount <= 0)
@@ -2382,6 +2398,12 @@ void Unit::CalculateAbsorbResistBlock(WorldObject* pCaster, SpellNonMeleeDamage 
 
     if (blocked)
     {
+        uint32 blockDamageReduction = damageInfo->damage * uint32(std::abs(GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_DAMAGE_PERCENT))) / 100;
+        if (blockDamageReduction > damageInfo->damage)
+            blockDamageReduction = damageInfo->damage;
+
+        damageInfo->damage -= blockDamageReduction;
+
         damageInfo->blocked = GetShieldBlockValue();
 
         if (damageInfo->damage < damageInfo->blocked)
@@ -2930,6 +2952,20 @@ float Unit::MeleeMissChanceCalc(Unit const* pVictim, WeaponAttackType attType) c
     else
         hitChance = m_modMeleeHitChance;
 
+    if (IsPet())
+    {
+        if (Unit* owner = GetOwner())
+        {
+            AuraList const& petMeleeHitAuras = GetAurasByType(SPELL_AURA_MOD_PET_MELEE_HIT_PERCENT_OF_OWNER);
+            for (const auto aura : petMeleeHitAuras)
+                hitChance += owner->m_modSpellHitChance * aura->GetModifier()->m_amount / 100.0f;
+
+            AuraList const& ownerPetMeleeHitAuras = owner->GetAurasByType(SPELL_AURA_MOD_PET_MELEE_HIT_PERCENT_OF_OWNER);
+            for (const auto aura : ownerPetMeleeHitAuras)
+                hitChance += owner->m_modSpellHitChance * aura->GetModifier()->m_amount / 100.0f;
+        }
+    }
+
     // There is some code in 1.12 that explicitly adds a modifier that causes the first 1% of +hit gained from
     // talents or gear to be ignored against monsters with more than 10 Defense Skill above the attacking player’s Weapon Skill.
     // https://us.forums.blizzard.com/en/wow/t/bug-hit-tables/185675/33
@@ -3410,6 +3446,41 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
         // If it was the cast, rogue will see others rogue at 40 meters
         if (i->GetId() != 2836)
             modifier += i->GetModifier()->m_amount;
+    }
+
+    return modifier;
+}
+
+int32 Unit::GetTotalAuraRangeModifier(AuraType auratype) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for (const auto& i : mTotalAuraList)
+    {
+        SpellEntry const* spellProto = i->GetSpellProto();
+        if (GetTypeId() == TYPEID_PLAYER && spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
+        {
+            Player const* player = static_cast<Player const*>(this);
+            bool hasMatchingWeapon = false;
+            for (int attack = 0; attack < MAX_ATTACK; ++attack)
+            {
+                WeaponAttackType const attackType = WeaponAttackType(attack);
+                if (Item* item = player->GetWeaponForAttack(attackType, true, true))
+                {
+                    if (item->IsFitToSpellRequirements(spellProto))
+                    {
+                        hasMatchingWeapon = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasMatchingWeapon)
+                continue;
+        }
+
+        modifier += i->GetModifier()->m_amount;
     }
 
     return modifier;
@@ -3937,7 +4008,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder *holder)
         {
             // Nostalrius - fix stack same HoT rank / diff caster
             if (firstInChain && !allowPeriodicHealStacking)
-                RemoveAurasDueToSpell(i_spellId);
+                RemoveAurasDueToSpell(i_spellId, nullptr, AURA_REMOVE_BY_STACK);
             else switch (spellId)
             {
             // Blessing of Light does not stack between casters.
@@ -4000,7 +4071,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder *holder)
                 continue;
             }
             DETAIL_LOG("[STACK][%u/%u] SpellSpecPerTarget ou SpellSpecPerCaster", spellId, i_spellId);
-            RemoveAurasDueToSpell(i_spellId);
+            RemoveAurasDueToSpell(i_spellId, nullptr, firstInChain ? AURA_REMOVE_BY_STACK : AURA_REMOVE_BY_DEFAULT);
 
             if (m_spellAuraHolders.empty())
                 break;
@@ -4029,7 +4100,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder *holder)
                 continue;
             }
             DETAIL_LOG("[STACK][%u/%u] SpellPerTarget", spellId, i_spellId);
-            RemoveAurasDueToSpell(i_spellId);
+            RemoveAurasDueToSpell(i_spellId, nullptr, firstInChain ? AURA_REMOVE_BY_STACK : AURA_REMOVE_BY_DEFAULT);
 
             if (m_spellAuraHolders.empty())
                 break;
@@ -4845,6 +4916,11 @@ void Unit::HandleTriggers(Unit* pVictim, uint32 procExtra, uint32 amount, int32 
         uint32 cooldown = 0;
         if (spellProcEvent && spellProcEvent->cooldown)
             cooldown = spellProcEvent->cooldown;
+        if (cooldown)
+        {
+            if (Player* modOwner = triggeredByHolder->GetTarget()->GetSpellModOwner())
+                modOwner->ApplySpellMod(triggeredByHolder->GetId(), SPELLMOD_PROC_COOLDOWN, cooldown);
+        }
 
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
@@ -4875,16 +4951,23 @@ void Unit::HandleTriggers(Unit* pVictim, uint32 procExtra, uint32 amount, int32 
             if ((triggeredByAura->GetSpellProto()->TargetAuraState == AURA_STATE_HEALTHLESS_20_PERCENT) && (!itr.target || !itr.target->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT)))
                 continue;
 
-            // NULL-POINTER GUARD: AuraProcHandler is a static array of member function
-            // pointers indexed by AuraType. Not every AuraType has a handler — entries for
-            // unimplemented aura types are nullptr. Without this check, calling through a
-            // null member function pointer jumps to address 0 (observed in crash_20260528_141110:
-            // null-PC call from Unit::HandleTriggers+0x1e1 during Player::Update melee proc).
-            uint32 auraNameIdx = (uint32)auraModifier->m_auraname;
-            if (auraNameIdx >= TOTAL_AURAS || !AuraProcHandler[auraNameIdx])
-                continue; // unhandled aura proc — skip silently
-            SpellAuraProcResult procResult = (*caster.*AuraProcHandler[auraNameIdx])(itr.target, amount, originalAmount, triggeredByAura, procSpell, itr.procFlag, procExtra, cooldown);
-            switch (procResult)
+            std::optional<SpellAuraProcResult> procResult;
+            if (triggeredByHolder->GetAuraScript())
+                procResult = triggeredByHolder->GetAuraScript()->OnProc(caster, itr.target, amount, originalAmount, triggeredByAura, procSpell, itr.procFlag, procExtra, cooldown);
+            if (!procResult)
+            {
+                // NULL-POINTER GUARD: AuraProcHandler is a static array of member function
+                // pointers indexed by AuraType. Not every AuraType has a handler — entries for
+                // unimplemented aura types are nullptr. Without this check, calling through a
+                // null member function pointer jumps to address 0 (observed in crash_20260528_141110:
+                // null-PC call from Unit::HandleTriggers+0x1e1 during Player::Update melee proc).
+                uint32 auraNameIdx = (uint32)auraModifier->m_auraname;
+                if (auraNameIdx >= TOTAL_AURAS || !AuraProcHandler[auraNameIdx])
+                    continue; // unhandled aura proc — skip silently
+                procResult = (*caster.*AuraProcHandler[auraNameIdx])(itr.target, amount, originalAmount, triggeredByAura, procSpell, itr.procFlag, procExtra, cooldown);
+            }
+
+            switch (*procResult)
             {
                 case SPELL_AURA_PROC_CANT_TRIGGER:
                     continue;
@@ -4903,6 +4986,9 @@ void Unit::HandleTriggers(Unit* pVictim, uint32 procExtra, uint32 amount, int32 
             // If last charge dropped add spell to remove list
             if (triggeredByHolder->DropAuraCharge())
                 removedSpells.push_back(RemovedSpellData(triggeredByHolder->GetId(), caster));
+
+            if (triggeredByHolder->GetAuraScript())
+                triggeredByHolder->GetAuraScript()->OnAuraChargesChanged(triggeredByHolder);
         }
 
         triggeredByHolder->SetInUse(false);
@@ -5842,8 +5928,39 @@ bool Unit::IsSpellCrit(Unit const* pVictim, SpellEntry const* spellProto, SpellS
                     crit_chance = ((Player*)this)->GetSpellCritPercent(GetFirstSchoolInMask(schoolMask));
                 else
                 {
-                    crit_chance = float(m_baseSpellCritChance);
-                    crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+                    Creature const* creature = ToCreature();
+                    Totem const* totem = creature && creature->IsTotem() ? creature->ToTotem() : nullptr;
+                    Unit* owner = totem && totem->GetTotemType() != TOTEM_STATUE ? GetOwner() : nullptr;
+                    Player const* playerOwner = owner ? owner->ToPlayer() : nullptr;
+
+                    if (playerOwner && playerOwner->GetClass() == CLASS_SHAMAN &&
+                        playerOwner->GetTotem(TOTEM_SLOT_FIRE) == totem &&
+                        (spellProto->GetSpellSchoolMask() & SPELL_SCHOOL_MASK_FIRE) &&
+                        spellProto->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE))
+                    {
+                        crit_chance = playerOwner->GetSpellCritPercent(GetFirstSchoolInMask(schoolMask));
+                    }
+                    else
+                    {
+                        crit_chance = float(m_baseSpellCritChance);
+                        crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+                    }
+                }
+                if (IsPet())
+                {
+                    if (Unit* owner = GetOwner())
+                    {
+                        SpellSchools const school = GetFirstSchoolInMask(schoolMask);
+                        float const ownerCrit = owner->IsPlayer() ? static_cast<Player*>(owner)->GetSpellCritPercent(school) : float(owner->m_baseSpellCritChance);
+
+                        AuraList const& petSpellCritAuras = GetAurasByType(SPELL_AURA_MOD_PET_SPELL_CRIT_PERCENT_OF_OWNER);
+                        for (const auto aura : petSpellCritAuras)
+                            crit_chance += ownerCrit * aura->GetModifier()->m_amount / 100.0f;
+
+                        AuraList const& ownerPetSpellCritAuras = owner->GetAurasByType(SPELL_AURA_MOD_PET_SPELL_CRIT_PERCENT_OF_OWNER);
+                        for (const auto aura : ownerPetSpellCritAuras)
+                            crit_chance += ownerCrit * aura->GetModifier()->m_amount / 100.0f;
+                    }
                 }
                 // taken
                 if (!spellProto->IsPositiveSpell())
@@ -5862,19 +5979,12 @@ bool Unit::IsSpellCrit(Unit const* pVictim, SpellEntry const* spellProto, SpellS
                     {
                         // Shatter
                         case 849:
-                            if (pVictim->IsFrozen()) crit_chance += 10.0f;
-                            break;
                         case 910:
-                            if (pVictim->IsFrozen()) crit_chance += 20.0f;
-                            break;
                         case 911:
-                            if (pVictim->IsFrozen()) crit_chance += 30.0f;
-                            break;
                         case 912:
-                            if (pVictim->IsFrozen()) crit_chance += 40.0f;
-                            break;
                         case 913:
-                            if (pVictim->IsFrozen()) crit_chance += 50.0f;
+                            if (pVictim->IsFrozen())
+                                crit_chance += i->GetModifier()->m_amount;
                             break;
                         default:
                             break;
@@ -5896,6 +6006,9 @@ bool Unit::IsSpellCrit(Unit const* pVictim, SpellEntry const* spellProto, SpellS
         }
     }
     // percent done
+    if (spell)
+        spell->OnSpellCritChanceCalculate(pVictim, crit_chance);
+
     // only players use intelligence for critical chance computations
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance, spell);
@@ -5934,16 +6047,11 @@ uint32 Unit::SpellHealingBonusTaken(WorldObject* pCaster, SpellEntry const* spel
         return healamount < 0 ? 0 : healamount;
     }
 
-    // Taken mods
-    // Healing Wave cast
-    if (spellProto->IsFitToFamily<SPELLFAMILY_SHAMAN, CF_SHAMAN_HEALING_WAVE>())
-    {
-        // Search for Healing Way on Victim
-        Unit::AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
-        for (const auto& itr : auraDummy)
-            if (itr->GetId() == 29203)
-                takenTotalMod *= (itr->GetModifier()->m_amount + 100.0f) / 100.0f;
-    }
+    // Scripted target-side healing taken mods
+    Unit::AuraList const& auraDummy = GetAurasByType(SPELL_AURA_DUMMY);
+    for (const auto& itr : auraDummy)
+        if (AuraScript* script = itr->GetAuraScript())
+            script->OnSpellHealingBonusTaken(itr, pCaster, spellProto, effectIndex, healamount, damagetype, stack, spell, takenTotalMod);
 
     // Healing Done
     // Done total percent damage auras
@@ -6813,6 +6921,18 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 {
     if (dVal == 0)
         return 0;
+
+    if (power == POWER_MANA && dVal > 0)
+    {
+        int32 const manaGainMod = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_GAIN_PERCENT);
+        if (manaGainMod)
+        {
+            float const multiplier = std::max(0.0f, (100.0f + manaGainMod) / 100.0f);
+            dVal = int32(float(dVal) * multiplier);
+            if (dVal <= 0)
+                return 0;
+        }
+    }
 
     int32 gain = 0;
     int32 curPower = (int32)GetPower(power);
@@ -9378,6 +9498,9 @@ uint32 CreateProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missC
                 // On absorb
                 if (damageInfo->absorb)
                     procEx |= PROC_EX_ABSORB;
+                // On partial resist
+                if (damageInfo->resist > 0 && damageInfo->damage > 0)
+                    procEx |= PROC_EX_PARTIAL_RESIST;
                 // On crit
                 if (damageInfo->HitInfo & SPELL_HIT_TYPE_CRIT)
                     procEx |= PROC_EX_CRITICAL_HIT;
@@ -9445,6 +9568,25 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
             }
             else //For attacker
             {
+                // Kill Command on critting victim
+                if ((procExtra & PROC_EX_CRITICAL_HIT) && pTarget)
+                {
+                    if (IsPlayer() && GetClass() == CLASS_HUNTER)
+                    {
+                        ModifyAuraState(AURA_STATE_CRIT, true);
+                        StartReactiveTimer(REACTIVE_CRIT, pTarget->GetObjectGuid());
+                    }
+                    // Deprecated in 1.18.1 - Baited Shot on pet critting victim
+                     else if (Unit* owner = GetOwner())
+                     {
+                         if (owner->IsPlayer() && owner->GetClass() == CLASS_HUNTER)
+                         {
+                             owner->ModifyAuraState(AURA_STATE_PET_CRIT, true);
+                             owner->StartReactiveTimer(REACTIVE_PET_CRIT, pTarget->GetObjectGuid());
+                         }
+                     }
+                }
+
                 // Overpower on victim dodge
                 if (procExtra & PROC_EX_DODGE && IsPlayer() && GetClass() == CLASS_WARRIOR)
                 {
@@ -9918,6 +10060,11 @@ void Unit::ClearAllReactives()
         ModifyAuraState(AURA_STATE_DEFENSE, false);
     if (GetClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+    if (HasAuraState(AURA_STATE_CRIT))
+        ModifyAuraState(AURA_STATE_CRIT, false);
+    // Deprecated in 1.18.1 for Baited Shot.
+    if (GetClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_PET_CRIT))
+        ModifyAuraState(AURA_STATE_PET_CRIT, false);
     if (GetClass() == CLASS_ROGUE && HasAuraState(AURA_STATE_TARGET_DODGED))
         ModifyAuraState(AURA_STATE_TARGET_DODGED, false);
     if (GetClass() == CLASS_WARRIOR && IsPlayer())
@@ -9947,6 +10094,15 @@ void Unit::UpdateReactives(uint32 p_time)
                 case REACTIVE_HUNTER_PARRY:
                     if (GetClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
                         ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+                    break;
+                case REACTIVE_CRIT:
+                    if (GetClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_CRIT))
+                        ModifyAuraState(AURA_STATE_CRIT, false);
+                    break;
+                // Deprecated in 1.18.1 for Baited Shot.
+                case REACTIVE_PET_CRIT:
+                    if (GetClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_PET_CRIT))
+                        ModifyAuraState(AURA_STATE_PET_CRIT, false);
                     break;
                 case REACTIVE_OVERPOWER:
                     if (GetClass() == CLASS_WARRIOR && IsPlayer())
@@ -10891,6 +11047,7 @@ float Unit::GetCombatReach(Unit const* pVictim, bool ability, float flat_mod) co
         : 0.0f;
 
     float reach = GetCombatReach(true) + victimReach + flat_mod;
+    reach += GetTotalAuraRangeModifier(SPELL_AURA_MOD_ATTACK_AND_SPELL_RANGE) / 1000.0f;
 
     reach += BASE_MELEERANGE_OFFSET;
     if (reach < ATTACK_DISTANCE)
