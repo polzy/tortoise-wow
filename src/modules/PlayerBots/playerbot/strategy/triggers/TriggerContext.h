@@ -98,6 +98,7 @@ namespace ai
 
             creators["dps assist"] = [](PlayerbotAI* ai) { return new DpsAssistTrigger(ai); };
             creators["tank assist"] = [](PlayerbotAI* ai) { return new TankAssistTrigger(ai); };
+            creators["tank face"] = [](PlayerbotAI* ai) { return new TankFaceTrigger(ai); };
             creators["lose aggro"] = [](PlayerbotAI* ai) { return new LoseAggroTrigger(ai); };
             creators["has aggro"] = [](PlayerbotAI* ai) { return new HasAggroTrigger(ai); };
 

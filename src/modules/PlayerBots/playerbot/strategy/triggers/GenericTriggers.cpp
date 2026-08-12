@@ -5,6 +5,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/strategy/values/AoeValues.h"
+#include "playerbot/strategy/actions/TankFaceAction.h"
 
 #include <regex>
 
@@ -585,6 +586,11 @@ bool TankAssistTrigger::IsActive()
 #ifdef MANGOS
     return tankTarget->getVictim() != AI_VALUE(Unit*, "self target");
 #endif
+}
+
+bool TankFaceTrigger::IsActive()
+{
+    return TankFaceAction::NeedsReposition(ai, bot);
 }
 
 bool DpsAssistTrigger::IsActive()

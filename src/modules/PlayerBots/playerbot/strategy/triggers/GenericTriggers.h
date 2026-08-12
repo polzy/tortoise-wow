@@ -869,6 +869,14 @@ namespace ai
 		virtual bool IsActive() override;
 	};
 
+    // MT holds the boss but the raid stands in its frontal cone — reposition.
+    class TankFaceTrigger : public Trigger
+    {
+    public:
+        TankFaceTrigger(PlayerbotAI* ai) : Trigger(ai, "tank face", 3) {}
+        virtual bool IsActive() override;
+    };
+
     class DpsAssistTrigger : public Trigger
 	{
 	public:

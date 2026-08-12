@@ -22,6 +22,7 @@
 #include "GreetAction.h"
 #include "ImbueAction.h"
 #include "MovementActions.h"
+#include "TankFaceAction.h"
 #include "MoveToRpgTargetAction.h"
 #include "MoveToTravelTargetAction.h"
 #include "OutfitAction.h"
@@ -131,6 +132,7 @@ namespace ai
             creators["food"] = [](PlayerbotAI* ai) { return new EatAction(ai); };
             creators["drink"] = [](PlayerbotAI* ai) { return new DrinkAction(ai); };
             creators["tank assist"] = [](PlayerbotAI* ai) { return new TankAssistAction(ai); };
+            creators["tank face"] = [](PlayerbotAI* ai) { return new TankFaceAction(ai); };
             creators["dps assist"] = [](PlayerbotAI* ai) { return new DpsAssistAction(ai); };
             creators["dps aoe"] = [](PlayerbotAI* ai) { return new DpsAoeAction(ai); };
             creators["attack rti target"] = [](PlayerbotAI* ai) { return new AttackRTITargetAction(ai); };
