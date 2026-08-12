@@ -210,6 +210,8 @@ public:
     std::string randomBotAccountPrefix;
     uint32 randomBotAccountCount;
     bool deleteRandomBotAccounts;
+    // Resolved to guids by RandomPlayerbotMgr, which has the database.
+    std::list<std::string> pinnedBotNames;
     uint32 randomBotGuildCount;
     bool deleteRandomBotGuilds;
     uint32 randomBotArenaTeamCount;

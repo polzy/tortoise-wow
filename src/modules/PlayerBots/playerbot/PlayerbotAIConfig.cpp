@@ -516,6 +516,21 @@ bool PlayerbotAIConfig::Initialize()
     randomBotAccountPrefix = config.GetStringDefault("AiPlayerbot.RandomBotAccountPrefix", "rndbot");
     randomBotAccountCount = config.GetIntDefault("AiPlayerbot.RandomBotAccountCount", 50);
     deleteRandomBotAccounts = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotAccounts", false);
+    // Comma separated character names. A pinned bot is kept logged in and is
+    // exempt from the random relocation the manager applies to everyone else,
+    // so its run can be followed from one level to the next.
+    {
+        std::string names = config.GetStringDefault("AiPlayerbot.PinnedBots", "");
+        std::stringstream ss(names);
+        std::string name;
+        while (std::getline(ss, name, ','))
+        {
+            size_t b = name.find_first_not_of(" \t");
+            size_t e = name.find_last_not_of(" \t");
+            if (b != std::string::npos)
+                pinnedBotNames.push_back(name.substr(b, e - b + 1));
+        }
+    }
     sLog.outString("[PB_DEBUG] accountPrefix=%s, accountCount=%u, deleteAccounts=%u",
         randomBotAccountPrefix.c_str(), randomBotAccountCount, (uint32)deleteRandomBotAccounts);
     randomBotGuildCount = config.GetIntDefault("AiPlayerbot.RandomBotGuildCount", 20);
