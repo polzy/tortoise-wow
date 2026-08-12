@@ -2125,7 +2125,7 @@ int32 PlayerbotAI::CalculateGlobalCooldown(uint32 spellid)
         globalCooldown = spellEntry->StartRecoveryTime;
     }
 
-    return globalCooldown > 0 ? globalCooldown : sPlayerbotAIConfig.reactDelay;
+    return globalCooldown;
 }
 
 void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet)
@@ -4353,16 +4353,31 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
             }
         }
 
+        // Vanilla signature: IsImmuneToSpell(spellInfo, castOnSelf) — no
+        // effectMask/caster params (upstream #306 targets newer cmangos).
+        bool immune = target->IsImmuneToSpell(spellInfo, false);
         if (!damage)
         {
-            // Vanilla signature: IsImmuneToSpell(spellInfo, castOnSelf) — no
-            // effectMask/caster params (upstream #306 targets newer cmangos).
-            bool immune = target->IsImmuneToSpell(spellInfo, false);
             if (!immune)
             {
                 for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
                     immune = target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, false);
             }
+
+            if (immune)
+            {
+                if (checkResult)
+                {
+                    *checkResult = SPELL_FAILED_IMMUNE;
+                }
+
+                return false;
+            }
+        }
+        else
+        {
+            if (!immune)
+                immune = target->IsImmuneToDamage(spellInfo->GetSpellSchoolMask());
 
             if (immune)
             {
@@ -4670,7 +4685,7 @@ uint8 PlayerbotAI::GetHealthPercent() const
 
 uint8 PlayerbotAI::GetManaPercent(const Unit& target) const
 {
-   return (static_cast<float>(target.GetPower(POWER_MANA)) / target.GetMaxPower(POWER_MANA)) * 100;
+   return target.GetPowerPercent();
 }
 
 uint8 PlayerbotAI::GetManaPercent() const

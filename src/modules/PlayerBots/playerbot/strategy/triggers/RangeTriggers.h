@@ -28,6 +28,11 @@ namespace ai
                 const bool isCaster = (cls == CLASS_PRIEST || cls == CLASS_MAGE ||
                                        cls == CLASS_WARLOCK || cls == CLASS_HUNTER ||
                                        cls == CLASS_DRUID || cls == CLASS_SHAMAN);
+                // An explicit stay order beats caster self-preservation: the user
+                // pinned the bot to this spot (cmangos 0ddc94eb, kept above our
+                // caster carve-out which only exempts the follow/guard defaults).
+                if (ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT))
+                    return false;
                 if (!isCaster &&
                     (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
                      ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT) ||
@@ -48,6 +53,11 @@ namespace ai
                 {
                     return false;
                 }
+
+                // Don't move if our flee range (how far bot runs) is too low to escape attack distance.
+                // Ends useless micro-kiting jitter against mobs the bot can't actually escape.
+                if (ai->GetRange("flee") <= ATTACK_DISTANCE)
+                    return false;
 
                 float const combatReach = bot->GetCombinedCombatReach(target, false);
                 float const minDistance = ai->GetRange("spell") + combatReach;
@@ -426,7 +436,7 @@ namespace ai
 
         bool IsActive() override
         {
-            return !AI_VALUE2(bool, "can free move", "wandermin") && AI_VALUE2(bool, "can free move", "wandermaz");
+            return !AI_VALUE2(bool, "can free move", "wandermin") && AI_VALUE2(bool, "can free move", "wandermax");
         }
     };
 

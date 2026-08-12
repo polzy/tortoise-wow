@@ -172,6 +172,16 @@ bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
     }
 
     // Immune to damage
+    // Before we check auras, check school derived immunity for creatures
+    // (cmangos #313 + #341: creature-template mask only — the broad Unit check
+    // flagged temporarily-immune targets as permanently unattackable).
+    // Core field is school_immune_mask on this fork (upstream: SchoolImmuneMask).
+    if (target->IsCreature())
+    {
+        if (((Creature*)target)->GetCreatureInfo()->school_immune_mask == SPELL_SCHOOL_MASK_ALL)
+            return true;
+    }
+
     PlayerbotAI* ai = player->GetPlayerbotAI();
     if (!ai)
         return false;

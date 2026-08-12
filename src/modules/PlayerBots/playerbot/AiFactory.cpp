@@ -319,7 +319,10 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
         }
     }
 
-    return GetPlayerRoles(cls, tab);
+    if (role == BOT_ROLE_NONE)
+        role = GetPlayerRoles(cls, tab);
+
+    return role;
 }
 
 void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* combatEngine)
