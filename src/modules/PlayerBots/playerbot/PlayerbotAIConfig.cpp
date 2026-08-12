@@ -172,7 +172,10 @@ bool PlayerbotAIConfig::Initialize()
     sightDistance = config.GetFloatDefault("AiPlayerbot.SightDistance", 75.0f);
     spellDistance = config.GetFloatDefault("AiPlayerbot.SpellDistance", 25.0f);
     shootDistance = config.GetFloatDefault("AiPlayerbot.ShootDistance", 25.0f);
-    healDistance = config.GetFloatDefault("AiPlayerbot.HealDistance", 125.0f);
+    // 125 was ~3x the reach of any vanilla heal (40y max): healers believed they
+    // were in range, started running in mid-triage and healed late. 30 matches
+    // Shyalya's measured default and keeps healers inside actual cast range.
+    healDistance = config.GetFloatDefault("AiPlayerbot.HealDistance", 30.0f);
     reactDistance = config.GetFloatDefault("AiPlayerbot.ReactDistance", 150.0f);
     maxFreeMoveDistance = config.GetFloatDefault("AiPlayerbot.MaxFreeMoveDistance", 150.0f);
     freeMoveDelay = config.GetFloatDefault("AiPlayerbot.FreeMoveDelay", 30.0f);
