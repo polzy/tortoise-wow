@@ -24,6 +24,12 @@ bool ShouldPullTrigger::IsActive()
     if (!map || !map->IsDungeon())
         return false;
 
+    // IsDungeon() is true for raids too. Keep auto-pull out of raids: our raid
+    // stack gates engages through the pro-engage layer and the master's call —
+    // a tank deciding to open on Ragnaros because the healer has mana is a wipe.
+    if (map->IsRaid())
+        return false;
+
     if (!PlayerbotAI::IsTank(bot))
         return false;
 
