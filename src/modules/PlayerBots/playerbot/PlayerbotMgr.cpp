@@ -927,6 +927,19 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     {
         OBL_PHASE("master path: GetObjectGuid");
         ObjectGuid masterGuid = master->GetObjectGuid();
+
+        // A random bot loaded from disk restores its saved bot-only group (most
+        // bots are stuck in one from the grouper behaviour). The add-to-master
+        // checks below all require !bot->GetGroup(), so without this the bot
+        // stays in its bot group and never joins the master — ".bot fill" then
+        // only ever adds the single bot that happened to be groupless. Kick it
+        // out of any group that is not the master's first.
+        if (bot->GetGroup() && bot->GetGroup() != master->GetGroup())
+        {
+            OBL_PHASE("RemoveFromGroup (leave saved bot group)");
+            bot->RemoveFromGroup();
+        }
+
         if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid) && !sPlayerbotAIConfig.IsFreeAltBot(bot))
         {
             OBL_PHASE("ChangeLeader");
