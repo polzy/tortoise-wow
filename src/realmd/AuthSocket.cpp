@@ -1246,7 +1246,12 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt)
         else
             AmountOfCharacters = 0;
 
-        bool ok_build = i.second.realmBuildInfo.build == _build;
+        // Accept any client build the auth layer already accepts (>= the
+        // expected minimum, see FindBuildInfo) instead of an exact match on the
+        // hardcoded ExpectedRealmdClientBuilds[0]. Without this a 1.18.1 client
+        // (build > 7199) authenticates fine but the realm shows greyed/offline
+        // because 7199 != _build. Mirrors the valid_version check at login.
+        bool ok_build = FindBuildInfo(_build) != nullptr;
 
         RealmBuildInfo const* buildInfo = ok_build ? FindBuildInfo(_build) : nullptr;
         if (!buildInfo)
