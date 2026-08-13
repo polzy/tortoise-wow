@@ -435,7 +435,7 @@ bool ItemCountTrigger::IsActive()
 
 bool InterruptSpellTrigger::IsActive()
 {
-	return SpellTrigger::IsActive() && ai->IsInterruptableSpellCasting(GetTarget(), getName(), true);
+	return SpellTrigger::IsActive() && ai->IsInterruptableSpellCasting(GetTarget(), getName());
 }
 
 bool DeflectSpellTrigger::IsActive()

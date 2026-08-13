@@ -5631,23 +5631,56 @@ bool PlayerbotAI::RemoveAura(const std::string& name)
     return false;
 }
 
-bool PlayerbotAI::IsInterruptableSpellCasting(Unit* target, std::string spell, uint8 effectMask)
+bool PlayerbotAI::IsCastInterruptible(Unit* target)
+{
+    // This core has no Unit::IsInterruptible(); mirror the exact conditions
+    // Spell::EffectInterruptCast uses server-side, so the bot only queues an
+    // interrupt when the kick would actually land. Most raid-boss casts fail
+    // this check (no SPELL_INTERRUPT_FLAG_DAMAGE / CHANNEL_FLAG_INTERRUPT).
+    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+    {
+        if (Spell* spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
+        {
+            if (i != CURRENT_CHANNELED_SPELL && !spell->GetCastTime())
+                continue;
+
+            SpellEntry const* curSpellInfo = spell->m_spellInfo;
+            if ((spell->getState() == SPELL_STATE_CASTING
+                || (spell->getState() == SPELL_STATE_PREPARING && spell->GetCastTime() > 0))
+                && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE
+                && ((i == CURRENT_GENERIC_SPELL && curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE)
+                || (i == CURRENT_CHANNELED_SPELL && curSpellInfo->ChannelInterruptFlags & CHANNEL_FLAG_INTERRUPT)))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::IsInterruptableSpellCasting(Unit* target, std::string spell)
 {
 	uint32 spellid = aiObjectContext->GetValue<uint32>("spell id", spell)->Get();
-	if (!spellid || !target->IsNonMeleeSpellCasted(true))
+	if (!spellid || !target->IsNonMeleeSpellCasted(true) || !IsCastInterruptible(target))
 		return false;
 
 	SpellEntry const *spellInfo = sServerFacade.LookupSpellInfo(spellid);
 	if (!spellInfo)
 		return false;
 
+    // Reject when the target is immune to the interrupt spell or any of its
+    // effects (upstream 26de49df — vanilla immunity API takes no effect mask).
+    if (target->IsImmuneToSpell(spellInfo, false))
+        return false;
+
+    for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
+    {
+        if (spellInfo->Effect[i] && target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, false))
+            return false;
+    }
+
 	for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
 	{
-		if ((spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
-			return true;
-
-        if ((spellInfo->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST) &&
-            (!target->IsImmuneToSpell(spellInfo, true) || !target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, true)))
+        if (spellInfo->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST)
             return true;
 
         if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA) && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SILENCE)

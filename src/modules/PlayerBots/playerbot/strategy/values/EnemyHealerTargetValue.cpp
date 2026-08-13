@@ -24,7 +24,7 @@ Unit* EnemyHealerTargetValue::Calculate()
         if (sServerFacade.GetDistance2d(bot, unit) > ai->GetRange("spell"))
             continue;
 
-        if (!ai->IsInterruptableSpellCasting(unit, spell, true))
+        if (!ai->IsInterruptableSpellCasting(unit, spell))
             continue;
 
         Spell* spell2 = unit->GetCurrentSpell(CURRENT_GENERIC_SPELL);
@@ -47,7 +47,7 @@ Unit* EnemyHealerTargetValue::Calculate()
         Unit* unit = ai->GetUnit(guid);
         if (!unit || unit == target) continue;
         if (sServerFacade.GetDistance2d(bot, unit) > ai->GetRange("spell")) continue;
-        if (!ai->IsInterruptableSpellCasting(unit, spell, true)) continue;
+        if (!ai->IsInterruptableSpellCasting(unit, spell)) continue;
 
         Spell* spell2 = unit->GetCurrentSpell(CURRENT_GENERIC_SPELL);
         if (spell2 && IsPositiveSpell(spell2->m_spellInfo)) return unit;
