@@ -2963,15 +2963,16 @@ std::list<std::string> PlayerbotHolder::HandleFill(Player* master, const std::st
         return messages;
     }
 
-    // Include ONLINE bots too, not just offline ones: on a busy server the ~50
-    // autologin random bots (which are the geared level-60s) are all online, so
-    // an "online = 0" filter left only naked leveling bots to fill with — often
-    // just one. Prefer online (already-geared) high-level bots; SafeAddPlayerBot
-    // attaches an already-in-world bot to the group via OnBotLogin.
+    // Only OFFLINE bots: an online random bot is usually already in a bot-only
+    // group, and you cannot invite a player who is already grouped — it gets
+    // controlled but never joins the master's party (looked like "nothing
+    // happens"). Freshly-loaded offline bots go through the full login path that
+    // invites them to the group. There are plenty of offline level-60 bots; the
+    // pipeline's ".bot init *" gears whichever ones join. Highest level first.
     auto result = CharacterDatabase.PQuery(
         "SELECT c.guid, c.name FROM characters c "
-        "WHERE c.level >= 55 AND c.race IN (%s) "
-        "ORDER BY c.online DESC, c.level DESC, RAND() LIMIT %u",
+        "WHERE c.level >= 55 AND c.race IN (%s) AND c.online = 0 "
+        "ORDER BY c.level DESC, RAND() LIMIT %u",
         factionRaces.c_str(), needed);
 
     if (!result)
