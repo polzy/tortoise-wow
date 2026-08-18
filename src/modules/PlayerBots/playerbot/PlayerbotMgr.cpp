@@ -414,6 +414,7 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_botCommandHandlers["always"] = &PlayerbotHolder::HandleBotAlways;
     m_botCommandHandlers["debug"] = &PlayerbotHolder::HandleBotDebug;
     m_botCommandHandlers["c"] = &PlayerbotHolder::HandleBotC;
+    m_botCommandHandlers["role"] = &PlayerbotHolder::HandleBotRole;
     m_botCommandHandlers["w"] = &PlayerbotHolder::HandleConsoleWhisper;
     m_botCommandHandlers["cmd"] = &PlayerbotHolder::HandleConsoleCmd;
     m_botCommandHandlers["test"] = &PlayerbotHolder::HandleBotTest;
@@ -2058,6 +2059,33 @@ std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::
         return "Bot has no AI";
 
     ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, master ? master : bot), true);
+    return "ok";
+}
+
+// .bot role <name> <tank|heal|dps> — set the bot's intended role. The next
+// ".bot init" re-specs (InitTalentsTree reads GetForcedRole) and re-gears
+// (spec-aware) the bot to match, so a healer paladin becomes Holy with healing
+// gear instead of a random spec + 2H sword.
+std::string PlayerbotHolder::HandleBotRole(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "role requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    uint8 role = 0;
+    if (param.find("tank") != std::string::npos)
+        role = BOT_ROLE_TANK;
+    else if (param.find("heal") != std::string::npos)
+        role = BOT_ROLE_HEALER;
+    else if (param.find("dps") != std::string::npos || param.find("dd") != std::string::npos)
+        role = BOT_ROLE_DPS;
+    else
+        return "usage: .bot role <name> tank|heal|dps";
+
+    ai->SetForcedRole(role);
     return "ok";
 }
 

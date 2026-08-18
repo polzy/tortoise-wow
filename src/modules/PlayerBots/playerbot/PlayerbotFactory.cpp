@@ -2488,10 +2488,54 @@ void PlayerbotFactory::InitSpells()
         InitAvailableSpells();
 }
 
+// Talent tab (0/1/2) that best fits a role for a class, or -1 for "no preference"
+// (pure DPS classes, or a role the class can't fill). Tab numbering is vanilla:
+// Warrior Arms0/Fury1/Prot2, Paladin Holy0/Prot1/Ret2, Priest Disc0/Holy1/Shadow2,
+// Shaman Ele0/Enh1/Resto2, Druid Balance0/Feral1/Resto2.
+static int SpecNoForRole(uint8 cls, uint8 role)
+{
+    switch (cls)
+    {
+        case CLASS_WARRIOR:
+            if (role & BOT_ROLE_TANK) return 2;   // Protection
+            return 1;                              // Fury (dps)
+        case CLASS_PALADIN:
+            if (role & BOT_ROLE_HEALER) return 0;  // Holy
+            if (role & BOT_ROLE_TANK)   return 1;  // Protection
+            return 2;                              // Retribution
+        case CLASS_PRIEST:
+            if (role & BOT_ROLE_HEALER) return 1;  // Holy
+            return -1;                             // dps: keep random (shadow/disc)
+        case CLASS_SHAMAN:
+            if (role & BOT_ROLE_HEALER) return 2;  // Restoration
+            return -1;
+        case CLASS_DRUID:
+            if (role & BOT_ROLE_HEALER) return 2;  // Restoration
+            if (role & BOT_ROLE_TANK)   return 1;  // Feral (bear)
+            return -1;
+        default:
+            return -1;                             // hunter/rogue/mage/warlock: dps only
+    }
+}
+
 void PlayerbotFactory::InitTalentsTree(bool incremental)
 {
     uint32 specNo = sRandomPlayerbotMgr.GetValue(bot->GetGUIDLow(), "specNo");
-    if (incremental && specNo)
+
+    // Role-aware spec: a bot assigned a tank/heal role gets the matching talent
+    // tree, so a healer paladin is Holy (not Retribution with a 2H sword). The
+    // spec-aware gear step (InitEquipment, which scores items by the bot's active
+    // talent tab) then equips healing/tanking gear to match. Overrides both the
+    // stored specNo and the random roll.
+    uint8 forcedRole = bot->GetPlayerbotAI() ? bot->GetPlayerbotAI()->GetForcedRole() : 0;
+    int roleSpec = forcedRole ? SpecNoForRole(bot->getClass(), forcedRole) : -1;
+
+    if (roleSpec >= 0)
+    {
+        specNo = (uint32)roleSpec;
+        sRandomPlayerbotMgr.SetValue(bot, "specNo", specNo + 1);
+    }
+    else if (incremental && specNo)
 	{
         specNo -= 1;
 	}
@@ -2508,6 +2552,8 @@ void PlayerbotFactory::InitTalentsTree(bool incremental)
 
     InitTalents(specNo);
 
+    // Fill the role tree first (above), so it dominates and GetPlayerSpecTab picks
+    // it for gear. Any leftover points spill to a secondary tree.
     if (bot->GetFreeTalentPoints()) {
         InitTalents(2 - specNo);
     }
