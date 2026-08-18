@@ -928,6 +928,12 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
         OBL_PHASE("master path: GetObjectGuid");
         ObjectGuid masterGuid = master->GetObjectGuid();
 
+        // Bind the bot to this master. Without it, a filled random bot joins the
+        // party but its AI master stays unset, so ".bot remove *" refuses to
+        // remove it ("this bot isn't bound to you") — the group looked unclearable.
+        if (bot->GetPlayerbotAI())
+            bot->GetPlayerbotAI()->SetMaster(master);
+
         // A random bot loaded from disk restores its saved bot-only group (most
         // bots are stuck in one from the grouper behaviour). The add-to-master
         // checks below all require !bot->GetGroup(), so without this the bot
@@ -2625,6 +2631,12 @@ std::string PlayerbotHolder::HandleBotRemoveLogout(Player* bot, Player* master, 
             return "This bot isn't bound to you. /invite first to acquire, then /uninvite + .rndbot remove.";
     }
 
+    // Take the bot out of the master's group FIRST. A random bot otherwise just
+    // logs out and its autologin re-adds it to the same persisted group — the
+    // party looked like it could never be cleared ("Vider" only relogged them).
+    if (bot->GetGroup())
+        bot->RemoveFromGroup();
+
     if (isRandomAccount)
         sRandomPlayerbotMgr.Remove(bot);
     else if (GetPlayerBot(bot->GetGUIDLow()))
@@ -2976,24 +2988,6 @@ std::list<std::string> PlayerbotHolder::HandleFill(Player* master, const std::st
         return messages;
     }
 
-    // Only OFFLINE bots: an online random bot is usually already in a bot-only
-    // group, and you cannot invite a player who is already grouped — it gets
-    // controlled but never joins the master's party (looked like "nothing
-    // happens"). Freshly-loaded offline bots go through the full login path that
-    // invites them to the group. There are plenty of offline level-60 bots; the
-    // pipeline's ".bot init *" gears whichever ones join. Highest level first.
-    auto result = CharacterDatabase.PQuery(
-        "SELECT c.guid, c.name FROM characters c "
-        "WHERE c.level >= 55 AND c.race IN (%s) AND c.online = 0 "
-        "ORDER BY c.level DESC, RAND() LIMIT %u",
-        factionRaces.c_str(), needed);
-
-    if (!result)
-    {
-        messages.push_back("No available bots found");
-        return messages;
-    }
-
     PlayerbotMgr* mgr = master->GetPlayerbotMgr();
     if (!mgr)
     {
@@ -3001,16 +2995,64 @@ std::list<std::string> PlayerbotHolder::HandleFill(Player* master, const std::st
         return messages;
     }
 
-    uint32 queued = 0;
-    do
-    {
-        Field* fields = result->Fetch();
-        uint32 guid = fields[0].GetUInt32();
-        mgr->m_pendingGroupBotGuids.push_back(guid);
-        queued++;
-    } while (result->NextRow() && queued < needed);
+    // Role-aware fill: reserve slots for tanks (warriors) and healers so a 5-man
+    // isn't four DPS. Scale with group size. Only OFFLINE bots — an online random
+    // bot is usually already in a bot-only group and can't be re-invited (it gets
+    // controlled but never joins the party). Offline bots go through the full
+    // login path that invites them, and OnBotLogin now drops any saved bot group
+    // first. The pipeline's ".bot init *" gears whichever ones join.
+    uint32 nTanks = std::max((uint32)1, maxSize / 10);          // 5-man:1, 20:2, 40:4
+    uint32 nHeals = std::max((uint32)1, maxSize / 5);           // 5-man:1, 20:4, 40:8
+    nTanks = std::min(nTanks, needed);
+    nHeals = std::min(nHeals, needed - nTanks);
 
-    messages.push_back("Queued " + std::to_string(queued) + " bots. Adding 1 per second (auto-joining group).");
+    // Vanilla: Alliance heals = Priest(5)/Paladin(2), Horde heals = Priest(5)/Shaman(7).
+    const char* tankClasses = "1";                              // Warrior
+    const char* healClasses = isAlliance ? "5,2" : "5,7";
+
+    std::set<uint32> picked;
+    uint32 queued = 0;
+
+    auto pickBots = [&](const char* classFilter, uint32 limit)
+    {
+        if (limit == 0 || queued >= needed)
+            return;
+        std::string exclude;
+        for (uint32 g : picked)
+        {
+            if (!exclude.empty()) exclude += ",";
+            exclude += std::to_string(g);
+        }
+        std::string notIn = exclude.empty() ? "" : (" AND c.guid NOT IN (" + exclude + ")");
+        auto res = CharacterDatabase.PQuery(
+            "SELECT c.guid FROM characters c "
+            "WHERE c.level >= 55 AND c.race IN (%s) AND c.online = 0 AND c.class IN (%s)%s "
+            "ORDER BY c.level DESC, RAND() LIMIT %u",
+            factionRaces.c_str(), classFilter, notIn.c_str(), limit);
+        if (!res)
+            return;
+        do
+        {
+            uint32 g = res->Fetch()[0].GetUInt32();
+            if (picked.insert(g).second)
+            {
+                mgr->m_pendingGroupBotGuids.push_back(g);
+                queued++;
+            }
+        } while (res->NextRow() && queued < needed);
+    };
+
+    pickBots(tankClasses, nTanks);                              // tanks first
+    pickBots(healClasses, nHeals);                              // then healers
+    pickBots("1,2,3,4,5,7,8,9,11", needed - queued);           // fill the rest, any class
+
+    if (queued == 0)
+    {
+        messages.push_back("No available bots found");
+        return messages;
+    }
+
+    messages.push_back("Queued " + std::to_string(queued) + " bots (tank+heal+dps). Adding 1 per 3s, then run Smart Roles.");
     return messages;
 }
 
